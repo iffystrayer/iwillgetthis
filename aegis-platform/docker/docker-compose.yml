@@ -1,0 +1,178 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: aegis-db
+    environment:
+      POSTGRES_DB: aegis_db
+      POSTGRES_USER: aegis_user
+      POSTGRES_PASSWORD: aegis_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - aegis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis_user -d aegis_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aegis-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - aegis-network
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: aegis-backend
+    environment:
+      # Core Application
+      ENVIRONMENT: production
+      DEBUG: "false"
+      APP_NAME: "Aegis Risk Management Platform"
+      APP_VERSION: "1.0.0"
+      
+      # Database
+      DATABASE_URL: postgresql://aegis_user:aegis_password@db:5432/aegis_db
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # Security & JWT
+      SECRET_KEY: "${SECRET_KEY:-aegis-super-secret-key-change-in-production-2025}"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-aegis-jwt-secret-key-change-in-production-2025}"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      JWT_ALGORITHM: "HS256"
+      ALGORITHM: "HS256"
+      
+      # CORS
+      CORS_ORIGINS: '["http://localhost:3000", "http://localhost:5173", "http://frontend:3000", "https://*.space.minimax.io"]'
+      
+      # File Upload & Storage
+      MAX_FILE_SIZE: 52428800
+      UPLOAD_PATH: /app/uploads
+      ALLOWED_FILE_TYPES: '["pdf", "docx", "txt", "csv", "json", "png", "jpg", "jpeg"]'
+      
+      # Logging
+      LOG_LEVEL: INFO
+      ENABLE_AUDIT_LOGGING: "true"
+      
+      # AI/LLM Providers (Optional - configure as needed)
+      DEFAULT_LLM_PROVIDER: openai
+      ENABLE_OPENAI: "true"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "gpt-4-turbo-preview"
+      
+      ENABLE_AZURE_OPENAI: "false"
+      AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY:-}"
+      AZURE_OPENAI_ENDPOINT: "${AZURE_OPENAI_ENDPOINT:-}"
+      AZURE_OPENAI_API_VERSION: "2024-02-01"
+      AZURE_OPENAI_DEPLOYMENT_NAME: "gpt-4-turbo"
+      
+      # External Integrations (Optional)
+      ENABLE_OPENVAS: "false"
+      OPENVAS_HOST: "${OPENVAS_HOST:-}"
+      OPENVAS_USERNAME: "${OPENVAS_USERNAME:-}"
+      OPENVAS_PASSWORD: "${OPENVAS_PASSWORD:-}"
+      
+      ENABLE_OPENCTI: "false"
+      OPENCTI_URL: "${OPENCTI_URL:-}"
+      OPENCTI_TOKEN: "${OPENCTI_TOKEN:-}"
+      
+      # Email Settings (Optional)
+      SMTP_SERVER: "${SMTP_SERVER:-smtp.gmail.com}"
+      SMTP_PORT: 587
+      SMTP_USERNAME: "${SMTP_USERNAME:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_USE_TLS: "true"
+      EMAIL_FROM: "${EMAIL_FROM:-noreply@aegis.example.com}"
+      
+      # Authentication (Optional - for Microsoft Entra ID)
+      ENABLE_AZURE_AUTH: "false"
+      AZURE_CLIENT_ID: "${AZURE_CLIENT_ID:-}"
+      AZURE_CLIENT_SECRET: "${AZURE_CLIENT_SECRET:-}"
+      AZURE_TENANT_ID: "${AZURE_TENANT_ID:-}"
+      
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aegis-network
+    volumes:
+      - uploads_data:/app/uploads
+      - reports_data:/app/reports
+      - logs_data:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: ../frontend/aegis-frontend
+      dockerfile: Dockerfile
+    container_name: aegis-frontend
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+      VITE_USE_MOCK_API: "false"
+      VITE_ENVIRONMENT: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - aegis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+  reports_data:
+    driver: local
+  logs_data:
+    driver: local
+
+networks:
+  aegis-network:
+    driver: bridge

@@ -1,0 +1,280 @@
+[
+    {
+        "type": "text",
+        "text": "Product Requirements Document (PRD): Aegis Risk Platform ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Version: 3.0 (Intelligent Platform Edition)   \nDate: October 26, 2023   \nAuthor: Cybersecurity Expert (Al Consultant)   \nStatus: Final Blueprint ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1. Introduction & Vision ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1.1. Overview ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Aegis is an intelligent Software-as-a-Service (SaaS) web application designed to streamline, automate, and centralize an organization's cybersecurity risk management lifecycle. By intelligently mapping CIs Controls to the NIST CSF, integrating with key security tools, and leveraging Large Language Models (LLMs), Aegis empowers security teams to move beyond manual processes and focus on high-impact strategic decisions. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1.2. Vision Statement ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "To be the most intuitive and powerful platform for operationalizing cybersecurity risk management, transforming it from a compliance chore into a proactive, threat-informed, and Al-assisted program ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "2. Target Audience & User Personas ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "· Persona 1: The CIso / Security Director: Needs high-level, business-aligned risk reporting and budget justification. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "· Persona 2: The Cybersecurity Analyst / GRC Specialist: Needs to perform detailed assessments, track remediation, and manage evidence efficiently. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "· Persona 3: The IT Manager / System Owner: Needs clear, actionable tasks and a simple interface to provide evidence. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "· Persona 4: The Internal/External Auditor: Needs an efficient way to review controls and audit trails. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "3. Core Features & Workflow ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The platform is built on a four-stage workflow: Assess, Analyze, Mitigate, Report, with dashboards and Al woven throughout. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "3.1. Dashboards: The Personalized Command Center ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The dashboard is not a single, static page but a dynamic, role-based command center designed to translate raw data into targeted insights. It is the most critical component for making the platform's data actionable. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Widgets: Risk Posture Trend (line graph), NIST CSF Maturity (radar chart), Overall Risk Heatmap, and Mitigation ROI. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "0 Answers: \"How safe are we, where should we invest, and are my programs working?\" ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The Analyst Workbench View: A tactical workload manager guiding daily activities. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "0 Widgets: \"My Open Tasks\" queue, calendar of upcoming assessments, feed of recent high-risk findings from integrations, and a queue for evidence awaiting review. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "0 Answers: \"What do I need to work on right now, and what's coming next?\" ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· The System Owner Inbox View: A simple, non-cluttered to-do list for non-security staff 0 Widgets: \"My Assigned Remediation Tasks,\" \"My Controls for Attestation,\" and clear, red-flagged \"Overdue Items\" alerts. o Answers: \"what does the security team need from me?\" ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3.2. Module 1: Assessment ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Asset Management: Centralized inventory of all organizational assets. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Integrated Frameworks: Pre-loaded NIST CSF and CIS Controls with editable mappings. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· LLM-Powered Evidence Analysis: When evidence (e.g., a policy PDF) is uploaded, the LLM scans the document and summarizes the specific sections relevant to the control being assessed. This drastically reduces manual reading time. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· LLM-Powered Narrative Generation: Based on the analyzed evidence, the platform suggests a first draft of the \"Control Narrative,\" shifting the analyst's work from writing to reviewing and editing. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3.3. Module 2: Analysis ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Risk Register: A central, dynamic repository of all identified risks. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Risk Calculation: Configurable matrix for calculating inherent and residual risk scores. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "LLM-Powered Risk Statement Generation: The LLM uses technical details (from scans), asset context, and threat intelligence (from OpenCTl) to automatically generate a formal, business-impact-oriented risk statement, ensuring consistency and clarity. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3.4. Module 3: Mitigation ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Plan of Action & Milestones (POA&M): Generate structured POA&Ms for accepted risks. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task Management & Workflow: Kanban-style board to track remediation tasks. LLM-Powered Remediation Suggestions: For a given risk, the LLM can propose a high-level, step-by-step remediation plan, providing an actionable starting point for the assigned system owner. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "3.5. Module 4: Reporting ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Template & Custom Reports: One-click and custom reports for compliance, maturity, and risk. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· LLM-Powered Executive Summary Generation: The CISO can auto-generate a business-centric narrative for leadership. The LLM analyzes key metrics (risk scores, mitigation progress, top risks) and produces a concise summary suitable for a board-level audience. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "4. Design & User Experience (UX/UI) ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "· Aesthetic: Clean, professional, modern, with available dark and light modes.   \n· Color Palette: Neutral base with a striking gradient accent color for primary actions and visualizations.   \n· Animations: Smooth page transitions, subtle interactive animations, and animated data visualizations to create a fluid and engaging experience. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "5. Technical Requirements ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· Authentication: Exclusively via OAuth 2.0 / OIDC, with first-class support for Microsoft Entra ID. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Backend: Python (Django/FastAPl) or Node.js (NestJS) with a PostgreSQL database. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· Frontend: React (with Next.js) for the core dynamic application and Astro for fast, content-heavy static sites (marketing, blog, documentation). ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Integrations: APl-first architecture with native connectors for: ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Vulnerability Management (OpenVAs): To automate evidence collection for CIS Control 7 and flag technical risks. 0  Cyber Threat Intelligence (OpencTl): To enrich risk analysis and inform likelihood scoring with realworld threat data. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· LLM Integration: Secure API calls to a foundational model provider (e.g., Azure OpenAl Service, Google Al Platform) with carefully engineered prompts to perform the specific automation tasks outlined in Section 3. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "6. Lifecycle Management & Auditability ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· Implementation Tracking: Detailed tasks with assignees, due dates, statuses, and a complete history of comments and attached artifacts.   \n· Review & Approval Workflow: A formal review gate (Awaiting Review) with an approval/rejection mechanism and mandatory feedback, all logged in an immutable audit trail.   \n· Integrated Documentation: The platform acts as a central evidence hub, linking policies and procedures directly to the controls they satisfy. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· Process Oversight Reporting: Reports on the health of the risk program itself, including overdue tasks, review bottlenecks, and controls with missing evidence. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "7. Success Metrics ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "· Adoption: Monthly Active Users (MAU), number of assessments created. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Efficiency: Reduction in time to complete a full assessment cycle (measured before and after LLM feature adoption). · Engagement: Percentage of high-risk items with an active mitigation plan. · Value & User Satisfaction: Number of executive reports generated; Net Promoter Score (NPS) with ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "specific questions on the usefulness of dashboards and Al features. ",
+        "page_idx": 2
+    }
+]

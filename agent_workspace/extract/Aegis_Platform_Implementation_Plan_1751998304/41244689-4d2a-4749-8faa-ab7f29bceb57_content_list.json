@@ -1,0 +1,330 @@
+[
+    {
+        "type": "text",
+        "text": "Aegis Platform Implementation Plan ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "This plan is divided into four distinct phases, allowing for iterative development, testing, and feedback. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "· Phase 1: Minimum Viable Product (MvP) - Build the core, end-to-end risk management loop. · Phase 2: Core Enhancements & Integrations - Add key integrations and improve the user experience. · Phase 3: Intelligence Layer - Weave in the LLM-powered automation features. · Phase 4: Enterprise Readiness - Add features for scale, auditing, and advanced reporting ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Phase 1: MVP - The Core Risk Management Loop ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "The goal of this phase is to have a functional, end-to-end platform that allows a user to perform a basic risk assessment and track it to completion. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Epic 1: Foundation & Project Setup ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Task: Initialize Git repository and establish branching strategy (e.g., GitFlow). Task: Set up cloud infrastructure (e.g., Azure App Service, Vercel, AWS Amplify)) Task: Configure CI/CD pipeline for automated testing and deployment Task: Set up project boilerplate for Frontend (Next.js) and Backend (FastAPI/Node.js) Task: Create initial database schema in PostgreSQL. Task: Implement basic design system tokens (colors, fonts, spacing) in the frontend. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Epic 2: User Authentication & Roles (Core) ",
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/uyi005.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Task: Integrate Microsoft Entra ID using OAuth 2.0 for user login/logout.   \nTask: Create database tables for Users and basic Roles (Admin, Analyst, ReadOnly) Task: Implement backend middleware to protect authenticated routes.   \nTask: Build the frontend login page and logic for handling authentication tokens.   \nTask: Create a simple user profile page. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Epic 3: Asset Management (Core) ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Task: Design and implement the Assets table in the database.   \nTask: Build backend API endpoints (CRUD - Create, Read, Update, Delete) for assets Task: Create frontend Ul to list, add, edit, and view assets.   \nTask: Implement a basic CsV import function for assets. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Epic 4: Assessment & Analysis (Core) ",
+        "page_idx": 0
+    },
+    {
+        "type": "image",
+        "img_path": "images/im2cty.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Task: Create a database seeding script to load NIST CSF and CIS Controls frameworks. Task: Build Ul to start a new assessment by selecting assets and a framework. Task: Develop the main assessment interface where users can set a status for each control (Implemented, Not Implemented, etc.). ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "$\\sqsupset$ Task: Implement the logic to automatically create a \"Risk\" in the Risk Register when a control is marked \"Not Implemented.\"   \n$\\sqsupset$ Task: Build the basic Risk Register Ul to view a list of identified risks.   \n$\\sqsupset$ Task: Implement the configurable Likelihood/Impact matrix and allow users to score risks. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 5: Mitigation & Reporting (Core) ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: From the Risk Register, allow users to create a simple remediation task (Title, Assignee, Status). Task: Build a basic Kanban or list view to track mitigation task status. Task: Create a single, simple report template (e.g., PDF export of the Risk Register) ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 6: Basic Dashboard ",
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/b86zu0.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: Design a simple, single dashboard for all users.   \nTask: Add widgets for basic counts: Total Assets, Open Risks, Assessments in Progress. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Phase 2: Core Enhancements & Integrations ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "With the core loop functional, this phase focuses on adding the powerful integrations and improving the UX. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 7: Advanced UX/UI Polish ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: Implement the gradient accent colors and other visual design elements.   \nTask: Add smooth page transitions and micro-animations on interactive elements.   \nTask: Implement skeleton loaders for a better data-loading experience.   \nTask: Implement both Light and Dark modes. ",
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/fkkpd4.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 8: Evidence & Documentation ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: Implement secure file upload capability for evidence (link to controls and tasks) Task: Add rich-text editor for control narratives and comments. Task: Build the \"Awaiting Review\" workflow gate for mitigation tasks. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 9: OpenVAS Integration ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: Develop a backend service to connect to the OpenVAS APl   \nTask: Create a UI for admins to configure the OpenVAS connection details securely.   \nTask: Implement the logic to correlate OpenVAS vulnerabilities with Aegis assets.   \nTask: Create a workflow to automatically flag controls (Cis 7) or create risks based on high-severity findings. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 10: OpenCTI Integration ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: Develop a backend service to connect to the OpenCTI GraphQL APl. ",
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/42dwzu.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 1
+    },
+    {
+        "type": "image",
+        "img_path": "images/tl991k.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Task: On the Risk Register page, create a new Ul tab or section called \"Threat Intel.\" Task: When a risk is viewed, query OpenCTI for related threat actors, malware, or campaigns and display the results. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Epic 11: Role-Based Dashboards ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "$\\sqsupset$ Task: Refactor the basic dashboard into a dynamic, widget-based system.   \n$\\sqsupset$ Task: Design and implement the CISO Cockpit, Analyst Workbench, and System Owner Inbox views. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Phase 3: Intelligence Layer (LLM Features) ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "This phase introduces the Al capabilities that differentiate the platform. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 12: LLM Service Integration ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Task: Select an LLM provider (e.g., Azure OpenAl) and set up secure API access.   \nTask: Create a centralized backend service for managing prompts and parsing LLM responses. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 13: Al-Powered Features ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Task: (Evidence Analysis): Add a button to \"Analyze Evidence.\" Wire it to the LLM service to scan uploaded documents and provide a summary.   \nTask: (Narrative Generation): Add a \"Suggest Narrative\" button that uses evidence summaries to generate a draft narrative for a control.   \nTask: (Risk Statement Generation): Add a \"Generate with AI\" button on the Risk Register that uses technical data and threat intel to draft a formal risk statement.   \nTask: (Remediation Suggestions): Add a \"Suggest Plan\" button on mitigation tasks to generate a highlevel, step-by-step remediation plan.   \nTask: (Executive Summary): In the reporting module, add a \"Generate Executive Summary\" button that analyzes dashboard metrics to produce a narrative for leadership. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Phase 4: Enterprise Readiness ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "This final phase adds features required for large-scale adoption, security, and compliance. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 14: Advanced Reporting & Auditing ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/cfx3nd.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Task: Develop the custom report builder with a drag-and-drop interface.   \nTask: Implement report scheduling and email distribution.   \nTask: Create a comprehensive audit trail for every significant action in the platform.   \nTask: Build a Ul to view and search the audit logs. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 15: Advanced RBAC ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Task: Extend the roles system to allow for custom, user-defined roles.   \nTask: Implement fine-grained permissions (e.g., restricting access to assets or modules based on role). ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/7svcll.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 16: Documentation ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/iq1hxg.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Task: Set up the Astro project for documentation.   \nTask: Write comprehensive user guides for all major features and personas.   \nTask: Create admin guides for setting up integrations and authentication. ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/accrnc.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Epic 17: Scalability & Security Hardening ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/zccxwi.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Task: Conduct performance and load testing on the platform. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Task: Perform a third-party penetration test and remediate findings. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Task: Optimize database queries and add caching where appropriate. ",
+        "page_idx": 3
+    }
+]
