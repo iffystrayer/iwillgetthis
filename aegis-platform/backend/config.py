@@ -34,10 +34,14 @@ class Settings(BaseSettings):
     # Application Settings
     APP_NAME: str = "Aegis Risk Management Platform"
     APP_VERSION: str = "1.0.0"
+    LOG_LEVEL: str = "INFO"
     
     # ==============================================
     # AI/LLM Core Configuration
     # ==============================================
+    
+    # AI Features Toggle
+    ENABLE_AI_FEATURES: bool = True
     
     # Provider Management
     DEFAULT_LLM_PROVIDER: str = "openai"
@@ -49,6 +53,13 @@ class Settings(BaseSettings):
     ENABLE_PERFORMANCE_MONITORING: bool = True
     ENABLE_PROVIDER_HEALTH_CHECKS: bool = True
     COST_OPTIMIZATION: bool = True
+    DAILY_COST_LIMIT: float = 100.0
+    PROVIDER_DAILY_LIMITS: Dict[str, float] = {
+        "openai": 50.0,
+        "anthropic": 30.0,
+        "azure_openai": 40.0,
+        "gemini": 20.0
+    }
     
     # Provider Selection Strategy
     PROVIDER_SELECTION_STRATEGY: str = "balanced"  # cost_optimized, performance_optimized, balanced
