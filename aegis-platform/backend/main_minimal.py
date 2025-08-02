@@ -182,6 +182,376 @@ async def test_ai_generation():
         "response_time_ms": 1200
     }
 
+# Asset Management Endpoints
+from asset_scoring import calculate_asset_criticality, get_criticality_factors_info
+
+@app.get("/api/v1/assets/categories")
+async def get_asset_categories():
+    """Get all asset categories"""
+    return [
+        {
+            "id": 1,
+            "name": "Servers",
+            "description": "Physical and virtual servers",
+            "color": "#ff6b6b",
+            "is_active": True,
+            "created_at": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "name": "Databases",
+            "description": "Database systems and instances",
+            "color": "#4ecdc4",
+            "is_active": True,
+            "created_at": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": 3,
+            "name": "Workstations",
+            "description": "End-user workstations and laptops",
+            "color": "#45b7d1",
+            "is_active": True,
+            "created_at": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": 4,
+            "name": "Network Devices",
+            "description": "Routers, switches, and network infrastructure",
+            "color": "#f9ca24",
+            "is_active": True,
+            "created_at": "2024-01-01T00:00:00Z"
+        },
+        {
+            "id": 5,
+            "name": "Applications",
+            "description": "Software applications and services",
+            "color": "#6c5ce7",
+            "is_active": True,
+            "created_at": "2024-01-01T00:00:00Z"
+        }
+    ]
+
+@app.get("/api/v1/assets")
+async def get_assets(
+    skip: int = 0,
+    limit: int = 20,
+    search: str = None,
+    asset_type: str = None,
+    criticality: str = None,
+    category_id: int = None
+):
+    """Get assets with filtering and pagination"""
+    # Mock asset data
+    assets = [
+        {
+            "id": 1,
+            "name": "Production Web Server",
+            "description": "Main production web server hosting customer applications",
+            "asset_type": "server",
+            "criticality": "critical",
+            "category_id": 1,
+            "owner_id": 1,
+            "ip_address": "192.168.1.100",
+            "hostname": "web-prod-01",
+            "operating_system": "Ubuntu 22.04 LTS",
+            "version": "22.04.3",
+            "location": "Data Center 1 - Rack A1",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "status": "active",
+            "tags": ["web", "production", "critical", "ubuntu"],
+            "is_active": True,
+            "created_at": "2024-01-15T10:30:00Z",
+            "updated_at": "2024-01-20T14:22:00Z"
+        },
+        {
+            "id": 2,
+            "name": "Database Server",
+            "description": "Primary PostgreSQL database server",
+            "asset_type": "database",
+            "criticality": "critical",
+            "category_id": 2,
+            "owner_id": 1,
+            "ip_address": "192.168.1.101",
+            "hostname": "db-prod-01",
+            "operating_system": "CentOS 8",
+            "version": "8.5",
+            "location": "Data Center 1 - Rack A2",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "status": "active",
+            "tags": ["database", "postgresql", "production", "critical"],
+            "is_active": True,
+            "created_at": "2024-01-10T09:15:00Z",
+            "updated_at": "2024-01-18T11:45:00Z"
+        },
+        {
+            "id": 3,
+            "name": "Development Workstation",
+            "description": "Developer workstation for application development",
+            "asset_type": "workstation",
+            "criticality": "medium",
+            "category_id": 3,
+            "owner_id": 2,
+            "ip_address": "192.168.1.200",
+            "hostname": "dev-ws-01",
+            "operating_system": "Windows 11",
+            "version": "22H2",
+            "location": "Office Building A - Floor 2",
+            "environment": "development",
+            "business_unit": "Engineering",
+            "status": "active",
+            "tags": ["workstation", "development", "windows"],
+            "is_active": True,
+            "created_at": "2024-01-12T13:20:00Z",
+            "updated_at": "2024-01-19T16:30:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_assets = assets
+    if search:
+        filtered_assets = [a for a in filtered_assets if search.lower() in a["name"].lower() or search.lower() in a["description"].lower()]
+    if asset_type:
+        filtered_assets = [a for a in filtered_assets if a["asset_type"] == asset_type]
+    if criticality:
+        filtered_assets = [a for a in filtered_assets if a["criticality"] == criticality]
+    if category_id:
+        filtered_assets = [a for a in filtered_assets if a["category_id"] == category_id]
+    
+    # Apply pagination
+    paginated_assets = filtered_assets[skip:skip + limit]
+    
+    return {
+        "items": paginated_assets,
+        "total": len(filtered_assets),
+        "page": skip // limit + 1,
+        "size": limit,
+        "total_pages": (len(filtered_assets) + limit - 1) // limit
+    }
+
+@app.get("/api/v1/assets/{asset_id}")
+async def get_asset(asset_id: int):
+    """Get specific asset by ID"""
+    if asset_id == 1:
+        return {
+            "id": 1,
+            "name": "Production Web Server",
+            "description": "Main production web server hosting customer applications",
+            "asset_type": "server",
+            "criticality": "critical",
+            "category_id": 1,
+            "category": {
+                "id": 1,
+                "name": "Servers",
+                "description": "Physical and virtual servers",
+                "color": "#ff6b6b"
+            },
+            "owner_id": 1,
+            "owner": {
+                "id": 1,
+                "email": "admin@aegis-platform.com",
+                "full_name": "System Administrator"
+            },
+            "ip_address": "192.168.1.100",
+            "hostname": "web-prod-01",
+            "operating_system": "Ubuntu 22.04 LTS",
+            "version": "22.04.3",
+            "location": "Data Center 1 - Rack A1",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "cost_center": "ENG-001",
+            "compliance_scope": ["SOC2", "ISO27001"],
+            "status": "active",
+            "purchase_date": "2023-12-01T00:00:00Z",
+            "warranty_expiry": "2026-12-01T00:00:00Z",
+            "last_scan_date": "2024-01-20T02:30:00Z",
+            "tags": ["web", "production", "critical", "ubuntu"],
+            "custom_fields": {
+                "backup_schedule": "daily",
+                "monitoring_enabled": True,
+                "security_patch_level": "up-to-date"
+            },
+            "is_active": True,
+            "created_at": "2024-01-15T10:30:00Z",
+            "updated_at": "2024-01-20T14:22:00Z"
+        }
+    else:
+        return {"error": "Asset not found", "detail": f"Asset with ID {asset_id} does not exist"}
+
+@app.post("/api/v1/assets")
+async def create_asset(asset_data: dict):
+    """Create new asset"""
+    # Simulate asset creation
+    new_asset = {
+        "id": 999,  # Mock ID
+        "name": asset_data.get("name", "New Asset"),
+        "description": asset_data.get("description", ""),
+        "asset_type": asset_data.get("asset_type", "other"),
+        "criticality": asset_data.get("criticality", "medium"),
+        "category_id": asset_data.get("category_id"),
+        "owner_id": asset_data.get("owner_id", 1),
+        "ip_address": asset_data.get("ip_address"),
+        "hostname": asset_data.get("hostname"),
+        "operating_system": asset_data.get("operating_system"),
+        "location": asset_data.get("location"),
+        "environment": asset_data.get("environment", "development"),
+        "business_unit": asset_data.get("business_unit"),
+        "status": "active",
+        "tags": asset_data.get("tags", []),
+        "is_active": True,
+        "created_at": "2024-01-21T10:00:00Z",
+        "updated_at": "2024-01-21T10:00:00Z"
+    }
+    return new_asset
+
+@app.put("/api/v1/assets/{asset_id}")
+async def update_asset(asset_id: int, asset_data: dict):
+    """Update existing asset"""
+    # Simulate asset update
+    updated_asset = {
+        "id": asset_id,
+        "name": asset_data.get("name", "Updated Asset"),
+        "description": asset_data.get("description", "Updated description"),
+        "asset_type": asset_data.get("asset_type", "server"),
+        "criticality": asset_data.get("criticality", "high"),
+        "status": asset_data.get("status", "active"),
+        "updated_at": "2024-01-21T10:30:00Z"
+    }
+    return updated_asset
+
+@app.delete("/api/v1/assets/{asset_id}")
+async def delete_asset(asset_id: int):
+    """Delete asset (soft delete)"""
+    return {
+        "success": True,
+        "message": f"Asset {asset_id} has been deactivated",
+        "asset_id": asset_id,
+        "deleted_at": "2024-01-21T10:45:00Z"
+    }
+
+@app.post("/api/v1/assets/{asset_id}/calculate-criticality")
+async def calculate_asset_criticality_score(asset_id: int):
+    """Calculate criticality score for a specific asset"""
+    # For demo purposes, get asset data from the mock asset
+    if asset_id == 1:
+        asset_data = {
+            "asset_type": "server",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "compliance_scope": ["SOC2", "ISO27001"],
+            "custom_fields": {
+                "backup_schedule": "daily",
+                "monitoring_enabled": True,
+                "security_patch_level": "up-to-date",
+                "sla_requirement": "99.9% uptime",
+                "recovery_time_objective": "4 hours",
+                "revenue_impact_per_hour": "50000",
+                "dependent_systems": ["web-frontend", "mobile-app", "api-gateway"]
+            }
+        }
+    else:
+        asset_data = {
+            "asset_type": "other",
+            "environment": "development",
+            "business_unit": "Other",
+            "compliance_scope": [],
+            "custom_fields": {}
+        }
+    
+    try:
+        criticality_result = calculate_asset_criticality(asset_data)
+        return {
+            "asset_id": asset_id,
+            "criticality_assessment": criticality_result,
+            "success": True
+        }
+    except Exception as e:
+        return {
+            "asset_id": asset_id,
+            "error": str(e),
+            "success": False
+        }
+
+@app.get("/api/v1/assets/criticality/factors")
+async def get_criticality_factors():
+    """Get information about criticality factors and scoring"""
+    return get_criticality_factors_info()
+
+@app.post("/api/v1/assets/batch-criticality")
+async def calculate_batch_criticality():
+    """Calculate criticality scores for all active assets"""
+    # Mock implementation for batch processing
+    mock_assets = [
+        {
+            "id": 1,
+            "name": "Production Web Server",
+            "asset_type": "server",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "compliance_scope": ["SOC2", "ISO27001"],
+            "custom_fields": {
+                "sla_requirement": "99.9% uptime",
+                "recovery_time_objective": "4 hours",
+                "revenue_impact_per_hour": "50000",
+                "dependent_systems": ["web-frontend", "mobile-app", "api-gateway"]
+            }
+        },
+        {
+            "id": 2,
+            "name": "Database Server",
+            "asset_type": "database",
+            "environment": "production",
+            "business_unit": "Engineering",
+            "compliance_scope": ["SOC2", "ISO27001", "PCI-DSS"],
+            "custom_fields": {
+                "data_classification": "confidential",
+                "sla_requirement": "99.9% uptime",
+                "recovery_time_objective": "1 hour",
+                "revenue_impact_per_hour": "100000",
+                "dependent_systems": ["web-server", "analytics", "reporting"]
+            }
+        },
+        {
+            "id": 3,
+            "name": "Development Workstation",
+            "asset_type": "workstation",
+            "environment": "development",
+            "business_unit": "Engineering",
+            "compliance_scope": [],
+            "custom_fields": {
+                "data_classification": "internal",
+                "recovery_time_objective": "24 hours",
+                "revenue_impact_per_hour": "0"
+            }
+        }
+    ]
+    
+    results = []
+    for asset in mock_assets:
+        try:
+            criticality_result = calculate_asset_criticality(asset)
+            results.append({
+                "asset_id": asset["id"],
+                "asset_name": asset["name"],
+                "criticality_assessment": criticality_result,
+                "success": True
+            })
+        except Exception as e:
+            results.append({
+                "asset_id": asset["id"],
+                "asset_name": asset["name"],
+                "error": str(e),
+                "success": False
+            })
+    
+    return {
+        "processed_assets": len(results),
+        "successful_assessments": sum(1 for r in results if r["success"]),
+        "failed_assessments": sum(1 for r in results if not r["success"]),
+        "results": results
+    }
+
 if __name__ == "__main__":
     port = 8000
     print(f"🚀 Starting server on port {port}")
