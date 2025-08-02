@@ -12,13 +12,13 @@ from ai_providers import (
     DeepSeekProvider, OllamaProvider, LiteLLMProvider,
     OpenRouterProvider, CustomProvider
 )
-from .ai_providers.anthropic_provider import AnthropicProvider
-from .ai_providers.cohere_provider import CohereProvider
-from .ai_providers.mistral_provider import MistralProvider
-from .ai_providers.huggingface_provider import HuggingFaceProvider
-from .ai_providers.together_provider import TogetherProvider
-from .ai_providers.lmstudio_provider import LMStudioProvider
-from .ai_providers.textgen_provider import TextGenWebUIProvider
+from ai_providers.anthropic_provider import AnthropicProvider
+from ai_providers.cohere_provider import CohereProvider
+from ai_providers.mistral_provider import MistralProvider
+from ai_providers.huggingface_provider import HuggingFaceProvider
+from ai_providers.together_provider import TogetherProvider
+from ai_providers.lmstudio_provider import LMStudioProvider
+from ai_providers.textgen_provider import TextGenWebUIProvider
 
 logger = logging.getLogger(__name__)
 

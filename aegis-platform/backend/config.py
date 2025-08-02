@@ -12,10 +12,10 @@ class Settings(BaseSettings):
     
     # Environment
     ENVIRONMENT: str = "development"
-    DEBUG: bool = False
+    DEBUG: bool = True
     
     # Database Configuration
-    DATABASE_URL: str = "postgresql://aegis_user:aegis_password@localhost:5432/aegis_db"
+    DATABASE_URL: str = "sqlite:///./aegis_development.db"
     
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"
