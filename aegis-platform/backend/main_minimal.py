@@ -805,6 +805,228 @@ async def get_network_map(request_data: dict):
         }
     }
 
+# Asset Import/Export Endpoints
+@app.post("/api/v1/assets/export")
+async def export_assets(request_data: dict):
+    """Export assets to various formats"""
+    format = request_data.get("format", "csv")
+    asset_ids = request_data.get("asset_ids")
+    include_relationships = request_data.get("include_relationships", False)
+    include_metadata = request_data.get("include_metadata", True)
+    
+    # Mock export data
+    if format == "csv":
+        csv_content = """name,description,asset_type,criticality,category_name,ip_address,hostname,operating_system,environment,business_unit
+Production Web Server,Main production web server,server,critical,Servers,192.168.1.100,web-prod-01,Ubuntu 22.04 LTS,production,Engineering
+Database Server,Primary PostgreSQL database,database,critical,Databases,192.168.1.101,db-prod-01,CentOS 8,production,Engineering
+Development Workstation,Developer workstation,workstation,medium,Workstations,192.168.1.200,dev-ws-01,Windows 11,development,Engineering"""
+        
+        return {
+            "format": "csv",
+            "assets_csv": csv_content,
+            "asset_count": 3,
+            "generated_at": "2024-01-21T16:00:00Z",
+            "success": True
+        }
+    
+    elif format == "json":
+        return {
+            "format": "json",
+            "export_metadata": {
+                "generated_at": "2024-01-21T16:00:00Z",
+                "asset_count": 3,
+                "includes_relationships": include_relationships
+            },
+            "assets": [
+                {
+                    "id": 1,
+                    "name": "Production Web Server",
+                    "description": "Main production web server",
+                    "asset_type": "server",
+                    "criticality": "critical",
+                    "ip_address": "192.168.1.100",
+                    "hostname": "web-prod-01",
+                    "environment": "production",
+                    "business_unit": "Engineering"
+                },
+                {
+                    "id": 2,
+                    "name": "Database Server", 
+                    "description": "Primary PostgreSQL database",
+                    "asset_type": "database",
+                    "criticality": "critical",
+                    "ip_address": "192.168.1.101",
+                    "hostname": "db-prod-01",
+                    "environment": "production",
+                    "business_unit": "Engineering"
+                }
+            ],
+            "success": True
+        }
+    
+    else:
+        return {
+            "success": False,
+            "error": f"Unsupported export format: {format}",
+            "supported_formats": ["csv", "json", "xlsx", "xml"]
+        }
+
+@app.post("/api/v1/assets/import")
+async def import_assets(request_data: dict):
+    """Import assets from various formats"""
+    format = request_data.get("format", "csv")
+    file_content = request_data.get("file_content", "")
+    validate_only = request_data.get("validate_only", False)
+    update_existing = request_data.get("update_existing", False)
+    create_categories = request_data.get("create_categories", True)
+    
+    # Mock import processing
+    if validate_only:
+        return {
+            "is_valid": True,
+            "total_rows": 3,
+            "valid_rows": 3,
+            "error_count": 0,
+            "warning_count": 1,
+            "errors": [],
+            "warnings": ["Row 2: Asset with name 'Database Server' already exists (ID: 2)"],
+            "validation_only": True
+        }
+    
+    # Mock successful import
+    return {
+        "success": True,
+        "total_processed": 3,
+        "created_count": 2,
+        "updated_count": 1,
+        "error_count": 0,
+        "errors": [],
+        "imported_assets": [
+            {
+                "id": 4,
+                "name": "New Server 1",
+                "asset_type": "server",
+                "criticality": "medium",
+                "created_at": "2024-01-21T16:00:00Z"
+            },
+            {
+                "id": 5,
+                "name": "New Server 2", 
+                "asset_type": "server",
+                "criticality": "high",
+                "created_at": "2024-01-21T16:00:00Z"
+            }
+        ]
+    }
+
+@app.get("/api/v1/assets/import/template")
+async def get_import_template(format: str = "csv", include_relationships: bool = False):
+    """Get import template for assets"""
+    
+    if format == "csv":
+        template_content = """name,description,asset_type,criticality,category_name,ip_address,hostname,operating_system,version,location,environment,business_unit,cost_center,compliance_scope,status,tags,custom_fields
+Example Web Server,Production web server hosting main application,server,high,Servers,192.168.1.100,web-prod-01,Ubuntu 22.04 LTS,22.04.3,Data Center 1 - Rack A1,production,Engineering,ENG-001,"[""SOC2"", ""ISO27001""]",active,"[""web"", ""production"", ""critical""]","{""backup_schedule"": ""daily"", ""monitoring_enabled"": true}"
+Example Database Server,Primary PostgreSQL database server,database,critical,Databases,192.168.1.101,db-prod-01,CentOS 8,8.5,Data Center 1 - Rack A2,production,Engineering,ENG-001,"[""SOC2"", ""ISO27001"", ""PCI-DSS""]",active,"[""database"", ""postgresql"", ""production""]","{""backup_schedule"": ""hourly"", ""encryption_enabled"": true}\""""
+        
+        return {
+            "format": "csv",
+            "template_content": template_content,
+            "description": "CSV template with sample asset data",
+            "include_relationships": include_relationships
+        }
+    
+    elif format == "json":
+        template_data = {
+            "assets": [
+                {
+                    "name": "Example Web Server",
+                    "description": "Production web server hosting main application",
+                    "asset_type": "server",
+                    "criticality": "high",
+                    "category_name": "Servers",
+                    "ip_address": "192.168.1.100",
+                    "hostname": "web-prod-01",
+                    "operating_system": "Ubuntu 22.04 LTS",
+                    "environment": "production",
+                    "business_unit": "Engineering",
+                    "tags": ["web", "production", "critical"],
+                    "custom_fields": {
+                        "backup_schedule": "daily",
+                        "monitoring_enabled": True
+                    }
+                }
+            ]
+        }
+        
+        return {
+            "format": "json",
+            "template_data": template_data,
+            "description": "JSON template with sample asset data",
+            "include_relationships": include_relationships
+        }
+    
+    else:
+        return {
+            "success": False,
+            "error": f"Unsupported template format: {format}",
+            "supported_formats": ["csv", "json", "xlsx", "xml"]
+        }
+
+@app.post("/api/v1/assets/bulk-operations")
+async def bulk_asset_operations(request_data: dict):
+    """Perform bulk operations on assets"""
+    operation = request_data.get("operation")  # delete, update, tag, categorize
+    asset_ids = request_data.get("asset_ids", [])
+    operation_data = request_data.get("operation_data", {})
+    
+    if operation == "delete":
+        return {
+            "success": True,
+            "operation": "bulk_delete",
+            "processed_count": len(asset_ids),
+            "deleted_assets": asset_ids,
+            "message": f"Successfully deleted {len(asset_ids)} assets"
+        }
+    
+    elif operation == "update":
+        return {
+            "success": True,
+            "operation": "bulk_update",
+            "processed_count": len(asset_ids),
+            "updated_fields": list(operation_data.keys()),
+            "updated_assets": asset_ids,
+            "message": f"Successfully updated {len(asset_ids)} assets"
+        }
+    
+    elif operation == "tag":
+        tags_to_add = operation_data.get("tags", [])
+        return {
+            "success": True,
+            "operation": "bulk_tag",
+            "processed_count": len(asset_ids),
+            "tags_added": tags_to_add,
+            "tagged_assets": asset_ids,
+            "message": f"Successfully tagged {len(asset_ids)} assets with {len(tags_to_add)} tags"
+        }
+    
+    elif operation == "categorize":
+        category_id = operation_data.get("category_id")
+        return {
+            "success": True,
+            "operation": "bulk_categorize",
+            "processed_count": len(asset_ids),
+            "new_category_id": category_id,
+            "categorized_assets": asset_ids,
+            "message": f"Successfully moved {len(asset_ids)} assets to new category"
+        }
+    
+    else:
+        return {
+            "success": False,
+            "error": f"Unsupported bulk operation: {operation}",
+            "supported_operations": ["delete", "update", "tag", "categorize"]
+        }
+
 if __name__ == "__main__":
     import random
     
