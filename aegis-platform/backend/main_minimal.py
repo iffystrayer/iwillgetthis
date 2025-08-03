@@ -2680,6 +2680,3290 @@ async def get_approval_dashboard():
         }
     }
 
+# ================================
+# Vulnerability Management System Endpoints
+# ================================
+
+@app.get("/api/v1/vulnerabilities")
+async def get_vulnerabilities(
+    severity: str = None,
+    status: str = None,
+    vulnerability_type: str = None,
+    asset_id: int = None,
+    assigned_to: int = None,
+    has_exploit: bool = None,
+    has_patch: bool = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get vulnerabilities with filtering and pagination"""
+    
+    # Mock vulnerability data
+    vulnerabilities = [
+        {
+            "id": 1,
+            "vulnerability_id": "VULN-2024-001",
+            "title": "Critical Remote Code Execution in Apache Struts",
+            "description": "A critical remote code execution vulnerability exists in Apache Struts 2.x that allows attackers to execute arbitrary code through crafted OGNL expressions.",
+            "vulnerability_type": "software",
+            "cve_id": "CVE-2024-12345",
+            "cwe_id": "CWE-94",
+            "severity": "critical",
+            "cvss_score": 9.8,
+            "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "status": "detected",
+            "discovered_date": "2024-01-25T10:30:00Z",
+            "discovery_method": "vulnerability_scan",
+            "asset": {
+                "id": 1,
+                "name": "Web Server 01",
+                "asset_type": "server",
+                "criticality": "critical"
+            },
+            "affected_software": "Apache Struts",
+            "affected_version": "2.5.30",
+            "attack_vector": "Network",
+            "attack_complexity": "Low",
+            "exploit_available": True,
+            "exploit_maturity": "Functional",
+            "patch_available": True,
+            "patch_details": "Upgrade to Apache Struts 2.5.33 or later",
+            "priority": "critical",
+            "assigned_to": {
+                "id": 3,
+                "email": "security.admin@company.com",
+                "full_name": "Security Administrator"
+            },
+            "sla_deadline": "2024-01-26T17:00:00Z",
+            "remediation_task_count": 1,
+            "created_at": "2024-01-25T10:30:00Z"
+        },
+        {
+            "id": 2,
+            "vulnerability_id": "VULN-2024-002",
+            "title": "SQL Injection in Customer Portal",
+            "description": "SQL injection vulnerability in the customer portal login form allows unauthorized data access.",
+            "vulnerability_type": "web_application",
+            "cwe_id": "CWE-89",
+            "severity": "high",
+            "cvss_score": 8.1,
+            "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+            "status": "in_progress",
+            "discovered_date": "2024-01-20T14:15:00Z",
+            "discovery_method": "penetration_test",
+            "asset": {
+                "id": 5,
+                "name": "Customer Portal",
+                "asset_type": "application",
+                "criticality": "high"
+            },
+            "url_path": "/portal/login",
+            "attack_vector": "Network",
+            "attack_complexity": "Low",
+            "exploit_available": False,
+            "patch_available": False,
+            "workaround_available": True,
+            "workaround_details": "Implement parameterized queries and input validation",
+            "priority": "high",
+            "assigned_to": {
+                "id": 7,
+                "email": "dev.lead@company.com",
+                "full_name": "Development Lead"
+            },
+            "sla_deadline": "2024-01-27T17:00:00Z",
+            "remediation_task_count": 2,
+            "created_at": "2024-01-20T14:15:00Z"
+        },
+        {
+            "id": 3,
+            "vulnerability_id": "VULN-2024-003",
+            "title": "Outdated SSL/TLS Configuration",
+            "description": "Server supports weak SSL/TLS protocols and cipher suites that are vulnerable to attack.",
+            "vulnerability_type": "configuration",
+            "cwe_id": "CWE-326",
+            "severity": "medium",
+            "cvss_score": 5.9,
+            "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "status": "triaged",
+            "discovered_date": "2024-01-22T09:45:00Z",
+            "discovery_method": "compliance_scan",
+            "asset": {
+                "id": 3,
+                "name": "Load Balancer",
+                "asset_type": "network",
+                "criticality": "high"
+            },
+            "affected_software": "HAProxy",
+            "affected_version": "1.8.14",
+            "attack_vector": "Network",
+            "attack_complexity": "High",
+            "exploit_available": False,
+            "patch_available": True,
+            "patch_details": "Update SSL configuration to disable weak protocols",
+            "priority": "medium",
+            "assigned_to": {
+                "id": 9,
+                "email": "network.admin@company.com",
+                "full_name": "Network Administrator"
+            },
+            "sla_deadline": "2024-02-21T17:00:00Z",
+            "remediation_task_count": 1,
+            "created_at": "2024-01-22T09:45:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_vulnerabilities = vulnerabilities
+    
+    if severity:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["severity"] == severity]
+    if status:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["status"] == status]
+    if vulnerability_type:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["vulnerability_type"] == vulnerability_type]
+    if asset_id:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["asset"]["id"] == asset_id]
+    if assigned_to:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["assigned_to"]["id"] == assigned_to]
+    if has_exploit is not None:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["exploit_available"] == has_exploit]
+    if has_patch is not None:
+        filtered_vulnerabilities = [v for v in filtered_vulnerabilities if v["patch_available"] == has_patch]
+    
+    # Apply pagination
+    paginated_vulnerabilities = filtered_vulnerabilities[skip:skip + limit]
+    
+    return {
+        "items": paginated_vulnerabilities,
+        "total": len(filtered_vulnerabilities),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "critical": len([v for v in filtered_vulnerabilities if v["severity"] == "critical"]),
+            "high": len([v for v in filtered_vulnerabilities if v["severity"] == "high"]),
+            "medium": len([v for v in filtered_vulnerabilities if v["severity"] == "medium"]),
+            "low": len([v for v in filtered_vulnerabilities if v["severity"] == "low"]),
+            "overdue": len([v for v in filtered_vulnerabilities if v["sla_deadline"] < datetime.now().isoformat()])
+        }
+    }
+
+@app.post("/api/v1/vulnerabilities")
+async def create_vulnerability(vulnerability_data: dict):
+    """Create a new vulnerability record"""
+    return {
+        "id": 999,
+        "vulnerability_id": "VULN-2024-999",
+        "title": vulnerability_data.get("title", "New Vulnerability"),
+        "description": vulnerability_data.get("description", ""),
+        "vulnerability_type": vulnerability_data.get("vulnerability_type", "software"),
+        "severity": vulnerability_data.get("severity", "medium"),
+        "cvss_score": vulnerability_data.get("cvss_score", 5.0),
+        "status": "detected",
+        "discovered_date": datetime.now().isoformat(),
+        "created_at": datetime.now().isoformat(),
+        "message": "Vulnerability created successfully"
+    }
+
+@app.get("/api/v1/vulnerabilities/{vulnerability_id}")
+async def get_vulnerability(vulnerability_id: int):
+    """Get specific vulnerability details"""
+    if vulnerability_id == 1:
+        return {
+            "id": 1,
+            "vulnerability_id": "VULN-2024-001",
+            "title": "Critical Remote Code Execution in Apache Struts",
+            "description": "A critical remote code execution vulnerability exists in Apache Struts 2.x that allows attackers to execute arbitrary code through crafted OGNL expressions. This vulnerability affects the OGNL (Object-Graph Navigation Language) expression evaluation mechanism and can be exploited by remote attackers without authentication.",
+            "vulnerability_type": "software",
+            "cve_id": "CVE-2024-12345",
+            "cwe_id": "CWE-94",
+            "vendor_advisory_id": "ASF-2024-001",
+            "external_references": [
+                "https://nvd.nist.gov/vuln/detail/CVE-2024-12345",
+                "https://struts.apache.org/security/S2-066.html"
+            ],
+            "severity": "critical",
+            "cvss_score": 9.8,
+            "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_version": "3.1",
+            "risk_score": 9.5,
+            "business_impact_score": 8.8,
+            "exploitability_score": 9.9,
+            "status": "detected",
+            "first_seen": "2024-01-25T10:30:00Z",
+            "last_seen": "2024-01-25T10:30:00Z",
+            "discovered_date": "2024-01-25T10:30:00Z",
+            "discovery_method": "vulnerability_scan",
+            "scan_id": 15,
+            "reported_by": "Automated Security Scanner",
+            "asset": {
+                "id": 1,
+                "name": "Web Server 01",
+                "asset_type": "server",
+                "criticality": "critical"
+            },
+            "affected_systems": ["web-server-01.company.com", "web-server-02.company.com"],
+            "network_location": "DMZ",
+            "service_port": "8080",
+            "affected_software": "Apache Struts",
+            "affected_version": "2.5.30",
+            "vulnerable_component": "struts2-core",
+            "attack_vector": "Network",
+            "attack_complexity": "Low",
+            "privileges_required": "None",
+            "user_interaction": "None",
+            "assigned_to": {
+                "id": 3,
+                "email": "security.admin@company.com",
+                "full_name": "Security Administrator"
+            },
+            "team_assigned": "Security Team",
+            "priority": "critical",
+            "sla_deadline": "2024-01-26T17:00:00Z",
+            "resolution_deadline": "2024-01-26T17:00:00Z",
+            "exploit_available": True,
+            "exploit_maturity": "Functional",
+            "threat_intelligence": {
+                "exploit_kits": ["ExploitKit Pro", "BlackHat Toolkit"],
+                "active_campaigns": ["Operation WebStrike"],
+                "threat_actors": ["APT28", "Criminal Group Alpha"],
+                "geographic_targeting": ["North America", "Europe"],
+                "industry_targeting": ["Financial Services", "Healthcare"]
+            },
+            "in_the_wild": True,
+            "patch_available": True,
+            "patch_details": "Upgrade to Apache Struts 2.5.33 or later. The patch addresses the OGNL injection vulnerability by implementing stricter expression validation and sandboxing.",
+            "workaround_available": True,
+            "workaround_details": "Disable OGNL expression evaluation or implement web application firewall rules to block malicious payloads.",
+            "compliance_frameworks": ["PCI-DSS", "SOX", "GDPR"],
+            "regulatory_requirements": ["PCI-DSS 6.2", "GDPR Article 32"],
+            "verified": True,
+            "verified_by": {
+                "id": 5,
+                "email": "senior.analyst@company.com",
+                "full_name": "Senior Security Analyst"
+            },
+            "verification_date": "2024-01-25T12:00:00Z",
+            "verification_notes": "Confirmed through manual testing. Successful code execution achieved.",
+            "false_positive": False,
+            "tags": ["critical", "rce", "apache", "struts", "owasp-top10"],
+            "custom_fields": {
+                "business_unit": "E-commerce",
+                "customer_facing": True,
+                "revenue_impact": "High"
+            },
+            "remediation_task_count": 1,
+            "assessment_count": 2,
+            "exploit_attempt_count": 0,
+            "created_at": "2024-01-25T10:30:00Z",
+            "updated_at": "2024-01-25T15:45:00Z"
+        }
+    else:
+        return {"error": "Vulnerability not found", "detail": f"Vulnerability with ID {vulnerability_id} does not exist"}
+
+@app.put("/api/v1/vulnerabilities/{vulnerability_id}")
+async def update_vulnerability(vulnerability_id: int, vulnerability_data: dict):
+    """Update vulnerability details"""
+    return {
+        "id": vulnerability_id,
+        "message": "Vulnerability updated successfully",
+        "updated_fields": list(vulnerability_data.keys()),
+        "updated_at": datetime.now().isoformat()
+    }
+
+@app.post("/api/v1/vulnerabilities/{vulnerability_id}/assess")
+async def assess_vulnerability(vulnerability_id: int, assessment_data: dict):
+    """Perform vulnerability risk assessment"""
+    return {
+        "vulnerability_id": vulnerability_id,
+        "assessment_id": "ASSESS-VULN-2024-001",
+        "base_score": 9.8,
+        "temporal_score": 9.5,
+        "environmental_score": 9.7,
+        "business_risk_score": 8.8,
+        "threat_intelligence_score": 9.9,
+        "composite_score": 9.5,
+        "priority_level": "critical",
+        "remediation_urgency": "immediate",
+        "confidence_level": 0.95,
+        "scoring_method": assessment_data.get("method", "composite"),
+        "sla_deadline": "2024-01-26T17:00:00Z",
+        "recommendations": [
+            "Apply security patch immediately",
+            "Implement emergency change process",
+            "Monitor for exploitation attempts",
+            "Consider temporary service isolation",
+            "Verify remediation through re-scanning"
+        ],
+        "assessment_date": datetime.now().isoformat()
+    }
+
+@app.get("/api/v1/vulnerabilities/{vulnerability_id}/remediation-tasks")
+async def get_vulnerability_remediation_tasks(vulnerability_id: int):
+    """Get remediation tasks for a vulnerability"""
+    tasks = [
+        {
+            "id": 1,
+            "task_id": "REM-2024-001",
+            "vulnerability_id": vulnerability_id,
+            "title": "Emergency Patch Deployment - Apache Struts",
+            "description": "Deploy critical security patch for Apache Struts RCE vulnerability",
+            "remediation_type": "patch",
+            "status": "in_progress",
+            "progress_percentage": 75,
+            "priority": "critical",
+            "assigned_to": {
+                "id": 3,
+                "email": "security.admin@company.com",
+                "full_name": "Security Administrator"
+            },
+            "planned_start_date": "2024-01-25T18:00:00Z",
+            "planned_completion_date": "2024-01-26T06:00:00Z",
+            "actual_start_date": "2024-01-25T18:30:00Z",
+            "estimated_effort_hours": 8,
+            "actual_effort_hours": 6,
+            "downtime_required": True,
+            "estimated_downtime_hours": 2,
+            "approval_required": True,
+            "approval_status": "approved",
+            "testing_required": True,
+            "testing_completed": False,
+            "created_at": "2024-01-25T16:00:00Z"
+        }
+    ]
+    
+    return {
+        "items": tasks,
+        "total": len(tasks),
+        "vulnerability_id": vulnerability_id
+    }
+
+@app.post("/api/v1/vulnerabilities/{vulnerability_id}/remediation-tasks")
+async def create_remediation_task(vulnerability_id: int, task_data: dict):
+    """Create a new remediation task for a vulnerability"""
+    return {
+        "id": 999,
+        "task_id": "REM-2024-999",
+        "vulnerability_id": vulnerability_id,
+        "title": task_data.get("title", "New Remediation Task"),
+        "description": task_data.get("description", ""),
+        "remediation_type": task_data.get("remediation_type", "patch"),
+        "status": "not_started",
+        "progress_percentage": 0,
+        "priority": task_data.get("priority", "medium"),
+        "assigned_to": task_data.get("assigned_to"),
+        "estimated_effort_hours": task_data.get("estimated_effort_hours"),
+        "created_at": datetime.now().isoformat(),
+        "message": "Remediation task created successfully"
+    }
+
+@app.get("/api/v1/vulnerability-scans")
+async def get_vulnerability_scans(
+    scan_type: str = None,
+    status: str = None,
+    initiated_by: int = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get vulnerability scans with filtering"""
+    
+    scans = [
+        {
+            "id": 1,
+            "scan_id": "SCAN-2024-001",
+            "name": "Weekly Network Vulnerability Scan",
+            "description": "Automated weekly vulnerability scan of the production network",
+            "scan_type": "network_scan",
+            "scanner_tool": "Nessus Professional",
+            "scanner_version": "10.7.2",
+            "status": "completed",
+            "target_scope": ["10.0.1.0/24", "10.0.2.0/24", "dmz.company.com"],
+            "scan_profile": "Full Network Scan",
+            "authentication_used": True,
+            "credentials_type": "SSH, Windows",
+            "start_time": "2024-01-25T02:00:00Z",
+            "end_time": "2024-01-25T06:30:00Z",
+            "duration_minutes": 270,
+            "total_hosts_scanned": 156,
+            "total_vulnerabilities": 47,
+            "critical_count": 2,
+            "high_count": 8,
+            "medium_count": 23,
+            "low_count": 14,
+            "info_count": 12,
+            "scan_coverage_percentage": 98.5,
+            "false_positive_rate": 0.08,
+            "scan_quality_score": 0.92,
+            "compliance_frameworks": ["PCI-DSS", "SOC2"],
+            "policy_violations": 5,
+            "baseline_scan": False,
+            "scheduled_scan": True,
+            "scan_frequency": "weekly",
+            "next_scheduled_scan": "2024-02-01T02:00:00Z",
+            "initiator": {
+                "id": 1,
+                "email": "security.ops@company.com",
+                "full_name": "Security Operations"
+            },
+            "created_at": "2024-01-25T01:55:00Z"
+        },
+        {
+            "id": 2,
+            "scan_id": "SCAN-2024-002",
+            "name": "Web Application Security Assessment",
+            "description": "Comprehensive security assessment of customer-facing web applications",
+            "scan_type": "web_app_scan",
+            "scanner_tool": "OWASP ZAP",
+            "scanner_version": "2.14.0",
+            "status": "running",
+            "target_scope": ["https://portal.company.com", "https://api.company.com"],
+            "scan_profile": "OWASP Top 10 Assessment",
+            "authentication_used": True,
+            "credentials_type": "OAuth2",
+            "start_time": "2024-01-26T10:00:00Z",
+            "end_time": None,
+            "duration_minutes": None,
+            "total_hosts_scanned": 2,
+            "total_vulnerabilities": 0,
+            "compliance_frameworks": ["OWASP"],
+            "baseline_scan": False,
+            "scheduled_scan": False,
+            "initiator": {
+                "id": 7,
+                "email": "appsec.team@company.com", 
+                "full_name": "Application Security Team"
+            },
+            "created_at": "2024-01-26T09:55:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_scans = scans
+    if scan_type:
+        filtered_scans = [s for s in filtered_scans if s["scan_type"] == scan_type]
+    if status:
+        filtered_scans = [s for s in filtered_scans if s["status"] == status]
+    if initiated_by:
+        filtered_scans = [s for s in filtered_scans if s["initiator"]["id"] == initiated_by]
+    
+    # Apply pagination
+    paginated_scans = filtered_scans[skip:skip + limit]
+    
+    return {
+        "items": paginated_scans,
+        "total": len(filtered_scans),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/vulnerability-scans")
+async def create_vulnerability_scan(scan_data: dict):
+    """Initiate a new vulnerability scan"""
+    return {
+        "id": 999,
+        "scan_id": "SCAN-2024-999",
+        "name": scan_data.get("name", "New Vulnerability Scan"),
+        "description": scan_data.get("description", ""),
+        "scan_type": scan_data.get("scan_type", "network_scan"),
+        "target_scope": scan_data.get("target_scope", []),
+        "status": "initiated",
+        "start_time": datetime.now().isoformat(),
+        "scheduled_scan": scan_data.get("scheduled_scan", False),
+        "created_at": datetime.now().isoformat(),
+        "message": "Vulnerability scan initiated successfully"
+    }
+
+@app.get("/api/v1/vulnerability-scans/{scan_id}")
+async def get_vulnerability_scan(scan_id: int):
+    """Get specific vulnerability scan details"""
+    if scan_id == 1:
+        return {
+            "id": 1,
+            "scan_id": "SCAN-2024-001",
+            "name": "Weekly Network Vulnerability Scan",
+            "description": "Automated weekly vulnerability scan of the production network infrastructure to identify security vulnerabilities and compliance issues.",
+            "scan_type": "network_scan",
+            "scanner_tool": "Nessus Professional",
+            "scanner_version": "10.7.2",
+            "status": "completed",
+            "target_scope": ["10.0.1.0/24", "10.0.2.0/24", "dmz.company.com"],
+            "scan_profile": "Full Network Scan with Credentials",
+            "authentication_used": True,
+            "credentials_type": "SSH, Windows, SNMP",
+            "start_time": "2024-01-25T02:00:00Z",
+            "end_time": "2024-01-25T06:30:00Z",
+            "duration_minutes": 270,
+            "total_hosts_scanned": 156,
+            "hosts_alive": 142,
+            "hosts_with_vulnerabilities": 89,
+            "total_vulnerabilities": 47,
+            "critical_count": 2,
+            "high_count": 8,
+            "medium_count": 23,
+            "low_count": 14,
+            "info_count": 12,
+            "new_vulnerabilities": 5,
+            "resolved_vulnerabilities": 3,
+            "scan_coverage_percentage": 98.5,
+            "false_positive_rate": 0.08,
+            "scan_quality_score": 0.92,
+            "compliance_frameworks": ["PCI-DSS", "SOC2", "NIST"],
+            "policy_violations": 5,
+            "pci_dss_compliance_score": 0.87,
+            "raw_output_file": "/scans/SCAN-2024-001-raw.xml",
+            "report_file": "/reports/SCAN-2024-001-report.pdf",
+            "baseline_scan": False,
+            "comparison_scan_id": None,
+            "scheduled_scan": True,
+            "scan_frequency": "weekly",
+            "next_scheduled_scan": "2024-02-01T02:00:00Z",
+            "auto_remediation_enabled": False,
+            "scan_notes": "Scan completed successfully. Notable findings include critical RCE vulnerability in web servers.",
+            "tags": ["production", "weekly", "automated"],
+            "initiator": {
+                "id": 1,
+                "email": "security.ops@company.com",
+                "full_name": "Security Operations Team"
+            },
+            "vulnerability_summary": [
+                {"severity": "critical", "count": 2, "examples": ["CVE-2024-12345", "CVE-2024-12346"]},
+                {"severity": "high", "count": 8, "examples": ["CVE-2024-11111", "CVE-2024-11112"]},
+                {"severity": "medium", "count": 23, "examples": ["CVE-2024-10001", "CVE-2024-10002"]},
+                {"severity": "low", "count": 14, "examples": ["CVE-2024-09001", "CVE-2024-09002"]}
+            ],
+            "created_at": "2024-01-25T01:55:00Z",
+            "updated_at": "2024-01-25T06:35:00Z"
+        }
+    else:
+        return {"error": "Scan not found", "detail": f"Vulnerability scan with ID {scan_id} does not exist"}
+
+@app.get("/api/v1/dashboards/vulnerability-summary")
+async def get_vulnerability_dashboard():
+    """Get vulnerability management dashboard summary"""
+    return {
+        "summary": {
+            "total_vulnerabilities": 127,
+            "critical_vulnerabilities": 8,
+            "high_vulnerabilities": 23,
+            "medium_vulnerabilities": 67,
+            "low_vulnerabilities": 29,
+            "new_last_7_days": 12,
+            "remediated_last_7_days": 18,
+            "overdue_remediations": 5,
+            "sla_violations": 3,
+            "false_positives": 7
+        },
+        "vulnerabilities_by_type": {
+            "software": 45,
+            "configuration": 32,
+            "web_application": 28,
+            "network": 15,
+            "authentication": 7
+        },
+        "vulnerabilities_by_status": {
+            "detected": 15,
+            "confirmed": 23,
+            "triaged": 31,
+            "in_progress": 42,
+            "patched": 12,
+            "mitigated": 4
+        },
+        "top_vulnerable_assets": [
+            {"asset_name": "Web Server 01", "vulnerability_count": 12, "critical_count": 2},
+            {"asset_name": "Database Server", "vulnerability_count": 8, "critical_count": 1},
+            {"asset_name": "API Gateway", "vulnerability_count": 7, "critical_count": 1},
+            {"asset_name": "Load Balancer", "vulnerability_count": 5, "critical_count": 0}
+        ],
+        "exploitation_metrics": {
+            "exploits_available": 23,
+            "active_exploits": 8,
+            "in_the_wild": 3,
+            "exploit_maturity_distribution": {
+                "functional": 8,
+                "proof_of_concept": 12,
+                "unproven": 3
+            }
+        },
+        "remediation_metrics": {
+            "average_time_to_patch_critical": 1.2,  # days
+            "average_time_to_patch_high": 5.8,
+            "patches_available": 78,
+            "workarounds_available": 45,
+            "remediation_success_rate": 0.89
+        },
+        "compliance_status": {
+            "pci_dss_compliance": 0.92,
+            "nist_compliance": 0.87,
+            "iso27001_compliance": 0.89,
+            "policy_violations": 8
+        },
+        "threat_intelligence": {
+            "cves_with_active_campaigns": 5,
+            "threat_actor_targeting": 12,
+            "geographic_risk_score": 7.2,
+            "industry_risk_score": 8.1
+        },
+        "scan_metrics": {
+            "total_scans_last_30_days": 28,
+            "successful_scans": 26,
+            "failed_scans": 2,
+            "average_scan_duration": 185,  # minutes
+            "scan_coverage": 0.94
+        },
+        "recent_critical_findings": [
+            {
+                "vulnerability_id": "VULN-2024-001",
+                "title": "Apache Struts RCE",
+                "cvss_score": 9.8,
+                "discovered_date": "2024-01-25T10:30:00Z"
+            },
+            {
+                "vulnerability_id": "VULN-2024-005",
+                "title": "WordPress SQL Injection",
+                "cvss_score": 9.1,
+                "discovered_date": "2024-01-24T15:20:00Z"
+            }
+        ],
+        "trend_data": {
+            "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+            "new_vulnerabilities": [15, 12, 18, 22],
+            "remediated_vulnerabilities": [8, 14, 16, 18],
+            "critical_vulnerabilities": [3, 2, 4, 8],
+            "sla_compliance": [0.95, 0.92, 0.89, 0.87]
+        }
+    }
+
+@app.get("/api/v1/reports/vulnerability-heatmap")
+async def get_vulnerability_heatmap():
+    """Generate vulnerability heatmap data"""
+    return {
+        "asset_vulnerability_matrix": [
+            [
+                {"asset": "Web Server 01", "critical": 2, "high": 4, "medium": 6, "low": 3, "total": 15},
+                {"asset": "Web Server 02", "critical": 1, "high": 3, "medium": 5, "low": 2, "total": 11},
+                {"asset": "Database Server", "critical": 1, "high": 2, "medium": 3, "low": 2, "total": 8},
+                {"asset": "API Gateway", "critical": 1, "high": 2, "medium": 3, "low": 1, "total": 7},
+                {"asset": "Load Balancer", "critical": 0, "high": 1, "medium": 3, "low": 1, "total": 5}
+            ]
+        ],
+        "severity_distribution": {
+            "critical": {"count": 8, "percentage": 6.3},
+            "high": {"count": 23, "percentage": 18.1},
+            "medium": {"count": 67, "percentage": 52.8},
+            "low": {"count": 29, "percentage": 22.8}
+        },
+        "asset_risk_scores": {
+            "Web Server 01": 8.7,
+            "Web Server 02": 7.2,
+            "Database Server": 7.8,
+            "API Gateway": 7.5,
+            "Load Balancer": 4.2
+        },
+        "network_exposure_analysis": {
+            "internet_facing": {"assets": 5, "vulnerabilities": 45, "avg_severity": 7.2},
+            "dmz": {"assets": 8, "vulnerabilities": 32, "avg_severity": 6.1},
+            "internal": {"assets": 45, "vulnerabilities": 50, "avg_severity": 4.8}
+        }
+    }
+
+@app.post("/api/v1/vulnerabilities/bulk-update")
+async def bulk_update_vulnerabilities(bulk_operation: dict):
+    """Perform bulk operations on vulnerabilities"""
+    
+    operation = bulk_operation.get("operation")
+    vulnerability_ids = bulk_operation.get("vulnerability_ids", [])
+    operation_data = bulk_operation.get("operation_data", {})
+    
+    success_count = len(vulnerability_ids)
+    error_count = 0
+    
+    return {
+        "success": True,
+        "operation": operation,
+        "processed_count": len(vulnerability_ids),
+        "success_count": success_count,
+        "error_count": error_count,
+        "errors": [],
+        "updated_vulnerabilities": vulnerability_ids,
+        "operation_summary": f"Successfully {operation} on {success_count} vulnerabilities",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# ================================
+# Incident Response and Crisis Management System Endpoints
+# ================================
+
+@app.get("/api/v1/incidents")
+async def get_incidents(
+    severity: str = None,
+    status: str = None,
+    category: str = None,
+    assigned_team: int = None,
+    assigned_responder: int = None,
+    escalation_level: str = None,
+    date_from: str = None,
+    date_to: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get incidents with filtering and pagination"""
+    
+    incidents = [
+        {
+            "id": 1,
+            "incident_id": "INC-20240125103000-A1B2C3D4",
+            "title": "Critical Data Breach - Customer Database Compromised",
+            "description": "Unauthorized access detected to customer database containing PII of 50,000 customers. Initial investigation indicates SQL injection attack through web application vulnerability.",
+            "category": "data_breach",
+            "severity": "critical",
+            "status": "containing",
+            "reported_at": "2024-01-25T10:30:00Z",
+            "detected_at": "2024-01-25T10:15:00Z",
+            "occurred_at": "2024-01-25T09:45:00Z",
+            "business_impact": "High - Customer PII exposed, potential regulatory fines, reputation damage",
+            "affected_systems": ["customer-db-prod", "web-app-portal"],
+            "affected_users_count": 50000,
+            "financial_impact": 2500000,
+            "reputation_impact": "critical",
+            "primary_responder_id": 3,
+            "incident_commander_id": 1,
+            "assigned_team_id": 1,
+            "escalation_level": "executive",
+            "escalated_at": "2024-01-25T11:00:00Z",
+            "requires_regulatory_reporting": True,
+            "regulatory_bodies_notified": ["State Attorney General"],
+            "regulatory_notification_deadline": "2024-01-27T10:30:00Z",
+            "confidentiality_level": "restricted",
+            "legal_hold_required": True,
+            "detection_method": "automated_scan",
+            "detection_source": "SIEM Alert - Anomalous Database Access",
+            "tags": ["data-breach", "sql-injection", "customer-data", "regulatory"],
+            "reported_by_user": {
+                "id": 5,
+                "email": "security.analyst@company.com",
+                "full_name": "Security Analyst"
+            },
+            "primary_responder": {
+                "id": 3,
+                "email": "security.lead@company.com",
+                "full_name": "Security Team Lead"
+            },
+            "incident_commander": {
+                "id": 1,
+                "email": "ciso@company.com",
+                "full_name": "Chief Information Security Officer"
+            },
+            "assigned_team": {
+                "id": 1,
+                "team_name": "Critical Incident Response Team",
+                "specializations": ["data_breach", "security_breach"]
+            },
+            "activity_count": 15,
+            "artifact_count": 8,
+            "communication_count": 12,
+            "task_count": 6,
+            "timeline_entry_count": 22,
+            "created_at": "2024-01-25T10:30:00Z",
+            "updated_at": "2024-01-25T16:45:00Z"
+        },
+        {
+            "id": 2,
+            "incident_id": "INC-20240124145000-B2C3D4E5",
+            "title": "Network Infrastructure Outage - Primary Data Center",
+            "description": "Complete network outage affecting primary data center. All customer-facing services are down. Root cause appears to be core router failure.",
+            "category": "system_outage",
+            "severity": "high",
+            "status": "recovering",
+            "reported_at": "2024-01-24T14:50:00Z",
+            "detected_at": "2024-01-24T14:48:00Z",
+            "occurred_at": "2024-01-24T14:47:00Z",
+            "resolved_at": "2024-01-24T18:30:00Z",
+            "business_impact": "Complete service disruption affecting all customers",
+            "affected_systems": ["core-router-01", "network-infrastructure", "all-services"],
+            "affected_users_count": 150000,
+            "financial_impact": 450000,
+            "reputation_impact": "high",
+            "primary_responder_id": 7,
+            "incident_commander_id": 2,
+            "assigned_team_id": 2,
+            "escalation_level": "l3_advanced",
+            "escalated_at": "2024-01-24T15:30:00Z",
+            "requires_regulatory_reporting": False,
+            "confidentiality_level": "internal",
+            "legal_hold_required": False,
+            "detection_method": "automated_monitoring",
+            "detection_source": "Network Monitoring System",
+            "tags": ["outage", "network", "infrastructure", "service-disruption"],
+            "reported_by_user": {
+                "id": 9,
+                "email": "network.ops@company.com",
+                "full_name": "Network Operations"
+            },
+            "primary_responder": {
+                "id": 7,
+                "email": "network.lead@company.com",
+                "full_name": "Network Team Lead"
+            },
+            "incident_commander": {
+                "id": 2,
+                "email": "cto@company.com",
+                "full_name": "Chief Technology Officer"
+            },
+            "assigned_team": {
+                "id": 2,
+                "team_name": "Infrastructure Response Team",
+                "specializations": ["system_outage", "network"]
+            },
+            "activity_count": 28,
+            "artifact_count": 5,
+            "communication_count": 18,
+            "task_count": 12,
+            "timeline_entry_count": 35,
+            "created_at": "2024-01-24T14:50:00Z",
+            "updated_at": "2024-01-24T19:15:00Z"
+        },
+        {
+            "id": 3,
+            "incident_id": "INC-20240123092000-C3D4E5F6",
+            "title": "Phishing Campaign Targeting Employees",
+            "description": "Large-scale phishing campaign targeting employees with credential harvesting emails. 25 employees reported suspicious emails, 3 may have entered credentials.",
+            "category": "phishing",
+            "severity": "medium",
+            "status": "investigating",
+            "reported_at": "2024-01-23T09:20:00Z",
+            "detected_at": "2024-01-23T09:10:00Z",
+            "occurred_at": "2024-01-23T08:30:00Z",
+            "business_impact": "Potential account compromise, credential theft",
+            "affected_systems": ["email-system", "employee-accounts"],
+            "affected_users_count": 25,
+            "financial_impact": 15000,
+            "reputation_impact": "low",
+            "primary_responder_id": 4,
+            "incident_commander_id": 3,
+            "assigned_team_id": 1,
+            "escalation_level": "l2_standard",
+            "requires_regulatory_reporting": False,
+            "confidentiality_level": "internal",
+            "legal_hold_required": False,
+            "detection_method": "user_report",
+            "detection_source": "Employee Reports",
+            "tags": ["phishing", "email", "credentials", "social-engineering"],
+            "reported_by_user": {
+                "id": 12,
+                "email": "hr.manager@company.com",
+                "full_name": "HR Manager"
+            },
+            "primary_responder": {
+                "id": 4,
+                "email": "security.analyst2@company.com",
+                "full_name": "Senior Security Analyst"
+            },
+            "incident_commander": {
+                "id": 3,
+                "email": "security.manager@company.com",
+                "full_name": "Security Manager"
+            },
+            "assigned_team": {
+                "id": 1,
+                "team_name": "Critical Incident Response Team",
+                "specializations": ["phishing", "security_breach"]
+            },
+            "activity_count": 8,
+            "artifact_count": 12,
+            "communication_count": 6,
+            "task_count": 4,
+            "timeline_entry_count": 15,
+            "created_at": "2024-01-23T09:20:00Z",
+            "updated_at": "2024-01-23T15:30:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_incidents = incidents
+    
+    if severity:
+        filtered_incidents = [i for i in filtered_incidents if i["severity"] == severity]
+    if status:
+        filtered_incidents = [i for i in filtered_incidents if i["status"] == status]
+    if category:
+        filtered_incidents = [i for i in filtered_incidents if i["category"] == category]
+    if assigned_team:
+        filtered_incidents = [i for i in filtered_incidents if i["assigned_team_id"] == assigned_team]
+    if assigned_responder:
+        filtered_incidents = [i for i in filtered_incidents if i["primary_responder_id"] == assigned_responder]
+    if escalation_level:
+        filtered_incidents = [i for i in filtered_incidents if i["escalation_level"] == escalation_level]
+    
+    # Apply pagination
+    paginated_incidents = filtered_incidents[skip:skip + limit]
+    
+    return {
+        "items": paginated_incidents,
+        "total": len(filtered_incidents),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "critical": len([i for i in filtered_incidents if i["severity"] == "critical"]),
+            "high": len([i for i in filtered_incidents if i["severity"] == "high"]),
+            "medium": len([i for i in filtered_incidents if i["severity"] == "medium"]),
+            "low": len([i for i in filtered_incidents if i["severity"] == "low"]),
+            "open_incidents": len([i for i in filtered_incidents if i["status"] not in ["closed", "cancelled"]]),
+            "overdue_regulatory": len([i for i in filtered_incidents if i.get("requires_regulatory_reporting") and i.get("regulatory_notification_deadline") and i["regulatory_notification_deadline"] < datetime.now().isoformat()])
+        }
+    }
+
+@app.post("/api/v1/incidents")
+async def create_incident(incident_data: dict):
+    """Create a new incident"""
+    return {
+        "id": 999,
+        "incident_id": f"INC-{datetime.now().strftime('%Y%m%d%H%M%S')}-{str(random.randint(10000000, 99999999)).upper()[:8]}",
+        "title": incident_data.get("title", "New Incident"),
+        "description": incident_data.get("description", ""),
+        "category": incident_data.get("category", "operational_issue"),
+        "severity": incident_data.get("severity", "medium"),
+        "status": "reported",
+        "reported_at": datetime.now().isoformat(),
+        "business_impact": incident_data.get("business_impact"),
+        "affected_systems": incident_data.get("affected_systems", []),
+        "affected_users_count": incident_data.get("affected_users_count", 0),
+        "reported_by": incident_data.get("reported_by", 1),
+        "escalation_level": "l1_basic",
+        "requires_regulatory_reporting": False,
+        "confidentiality_level": incident_data.get("confidentiality_level", "internal"),
+        "created_at": datetime.now().isoformat(),
+        "message": "Incident created successfully"
+    }
+
+@app.get("/api/v1/incidents/{incident_id}")
+async def get_incident(incident_id: int):
+    """Get specific incident details"""
+    if incident_id == 1:
+        return {
+            "id": 1,
+            "incident_id": "INC-20240125103000-A1B2C3D4",
+            "title": "Critical Data Breach - Customer Database Compromised",
+            "description": "Unauthorized access detected to customer database containing personally identifiable information (PII) of approximately 50,000 customers. Initial investigation indicates a SQL injection attack through a vulnerability in the customer portal web application. The attack appears to have occurred between 09:45 and 10:15 UTC on January 25, 2024.",
+            "category": "data_breach",
+            "severity": "critical",
+            "status": "containing",
+            "reported_at": "2024-01-25T10:30:00Z",
+            "detected_at": "2024-01-25T10:15:00Z",
+            "occurred_at": "2024-01-25T09:45:00Z",
+            "resolved_at": None,
+            "closed_at": None,
+            "business_impact": "High impact - Customer PII exposed including names, addresses, phone numbers, and email addresses. Potential regulatory fines under GDPR and state privacy laws. Significant reputation damage and customer trust issues expected.",
+            "affected_systems": ["customer-db-prod", "web-app-portal", "customer-api"],
+            "affected_users_count": 50000,
+            "financial_impact": 2500000,
+            "reputation_impact": "critical",
+            "primary_responder_id": 3,
+            "incident_commander_id": 1,
+            "assigned_team_id": 1,
+            "escalation_level": "executive",
+            "escalated_at": "2024-01-25T11:00:00Z",
+            "escalated_by": 3,
+            "escalation_reason": "Critical data breach with regulatory reporting requirements and high financial impact",
+            "requires_regulatory_reporting": True,
+            "regulatory_bodies_notified": ["State Attorney General", "EU Data Protection Authority"],
+            "regulatory_notification_deadline": "2024-01-27T10:30:00Z",
+            "confidentiality_level": "restricted",
+            "handling_instructions": "Restricted access - legal privilege applies. All communications must be approved by legal team.",
+            "legal_hold_required": True,
+            "detection_method": "automated_scan",
+            "detection_source": "SIEM Alert - Anomalous Database Access Pattern",
+            "tags": ["data-breach", "sql-injection", "customer-data", "regulatory", "gdpr", "critical"],
+            "custom_fields": {
+                "breach_type": "unauthorized_access",
+                "data_types_affected": ["pii", "contact_info"],
+                "geographic_scope": ["us", "eu"],
+                "notification_status": "in_progress"
+            },
+            "reported_by_user": {
+                "id": 5,
+                "email": "security.analyst@company.com",
+                "full_name": "Security Analyst"
+            },
+            "primary_responder": {
+                "id": 3,
+                "email": "security.lead@company.com",
+                "full_name": "Security Team Lead"
+            },
+            "incident_commander": {
+                "id": 1,
+                "email": "ciso@company.com",
+                "full_name": "Chief Information Security Officer"
+            },
+            "escalated_by_user": {
+                "id": 3,
+                "email": "security.lead@company.com",
+                "full_name": "Security Team Lead"
+            },
+            "assigned_team": {
+                "id": 1,
+                "team_name": "Critical Incident Response Team",
+                "description": "Specialized team for handling critical security incidents",
+                "specializations": ["data_breach", "security_breach", "regulatory_response"],
+                "team_lead": {
+                    "id": 1,
+                    "email": "ciso@company.com",
+                    "full_name": "Chief Information Security Officer"
+                }
+            },
+            "activity_count": 15,
+            "artifact_count": 8,
+            "communication_count": 12,
+            "task_count": 6,
+            "timeline_entry_count": 22,
+            "created_at": "2024-01-25T10:30:00Z",
+            "updated_at": "2024-01-25T16:45:00Z"
+        }
+    else:
+        return {"error": "Incident not found", "detail": f"Incident with ID {incident_id} does not exist"}
+
+@app.put("/api/v1/incidents/{incident_id}")
+async def update_incident(incident_id: int, incident_data: dict):
+    """Update incident details"""
+    return {
+        "id": incident_id,
+        "message": "Incident updated successfully",
+        "updated_fields": list(incident_data.keys()),
+        "updated_at": datetime.now().isoformat()
+    }
+
+@app.post("/api/v1/incidents/{incident_id}/escalate")
+async def escalate_incident(incident_id: int, escalation_data: dict):
+    """Escalate incident to higher level"""
+    return {
+        "incident_id": incident_id,
+        "previous_escalation_level": "l2_standard",
+        "new_escalation_level": escalation_data.get("escalation_level", "l3_advanced"),
+        "escalation_reason": escalation_data.get("reason", "Manual escalation requested"),
+        "escalated_by": escalation_data.get("escalated_by", 1),
+        "escalated_at": datetime.now().isoformat(),
+        "notification_sent": True,
+        "message": "Incident escalated successfully"
+    }
+
+@app.post("/api/v1/incidents/classify")
+async def classify_incident(classification_request: dict):
+    """Automatically classify incident based on description and context"""
+    title = classification_request.get("title", "")
+    description = classification_request.get("description", "")
+    
+    # Simple classification logic based on keywords
+    text_content = f"{title} {description}".lower()
+    
+    if any(keyword in text_content for keyword in ["data breach", "unauthorized access", "leaked", "exposed"]):
+        category = "data_breach"
+        severity = "critical"
+        confidence = 0.9
+    elif any(keyword in text_content for keyword in ["malware", "virus", "ransomware", "trojan"]):
+        category = "malware"
+        severity = "high"
+        confidence = 0.85
+    elif any(keyword in text_content for keyword in ["phishing", "suspicious email", "credential"]):
+        category = "phishing"
+        severity = "medium"
+        confidence = 0.8
+    elif any(keyword in text_content for keyword in ["outage", "down", "unavailable", "service"]):
+        category = "system_outage"
+        severity = "high"
+        confidence = 0.75
+    else:
+        category = "operational_issue"
+        severity = "medium"
+        confidence = 0.6
+    
+    escalation_mapping = {
+        "critical": "l4_expert",
+        "high": "l3_advanced",
+        "medium": "l2_standard",
+        "low": "l1_basic"
+    }
+    
+    response_time_mapping = {
+        "critical": 15,
+        "high": 60,
+        "medium": 240,
+        "low": 1440
+    }
+    
+    return {
+        "category": category,
+        "severity": severity,
+        "confidence_score": confidence,
+        "escalation_level": escalation_mapping[severity],
+        "required_response_time_minutes": response_time_mapping[severity],
+        "required_team": "Security Response Team" if category in ["data_breach", "malware", "phishing"] else "Operations Team",
+        "regulatory_reporting_required": category == "data_breach",
+        "auto_actions": [
+            {"action_type": "isolate_affected_systems", "parameters": {}} if severity == "critical" else None,
+            {"action_type": "collect_forensic_evidence", "parameters": {}} if category in ["data_breach", "malware"] else None
+        ],
+        "reasoning": f"Classification based on keyword analysis. Found indicators for {category} with {severity} severity."
+    }
+
+@app.get("/api/v1/incident-response-teams")
+async def get_incident_response_teams(
+    active: bool = None,
+    specialization: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get incident response teams"""
+    
+    teams = [
+        {
+            "id": 1,
+            "team_name": "Critical Incident Response Team",
+            "description": "Specialized team for handling critical security incidents and data breaches",
+            "team_lead_id": 1,
+            "escalation_contact_id": 1,
+            "time_zone": "UTC",
+            "specializations": ["data_breach", "security_breach", "malware", "phishing"],
+            "max_concurrent_incidents": 3,
+            "primary_contact_method": "phone",
+            "contact_details": {
+                "phone": "+1-555-SECURITY",
+                "email": "critical-response@company.com",
+                "slack_channel": "#critical-incidents"
+            },
+            "active": True,
+            "team_lead": {
+                "id": 1,
+                "email": "ciso@company.com",
+                "full_name": "Chief Information Security Officer"
+            },
+            "escalation_contact": {
+                "id": 1,
+                "email": "ciso@company.com",
+                "full_name": "Chief Information Security Officer"
+            },
+            "member_count": 8,
+            "current_incidents": 2,
+            "available_capacity": 1,
+            "created_at": "2023-01-15T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "team_name": "Infrastructure Response Team",
+            "description": "Team responsible for system outages and infrastructure incidents",
+            "team_lead_id": 2,
+            "escalation_contact_id": 2,
+            "time_zone": "UTC",
+            "specializations": ["system_outage", "network", "infrastructure", "operational_issue"],
+            "max_concurrent_incidents": 5,
+            "primary_contact_method": "slack",
+            "contact_details": {
+                "phone": "+1-555-INFRAOPS",
+                "email": "infrastructure-response@company.com",
+                "slack_channel": "#infrastructure-incidents"
+            },
+            "active": True,
+            "team_lead": {
+                "id": 2,
+                "email": "cto@company.com",
+                "full_name": "Chief Technology Officer"
+            },
+            "escalation_contact": {
+                "id": 2,
+                "email": "cto@company.com",
+                "full_name": "Chief Technology Officer"
+            },
+            "member_count": 12,
+            "current_incidents": 1,
+            "available_capacity": 4,
+            "created_at": "2023-01-15T00:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_teams = teams
+    if active is not None:
+        filtered_teams = [t for t in filtered_teams if t["active"] == active]
+    if specialization:
+        filtered_teams = [t for t in filtered_teams if specialization in t["specializations"]]
+    
+    # Apply pagination
+    paginated_teams = filtered_teams[skip:skip + limit]
+    
+    return {
+        "items": paginated_teams,
+        "total": len(filtered_teams),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/incident-response-teams")
+async def create_incident_response_team(team_data: dict):
+    """Create a new incident response team"""
+    return {
+        "id": 999,
+        "team_name": team_data.get("team_name", "New Response Team"),
+        "description": team_data.get("description", ""),
+        "specializations": team_data.get("specializations", []),
+        "max_concurrent_incidents": team_data.get("max_concurrent_incidents", 5),
+        "primary_contact_method": team_data.get("primary_contact_method", "email"),
+        "active": True,
+        "member_count": 0,
+        "current_incidents": 0,
+        "available_capacity": team_data.get("max_concurrent_incidents", 5),
+        "created_at": datetime.now().isoformat(),
+        "message": "Incident response team created successfully"
+    }
+
+@app.get("/api/v1/incidents/{incident_id}/activities")
+async def get_incident_activities(
+    incident_id: int,
+    activity_type: str = None,
+    response_phase: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get activities for an incident"""
+    
+    activities = [
+        {
+            "id": 1,
+            "incident_id": incident_id,
+            "activity_type": "incident_creation",
+            "title": "Incident Created",
+            "description": "Critical data breach incident created based on SIEM alert detection",
+            "performed_by": 5,
+            "performed_at": "2024-01-25T10:30:00Z",
+            "duration_minutes": 5,
+            "response_phase": "identification",
+            "outcome": "Incident successfully created and initial responders notified",
+            "success": True,
+            "next_actions": "Initiate containment procedures",
+            "artifacts_created": ["incident-report-initial.pdf"],
+            "systems_affected": ["customer-db-prod"],
+            "tools_used": ["SIEM", "Incident Management System"],
+            "priority": "critical",
+            "tags": ["creation", "initial-response"],
+            "performer": {
+                "id": 5,
+                "email": "security.analyst@company.com",
+                "full_name": "Security Analyst"
+            },
+            "created_at": "2024-01-25T10:30:00Z"
+        },
+        {
+            "id": 2,
+            "incident_id": incident_id,
+            "activity_type": "containment",
+            "title": "Database Access Restricted",
+            "description": "Implemented emergency access controls to limit database connectivity to essential services only",
+            "performed_by": 3,
+            "performed_at": "2024-01-25T11:15:00Z",
+            "duration_minutes": 30,
+            "response_phase": "containment",
+            "outcome": "Database access successfully restricted, unauthorized access vector closed",
+            "success": True,
+            "next_actions": "Continue forensic investigation",
+            "artifacts_created": ["firewall-rules-backup.json", "access-logs-pre-containment.log"],
+            "systems_affected": ["customer-db-prod", "firewall-cluster"],
+            "tools_used": ["Firewall Management", "Database Administration"],
+            "priority": "critical",
+            "tags": ["containment", "access-control"],
+            "performer": {
+                "id": 3,
+                "email": "security.lead@company.com",
+                "full_name": "Security Team Lead"
+            },
+            "created_at": "2024-01-25T11:15:00Z"
+        },
+        {
+            "id": 3,
+            "incident_id": incident_id,
+            "activity_type": "investigation",
+            "title": "Forensic Analysis Initiated",
+            "description": "Started detailed forensic analysis of database logs and web application access patterns",
+            "performed_by": 4,
+            "performed_at": "2024-01-25T12:00:00Z",
+            "duration_minutes": 120,
+            "response_phase": "investigation",
+            "outcome": "Confirmed SQL injection attack vector, identified affected records",
+            "success": True,
+            "next_actions": "Prepare customer notification materials",
+            "artifacts_created": ["forensic-analysis-report.pdf", "sql-injection-evidence.pcap"],
+            "systems_affected": ["customer-db-prod", "web-app-portal"],
+            "tools_used": ["Forensic Toolkit", "Log Analysis Platform"],
+            "priority": "high",
+            "tags": ["investigation", "forensics", "sql-injection"],
+            "performer": {
+                "id": 4,
+                "email": "forensic.analyst@company.com",
+                "full_name": "Digital Forensics Analyst"
+            },
+            "created_at": "2024-01-25T12:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_activities = activities
+    if activity_type:
+        filtered_activities = [a for a in filtered_activities if a["activity_type"] == activity_type]
+    if response_phase:
+        filtered_activities = [a for a in filtered_activities if a["response_phase"] == response_phase]
+    
+    # Apply pagination
+    paginated_activities = filtered_activities[skip:skip + limit]
+    
+    return {
+        "items": paginated_activities,
+        "total": len(filtered_activities),
+        "incident_id": incident_id,
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/incidents/{incident_id}/activities")
+async def create_incident_activity(incident_id: int, activity_data: dict):
+    """Create a new incident activity"""
+    return {
+        "id": 999,
+        "incident_id": incident_id,
+        "activity_type": activity_data.get("activity_type", "investigation"),
+        "title": activity_data.get("title", "New Activity"),
+        "description": activity_data.get("description", ""),
+        "performed_by": activity_data.get("performed_by", 1),
+        "performed_at": datetime.now().isoformat(),
+        "duration_minutes": activity_data.get("duration_minutes"),
+        "response_phase": activity_data.get("response_phase", "investigation"),
+        "priority": activity_data.get("priority", "medium"),
+        "created_at": datetime.now().isoformat(),
+        "message": "Incident activity created successfully"
+    }
+
+@app.get("/api/v1/incidents/{incident_id}/timeline")
+async def get_incident_timeline(
+    incident_id: int,
+    event_type: str = None,
+    phase: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get timeline entries for an incident"""
+    
+    timeline_entries = [
+        {
+            "id": 1,
+            "incident_id": incident_id,
+            "timestamp": "2024-01-25T09:45:00Z",
+            "event_type": "attack_action",
+            "title": "Initial SQL Injection Attempt",
+            "description": "Attacker began SQL injection attempts through customer portal login form",
+            "source": "Web Application Logs",
+            "confidence_level": "high",
+            "verified": True,
+            "phase": "identification",
+            "actor": "Unknown Attacker",
+            "target": "Customer Portal Database",
+            "technique": "SQL Injection (OWASP T1071)",
+            "impact_level": "critical",
+            "business_impact": "Unauthorized database access initiated",
+            "technical_impact": "Database queries bypassing authentication",
+            "supporting_artifacts": [1, 2],
+            "indicators": ["192.168.1.100", "malicious.payload.com"],
+            "tags": ["attack", "sql-injection", "initial-access"],
+            "verified_by": 4,
+            "verifier": {
+                "id": 4,
+                "email": "forensic.analyst@company.com",
+                "full_name": "Digital Forensics Analyst"
+            },
+            "created_at": "2024-01-25T12:30:00Z"
+        },
+        {
+            "id": 2,
+            "incident_id": incident_id,
+            "timestamp": "2024-01-25T10:15:00Z",
+            "event_type": "detection",
+            "title": "SIEM Alert Triggered",
+            "description": "Automated SIEM system detected anomalous database access patterns",
+            "source": "SIEM System",
+            "confidence_level": "high",
+            "verified": True,
+            "phase": "identification",
+            "actor": "SIEM System",
+            "target": "Customer Database",
+            "technique": "Automated Detection",
+            "impact_level": "low",
+            "business_impact": "Security team alerted to potential threat",
+            "technical_impact": "Alert generated and escalated",
+            "supporting_artifacts": [3],
+            "indicators": ["SIEM-ALERT-DB-001"],
+            "tags": ["detection", "siem", "automated"],
+            "verified": True,
+            "created_at": "2024-01-25T10:16:00Z"
+        },
+        {
+            "id": 3,
+            "incident_id": incident_id,
+            "timestamp": "2024-01-25T11:15:00Z",
+            "event_type": "response_action",
+            "title": "Database Access Restricted",
+            "description": "Emergency containment: Database access restricted to essential services only",
+            "source": "Incident Response Team",
+            "confidence_level": "high",
+            "verified": True,
+            "phase": "containment",
+            "actor": "Security Team Lead",
+            "target": "Customer Database",
+            "technique": "Access Control Implementation",
+            "impact_level": "medium",
+            "business_impact": "Attack vector closed, services temporarily limited",
+            "technical_impact": "Database connectivity restricted",
+            "supporting_artifacts": [4, 5],
+            "indicators": ["firewall-rule-emergency-001"],
+            "tags": ["containment", "access-control", "response"],
+            "verified": True,
+            "created_at": "2024-01-25T11:16:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_timeline = timeline_entries
+    if event_type:
+        filtered_timeline = [t for t in filtered_timeline if t["event_type"] == event_type]
+    if phase:
+        filtered_timeline = [t for t in filtered_timeline if t["phase"] == phase]
+    
+    # Apply pagination
+    paginated_timeline = filtered_timeline[skip:skip + limit]
+    
+    return {
+        "items": paginated_timeline,
+        "total": len(filtered_timeline),
+        "incident_id": incident_id,
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.get("/api/v1/dashboards/incident-summary")
+async def get_incident_dashboard():
+    """Get incident response dashboard summary"""
+    return {
+        "summary": {
+            "total_incidents": 45,
+            "open_incidents": 8,
+            "incidents_this_month": 12,
+            "avg_resolution_time_hours": 18.5,
+            "critical_incidents": 2,
+            "overdue_incidents": 1,
+            "escalated_incidents": 3,
+            "regulatory_incidents": 1
+        },
+        "incidents_by_severity": {
+            "critical": 2,
+            "high": 6,
+            "medium": 15,
+            "low": 22
+        },
+        "incidents_by_category": {
+            "security_breach": 8,
+            "data_breach": 3,
+            "system_outage": 12,
+            "phishing": 7,
+            "malware": 4,
+            "operational_issue": 11
+        },
+        "incidents_by_status": {
+            "reported": 2,
+            "triaged": 3,
+            "investigating": 8,
+            "containing": 2,
+            "eradicating": 1,
+            "recovering": 3,
+            "closed": 26
+        },
+        "incidents_by_team": {
+            "Critical Incident Response Team": 15,
+            "Infrastructure Response Team": 18,
+            "Application Security Team": 8,
+            "Network Operations Team": 4
+        },
+        "response_time_metrics": {
+            "mean_time_to_detect_hours": 2.3,
+            "mean_time_to_respond_hours": 0.8,
+            "mean_time_to_contain_hours": 4.2,
+            "mean_time_to_resolve_hours": 18.5
+        },
+        "recent_incidents": [
+            {
+                "incident_id": "INC-20240125103000-A1B2C3D4",
+                "title": "Critical Data Breach - Customer Database",
+                "severity": "critical",
+                "status": "containing",
+                "created_at": "2024-01-25T10:30:00Z"
+            },
+            {
+                "incident_id": "INC-20240124145000-B2C3D4E5",
+                "title": "Network Infrastructure Outage",
+                "severity": "high",
+                "status": "closed",
+                "created_at": "2024-01-24T14:50:00Z"
+            }
+        ],
+        "critical_incidents": [
+            {
+                "incident_id": "INC-20240125103000-A1B2C3D4",
+                "title": "Critical Data Breach - Customer Database",
+                "severity": "critical",
+                "escalation_level": "executive",
+                "regulatory_reporting": True
+            }
+        ],
+        "trend_data": {
+            "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+            "new_incidents": [8, 12, 15, 10],
+            "resolved_incidents": [6, 10, 14, 12],
+            "mean_resolution_time": [22.1, 19.8, 17.5, 18.5]
+        }
+    }
+
+# ================================
+# Compliance Management System Endpoints
+# ================================
+
+@app.get("/api/v1/compliance/frameworks")
+async def get_compliance_frameworks(
+    framework_type: str = None,
+    active: bool = None,
+    mandatory: bool = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get compliance frameworks with filtering"""
+    
+    frameworks = [
+        {
+            "id": 1,
+            "framework_id": "NIST-800-53-R5",
+            "name": "NIST SP 800-53 Revision 5",
+            "framework_type": "nist_800_53",
+            "description": "Security and Privacy Controls for Information Systems and Organizations",
+            "version": "Revision 5",
+            "authority": "National Institute of Standards and Technology",
+            "scope": "Federal information systems and organizations",
+            "industry_focus": "Government",
+            "geographic_scope": "United States",
+            "total_controls": 1000,
+            "active": True,
+            "mandatory": True,
+            "custom_framework": False,
+            "automated_assessment": True,
+            "assessment_frequency": "quarterly",
+            "overall_compliance_score": 78.5,
+            "last_assessment_date": "2024-01-20T00:00:00Z",
+            "assessment_count": 12,
+            "created_at": "2023-06-01T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "framework_id": "ISO-27001-2022",
+            "name": "ISO/IEC 27001:2022",
+            "framework_type": "iso_27001",
+            "description": "Information Security Management Systems Requirements",
+            "version": "2022",
+            "authority": "International Organization for Standardization",
+            "scope": "Information security management systems",
+            "industry_focus": "All Industries",
+            "geographic_scope": "Global",
+            "total_controls": 93,
+            "active": True,
+            "mandatory": False,
+            "custom_framework": False,
+            "automated_assessment": False,
+            "assessment_frequency": "annually",
+            "overall_compliance_score": 85.2,
+            "last_assessment_date": "2024-01-15T00:00:00Z",
+            "assessment_count": 8,
+            "created_at": "2023-08-15T00:00:00Z"
+        },
+        {
+            "id": 3,
+            "framework_id": "SOX-2024",
+            "name": "Sarbanes-Oxley Act",
+            "framework_type": "sox",
+            "description": "Corporate governance and financial reporting requirements",
+            "version": "2024",
+            "authority": "Securities and Exchange Commission",
+            "scope": "Publicly traded companies",
+            "industry_focus": "Financial Services",
+            "geographic_scope": "United States",
+            "total_controls": 45,
+            "active": True,
+            "mandatory": True,
+            "custom_framework": False,
+            "automated_assessment": False,
+            "assessment_frequency": "quarterly",
+            "overall_compliance_score": 92.1,
+            "last_assessment_date": "2024-01-10T00:00:00Z",
+            "assessment_count": 16,
+            "created_at": "2023-05-01T00:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_frameworks = frameworks
+    if framework_type:
+        filtered_frameworks = [f for f in filtered_frameworks if f["framework_type"] == framework_type]
+    if active is not None:
+        filtered_frameworks = [f for f in filtered_frameworks if f["active"] == active]
+    if mandatory is not None:
+        filtered_frameworks = [f for f in filtered_frameworks if f["mandatory"] == mandatory]
+    
+    # Apply pagination
+    paginated_frameworks = filtered_frameworks[skip:skip + limit]
+    
+    return {
+        "items": paginated_frameworks,
+        "total": len(filtered_frameworks),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "active_frameworks": len([f for f in filtered_frameworks if f["active"]]),
+            "mandatory_frameworks": len([f for f in filtered_frameworks if f["mandatory"]]),
+            "avg_compliance_score": sum(f["overall_compliance_score"] for f in filtered_frameworks) / len(filtered_frameworks) if filtered_frameworks else 0
+        }
+    }
+
+@app.post("/api/v1/compliance/frameworks")
+async def create_compliance_framework(framework_data: dict):
+    """Create a new compliance framework"""
+    return {
+        "id": 999,
+        "framework_id": f"CUSTOM-{datetime.now().strftime('%Y%m%d')}",
+        "name": framework_data.get("name", "New Framework"),
+        "framework_type": framework_data.get("framework_type", "custom"),
+        "description": framework_data.get("description", ""),
+        "version": framework_data.get("version", "1.0"),
+        "active": True,
+        "custom_framework": True,
+        "total_controls": 0,
+        "created_at": datetime.now().isoformat(),
+        "message": "Compliance framework created successfully"
+    }
+
+@app.get("/api/v1/compliance/frameworks/{framework_id}")
+async def get_compliance_framework(framework_id: int):
+    """Get specific compliance framework details"""
+    if framework_id == 1:
+        return {
+            "id": 1,
+            "framework_id": "NIST-800-53-R5",
+            "name": "NIST SP 800-53 Revision 5",
+            "framework_type": "nist_800_53",
+            "description": "Security and Privacy Controls for Information Systems and Organizations - Comprehensive cybersecurity framework providing a catalog of security and privacy controls for federal information systems and organizations to protect organizational operations and assets.",
+            "version": "Revision 5",
+            "effective_date": "2020-09-23T00:00:00Z",
+            "authority": "National Institute of Standards and Technology (NIST)",
+            "scope": "Federal information systems and organizations, and the supply chain",
+            "industry_focus": "Government, Federal Contractors",
+            "geographic_scope": "United States",
+            "total_controls": 1000,
+            "control_families": {
+                "AC": "Access Control",
+                "AT": "Awareness and Training",
+                "AU": "Audit and Accountability",
+                "CA": "Assessment, Authorization, and Monitoring",
+                "CM": "Configuration Management",
+                "CP": "Contingency Planning",
+                "IA": "Identification and Authentication",
+                "IR": "Incident Response",
+                "MA": "Maintenance",
+                "MP": "Media Protection",
+                "PE": "Physical and Environmental Protection",
+                "PL": "Planning",
+                "PS": "Personnel Security",
+                "RA": "Risk Assessment",
+                "SA": "System and Services Acquisition",
+                "SC": "System and Communications Protection",
+                "SI": "System and Information Integrity"
+            },
+            "framework_hierarchy": {
+                "families": 17,
+                "controls": 1000,
+                "enhancements": 3000
+            },
+            "active": True,
+            "mandatory": True,
+            "custom_framework": False,
+            "automated_assessment": True,
+            "assessment_frequency": "quarterly",
+            "overall_compliance_score": 78.5,
+            "last_assessment_date": "2024-01-20T00:00:00Z",
+            "assessment_count": 12,
+            "created_at": "2023-06-01T00:00:00Z",
+            "updated_at": "2024-01-20T15:30:00Z"
+        }
+    else:
+        return {"error": "Framework not found", "detail": f"Compliance framework with ID {framework_id} does not exist"}
+
+@app.get("/api/v1/compliance/frameworks/{framework_id}/controls")
+async def get_framework_controls(
+    framework_id: int,
+    control_family: str = None,
+    control_type: str = None,
+    implementation_status: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get controls for a specific framework"""
+    
+    controls = [
+        {
+            "id": 1,
+            "control_id": "AC-1",
+            "framework_id": framework_id,
+            "control_number": "AC-1",
+            "control_family": "AC",
+            "control_title": "Policy and Procedures",
+            "control_objective": "Establish access control policy and procedures",
+            "description": "Develop, document, and disseminate access control policy and procedures",
+            "control_type": "administrative",
+            "control_class": "Low",
+            "priority": "high",
+            "baseline_impact": "low",
+            "privacy_control": False,
+            "security_control": True,
+            "operational_control": True,
+            "implementation_status": "compliant",
+            "testing_frequency": "annually",
+            "last_test_date": "2024-01-15T00:00:00Z",
+            "next_test_date": "2025-01-15T00:00:00Z",
+            "automated_testing": False,
+            "assessment_count": 5,
+            "last_assessment_score": 8.5,
+            "finding_count": 0,
+            "evidence_count": 3
+        },
+        {
+            "id": 2,
+            "control_id": "AC-2",
+            "framework_id": framework_id,
+            "control_number": "AC-2",
+            "control_family": "AC",
+            "control_title": "Account Management",
+            "control_objective": "Manage information system accounts",
+            "description": "Manage information system accounts including establishing conditions for group and role membership",
+            "control_type": "technical",
+            "control_class": "Moderate",
+            "priority": "high",
+            "baseline_impact": "moderate",
+            "privacy_control": True,
+            "security_control": True,
+            "operational_control": False,
+            "implementation_status": "partially_compliant",
+            "testing_frequency": "quarterly",
+            "last_test_date": "2024-01-10T00:00:00Z",
+            "next_test_date": "2024-04-10T00:00:00Z",
+            "automated_testing": True,
+            "automation_tool": "Active Directory Scripts",
+            "assessment_count": 8,
+            "last_assessment_score": 7.2,
+            "finding_count": 2,
+            "evidence_count": 5
+        }
+    ]
+    
+    # Apply filters
+    filtered_controls = controls
+    if control_family:
+        filtered_controls = [c for c in filtered_controls if c["control_family"] == control_family]
+    if control_type:
+        filtered_controls = [c for c in filtered_controls if c["control_type"] == control_type]
+    if implementation_status:
+        filtered_controls = [c for c in filtered_controls if c["implementation_status"] == implementation_status]
+    
+    # Apply pagination
+    paginated_controls = filtered_controls[skip:skip + limit]
+    
+    return {
+        "items": paginated_controls,
+        "total": len(filtered_controls),
+        "framework_id": framework_id,
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/compliance/frameworks/{framework_id}/controls")
+async def create_control(framework_id: int, control_data: dict):
+    """Create a new control in a framework"""
+    return {
+        "id": 999,
+        "control_id": control_data.get("control_id", "CUSTOM-001"),
+        "framework_id": framework_id,
+        "control_title": control_data.get("control_title", "New Control"),
+        "description": control_data.get("description", ""),
+        "control_type": control_data.get("control_type", "administrative"),
+        "implementation_status": "not_assessed",
+        "created_at": datetime.now().isoformat(),
+        "message": "Control created successfully"
+    }
+
+@app.get("/api/v1/compliance/controls/{control_id}")
+async def get_control(control_id: int):
+    """Get specific control details"""
+    if control_id == 1:
+        return {
+            "id": 1,
+            "control_id": "AC-1",
+            "framework_id": 1,
+            "control_number": "AC-1",
+            "control_family": "AC",
+            "control_title": "Access Control Policy and Procedures",
+            "control_objective": "Establish, document, and maintain access control policies and procedures",
+            "description": "Develop, document, and disseminate access control policy that addresses purpose, scope, roles, responsibilities, management commitment, coordination among organizational entities, and compliance; and develop, document, and disseminate procedures to facilitate the implementation of the access control policy and associated access control controls.",
+            "implementation_guidance": "Access control policy and procedures should be consistent with applicable laws, executive orders, directives, regulations, policies, standards, and guidelines.",
+            "assessment_procedures": "Interview organizational personnel; examine access control policy and procedures documentation; examine system documentation.",
+            "control_type": "administrative",
+            "control_class": "Low",
+            "priority": "high",
+            "baseline_impact": "low",
+            "privacy_control": False,
+            "security_control": True,
+            "operational_control": True,
+            "implementation_status": "compliant",
+            "implementation_notes": "Policy updated annually and procedures reviewed quarterly",
+            "compensating_controls": [],
+            "testing_frequency": "annually",
+            "testing_methodology": "Document review and interview",
+            "last_test_date": "2024-01-15T00:00:00Z",
+            "next_test_date": "2025-01-15T00:00:00Z",
+            "automated_testing": False,
+            "parent_control_id": None,
+            "dependent_controls": ["AC-2", "AC-3", "AC-4"],
+            "related_controls": ["AT-1", "AU-1", "CA-1"],
+            "active": True,
+            "framework": {
+                "id": 1,
+                "name": "NIST SP 800-53 Revision 5",
+                "framework_type": "nist_800_53"
+            },
+            "assessment_count": 5,
+            "last_assessment_score": 8.5,
+            "finding_count": 0,
+            "evidence_count": 3,
+            "created_at": "2023-06-01T00:00:00Z",
+            "updated_at": "2024-01-15T10:30:00Z"
+        }
+    else:
+        return {"error": "Control not found", "detail": f"Control with ID {control_id} does not exist"}
+
+@app.get("/api/v1/compliance/assessments")
+async def get_compliance_assessments(
+    framework_id: int = None,
+    status: str = None,
+    assessment_type: str = None,
+    lead_assessor: int = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get compliance assessments with filtering"""
+    
+    assessments = [
+        {
+            "id": 1,
+            "assessment_id": "ASSESS-2024-001",
+            "framework_id": 1,
+            "assessment_name": "Q1 2024 NIST 800-53 Compliance Assessment",
+            "assessment_type": "internal",
+            "assessment_scope": "All critical systems and controls",
+            "status": "completed",
+            "progress_percentage": 100,
+            "start_date": "2024-01-15T00:00:00Z",
+            "end_date": "2024-01-20T00:00:00Z",
+            "planned_completion_date": "2024-01-25T00:00:00Z",
+            "overall_compliance_score": 78.5,
+            "compliant_controls": 785,
+            "non_compliant_controls": 125,
+            "partially_compliant_controls": 90,
+            "not_assessed_controls": 0,
+            "total_findings": 45,
+            "critical_findings": 3,
+            "high_findings": 12,
+            "medium_findings": 20,
+            "low_findings": 10,
+            "framework": {
+                "id": 1,
+                "name": "NIST SP 800-53 Revision 5",
+                "framework_type": "nist_800_53"
+            },
+            "lead_assessor": {
+                "id": 1,
+                "email": "lead.assessor@company.com",
+                "full_name": "Lead Compliance Assessor"
+            },
+            "assessment_team": [
+                {"id": 2, "email": "assessor1@company.com", "full_name": "Security Assessor 1"},
+                {"id": 3, "email": "assessor2@company.com", "full_name": "IT Assessor"}
+            ],
+            "external_auditor": "External Compliance Firm",
+            "created_at": "2024-01-10T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "assessment_id": "ASSESS-2024-002",
+            "framework_id": 2,
+            "assessment_name": "ISO 27001 Annual Assessment",
+            "assessment_type": "external",
+            "assessment_scope": "Information Security Management System",
+            "status": "in_progress",
+            "progress_percentage": 65,
+            "start_date": "2024-01-20T00:00:00Z",
+            "end_date": None,
+            "planned_completion_date": "2024-02-15T00:00:00Z",
+            "overall_compliance_score": None,
+            "compliant_controls": 45,
+            "non_compliant_controls": 8,
+            "partially_compliant_controls": 12,
+            "not_assessed_controls": 28,
+            "total_findings": 15,
+            "critical_findings": 1,
+            "high_findings": 4,
+            "medium_findings": 7,
+            "low_findings": 3,
+            "framework": {
+                "id": 2,
+                "name": "ISO/IEC 27001:2022",
+                "framework_type": "iso_27001"
+            },
+            "lead_assessor": {
+                "id": 4,
+                "email": "iso.assessor@company.com",
+                "full_name": "ISO Compliance Specialist"
+            },
+            "external_auditor": "ISO Certification Body",
+            "created_at": "2024-01-15T00:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_assessments = assessments
+    if framework_id:
+        filtered_assessments = [a for a in filtered_assessments if a["framework_id"] == framework_id]
+    if status:
+        filtered_assessments = [a for a in filtered_assessments if a["status"] == status]
+    if assessment_type:
+        filtered_assessments = [a for a in filtered_assessments if a["assessment_type"] == assessment_type]
+    if lead_assessor:
+        filtered_assessments = [a for a in filtered_assessments if a["lead_assessor"]["id"] == lead_assessor]
+    
+    # Apply pagination
+    paginated_assessments = filtered_assessments[skip:skip + limit]
+    
+    return {
+        "items": paginated_assessments,
+        "total": len(filtered_assessments),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "active_assessments": len([a for a in filtered_assessments if a["status"] in ["in_progress", "planned"]]),
+            "completed_assessments": len([a for a in filtered_assessments if a["status"] == "completed"]),
+            "avg_compliance_score": sum(a["overall_compliance_score"] for a in filtered_assessments if a["overall_compliance_score"]) / len([a for a in filtered_assessments if a["overall_compliance_score"]]) if [a for a in filtered_assessments if a["overall_compliance_score"]] else 0
+        }
+    }
+
+@app.post("/api/v1/compliance/assessments")
+async def create_compliance_assessment(assessment_data: dict):
+    """Create a new compliance assessment"""
+    return {
+        "id": 999,
+        "assessment_id": f"ASSESS-{datetime.now().strftime('%Y%m%d')}-999",
+        "framework_id": assessment_data.get("framework_id"),
+        "assessment_name": assessment_data.get("assessment_name", "New Assessment"),
+        "assessment_type": assessment_data.get("assessment_type", "internal"),
+        "status": "planned",
+        "progress_percentage": 0,
+        "start_date": assessment_data.get("start_date", datetime.now().isoformat()),
+        "planned_completion_date": assessment_data.get("planned_completion_date"),
+        "lead_assessor": assessment_data.get("lead_assessor"),
+        "created_at": datetime.now().isoformat(),
+        "message": "Compliance assessment created successfully"
+    }
+
+@app.get("/api/v1/compliance/assessments/{assessment_id}")
+async def get_compliance_assessment(assessment_id: int):
+    """Get specific compliance assessment details"""
+    if assessment_id == 1:
+        return {
+            "id": 1,
+            "assessment_id": "ASSESS-2024-001",
+            "framework_id": 1,
+            "assessment_name": "Q1 2024 NIST 800-53 Compliance Assessment",
+            "assessment_type": "internal",
+            "assessment_scope": "Comprehensive assessment of all NIST 800-53 controls across critical infrastructure and information systems",
+            "status": "completed",
+            "progress_percentage": 100,
+            "start_date": "2024-01-15T00:00:00Z",
+            "end_date": "2024-01-20T00:00:00Z",
+            "planned_completion_date": "2024-01-25T00:00:00Z",
+            "assessment_methodology": "NIST SP 800-53A assessment procedures with automated and manual testing",
+            "assessment_criteria": "NIST 800-53 Rev 5 control implementation requirements",
+            "overall_compliance_score": 78.5,
+            "compliant_controls": 785,
+            "non_compliant_controls": 125,
+            "partially_compliant_controls": 90,
+            "not_assessed_controls": 0,
+            "total_findings": 45,
+            "critical_findings": 3,
+            "high_findings": 12,
+            "medium_findings": 20,
+            "low_findings": 10,
+            "executive_summary": "Overall compliance posture is strong with 78.5% compliance rate. Critical findings require immediate attention in access control and incident response areas.",
+            "detailed_report_path": "/reports/ASSESS-2024-001-detailed.pdf",
+            "framework": {
+                "id": 1,
+                "name": "NIST SP 800-53 Revision 5",
+                "framework_type": "nist_800_53"
+            },
+            "lead_assessor": {
+                "id": 1,
+                "email": "lead.assessor@company.com",
+                "full_name": "Lead Compliance Assessor"
+            },
+            "assessment_team": [
+                {"id": 2, "email": "assessor1@company.com", "full_name": "Security Assessor 1"},
+                {"id": 3, "email": "assessor2@company.com", "full_name": "IT Assessor"},
+                {"id": 4, "email": "risk.assessor@company.com", "full_name": "Risk Assessment Specialist"}
+            ],
+            "external_auditor": "External Compliance Firm LLC",
+            "created_at": "2024-01-10T00:00:00Z",
+            "updated_at": "2024-01-20T17:00:00Z"
+        }
+    else:
+        return {"error": "Assessment not found", "detail": f"Assessment with ID {assessment_id} does not exist"}
+
+@app.post("/api/v1/compliance/assessments/{assessment_id}/conduct")
+async def conduct_assessment(assessment_id: int, assessment_config: dict):
+    """Conduct compliance assessment for a framework"""
+    return {
+        "assessment_id": assessment_id,
+        "status": "initiated",
+        "estimated_duration": "5-7 business days",
+        "total_controls_to_assess": 1000,
+        "automated_controls": 450,
+        "manual_controls": 550,
+        "assessment_methodology": assessment_config.get("methodology", "nist_sp_800_53a"),
+        "initiated_at": datetime.now().isoformat(),
+        "estimated_completion": "2024-02-05T17:00:00Z",
+        "message": "Compliance assessment initiated successfully"
+    }
+
+@app.get("/api/v1/compliance/findings")
+async def get_compliance_findings(
+    assessment_id: int = None,
+    control_id: int = None,
+    severity: str = None,
+    status: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get compliance findings with filtering"""
+    
+    findings = [
+        {
+            "id": 1,
+            "finding_id": "FIND-2024-001",
+            "assessment_id": 1,
+            "control_id": 15,
+            "finding_title": "Insufficient Access Control Documentation",
+            "finding_description": "Access control procedures lack sufficient detail for privileged account management",
+            "finding_type": "deficiency",
+            "severity": "high",
+            "risk_level": "high",
+            "business_impact": "Potential unauthorized access to critical systems",
+            "compliance_impact": "Non-compliance with AC-2 requirements",
+            "root_cause": "Procedure documentation has not been updated to reflect current processes",
+            "remediation_plan": "Update access control procedures to include detailed privileged account management steps",
+            "remediation_deadline": "2024-02-15T00:00:00Z",
+            "status": "open",
+            "remediation_status": "in_progress",
+            "validation_required": True,
+            "identified_date": "2024-01-18T00:00:00Z",
+            "assessment": {
+                "id": 1,
+                "assessment_name": "Q1 2024 NIST 800-53 Compliance Assessment"
+            },
+            "control": {
+                "id": 15,
+                "control_id": "AC-2",
+                "control_title": "Account Management"
+            },
+            "remediation_owner": {
+                "id": 3,
+                "email": "security.admin@company.com",
+                "full_name": "Security Administrator"
+            },
+            "evidence_count": 2
+        },
+        {
+            "id": 2,
+            "finding_id": "FIND-2024-002",
+            "assessment_id": 1,
+            "control_id": 25,
+            "finding_title": "Incomplete Incident Response Testing",
+            "finding_description": "Incident response procedures have not been tested in the past 12 months",
+            "finding_type": "deficiency",
+            "severity": "medium",
+            "risk_level": "medium",
+            "business_impact": "Reduced effectiveness of incident response capabilities",
+            "compliance_impact": "Partial non-compliance with IR-3 testing requirements",
+            "root_cause": "Testing schedule was not maintained due to resource constraints",
+            "remediation_plan": "Schedule and conduct comprehensive incident response testing",
+            "remediation_deadline": "2024-03-01T00:00:00Z",
+            "status": "open",
+            "remediation_status": "planned",
+            "validation_required": True,
+            "identified_date": "2024-01-19T00:00:00Z",
+            "assessment": {
+                "id": 1,
+                "assessment_name": "Q1 2024 NIST 800-53 Compliance Assessment"
+            },
+            "control": {
+                "id": 25,
+                "control_id": "IR-3",
+                "control_title": "Incident Response Testing"
+            },
+            "remediation_owner": {
+                "id": 5,
+                "email": "incident.manager@company.com",
+                "full_name": "Incident Response Manager"
+            },
+            "evidence_count": 1
+        }
+    ]
+    
+    # Apply filters
+    filtered_findings = findings
+    if assessment_id:
+        filtered_findings = [f for f in filtered_findings if f["assessment_id"] == assessment_id]
+    if control_id:
+        filtered_findings = [f for f in filtered_findings if f["control_id"] == control_id]
+    if severity:
+        filtered_findings = [f for f in filtered_findings if f["severity"] == severity]
+    if status:
+        filtered_findings = [f for f in filtered_findings if f["status"] == status]
+    
+    # Apply pagination
+    paginated_findings = filtered_findings[skip:skip + limit]
+    
+    return {
+        "items": paginated_findings,
+        "total": len(filtered_findings),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "critical": len([f for f in filtered_findings if f["severity"] == "critical"]),
+            "high": len([f for f in filtered_findings if f["severity"] == "high"]),
+            "medium": len([f for f in filtered_findings if f["severity"] == "medium"]),
+            "low": len([f for f in filtered_findings if f["severity"] == "low"]),
+            "open_findings": len([f for f in filtered_findings if f["status"] == "open"])
+        }
+    }
+
+@app.post("/api/v1/compliance/findings")
+async def create_compliance_finding(finding_data: dict):
+    """Create a new compliance finding"""
+    return {
+        "id": 999,
+        "finding_id": f"FIND-{datetime.now().strftime('%Y%m%d')}-999",
+        "assessment_id": finding_data.get("assessment_id"),
+        "control_id": finding_data.get("control_id"),
+        "finding_title": finding_data.get("finding_title", "New Finding"),
+        "finding_description": finding_data.get("finding_description", ""),
+        "finding_type": finding_data.get("finding_type", "deficiency"),
+        "severity": finding_data.get("severity", "medium"),
+        "status": "open",
+        "identified_date": datetime.now().isoformat(),
+        "created_at": datetime.now().isoformat(),
+        "message": "Compliance finding created successfully"
+    }
+
+@app.get("/api/v1/compliance/gap-analysis/{framework_id}")
+async def get_compliance_gap_analysis(framework_id: int, target_maturity_level: int = 3):
+    """Get compliance gap analysis for a framework"""
+    return {
+        "framework_id": framework_id,
+        "analysis_date": datetime.now().isoformat(),
+        "overall_compliance_percentage": 78.5,
+        "compliant_controls": 785,
+        "non_compliant_controls": 125,
+        "partially_compliant_controls": 90,
+        "not_assessed_controls": 0,
+        "critical_gaps": [
+            {
+                "control_id": "AC-2",
+                "control_title": "Account Management",
+                "current_maturity": 2,
+                "target_maturity": target_maturity_level,
+                "gap_size": target_maturity_level - 2,
+                "remediation_effort": {
+                    "estimated_days": 15,
+                    "estimated_cost": 12000,
+                    "complexity": "medium"
+                }
+            },
+            {
+                "control_id": "IR-3",
+                "control_title": "Incident Response Testing",
+                "current_maturity": 1,
+                "target_maturity": target_maturity_level,
+                "gap_size": target_maturity_level - 1,
+                "remediation_effort": {
+                    "estimated_days": 25,
+                    "estimated_cost": 20000,
+                    "complexity": "high"
+                }
+            }
+        ],
+        "high_priority_gaps": [
+            {
+                "control_id": "AU-6",
+                "control_title": "Audit Record Review",
+                "current_maturity": 2,
+                "target_maturity": target_maturity_level,
+                "gap_size": 1,
+                "remediation_effort": {
+                    "estimated_days": 10,
+                    "estimated_cost": 8000,
+                    "complexity": "low"
+                }
+            }
+        ],
+        "remediation_roadmap": [
+            {
+                "control_id": "IR-3",
+                "control_title": "Incident Response Testing",
+                "priority": 3,
+                "quarter": "Q1",
+                "effort_days": 25,
+                "estimated_cost": 20000
+            },
+            {
+                "control_id": "AC-2",
+                "control_title": "Account Management",
+                "priority": 2,
+                "quarter": "Q1",
+                "effort_days": 15,
+                "estimated_cost": 12000
+            },
+            {
+                "control_id": "AU-6",
+                "control_title": "Audit Record Review",
+                "priority": 1,
+                "quarter": "Q2",
+                "effort_days": 10,
+                "estimated_cost": 8000
+            }
+        ],
+        "estimated_remediation_effort": {
+            "total_effort_days": 50,
+            "total_estimated_cost": 40000,
+            "estimated_duration_quarters": 2,
+            "average_quarterly_effort": 25
+        },
+        "recommended_actions": [
+            "Prioritize incident response testing implementation",
+            "Enhance account management procedures",
+            "Implement automated audit log review processes"
+        ]
+    }
+
+@app.get("/api/v1/compliance/scorecard/{framework_id}")
+async def get_compliance_scorecard(framework_id: int, assessment_id: int = None):
+    """Get compliance scorecard for a framework"""
+    return {
+        "framework_id": framework_id,
+        "assessment_id": assessment_id or 1,
+        "scorecard_date": datetime.now().isoformat(),
+        "overall_score": 78.5,
+        "maturity_score": 3.2,
+        "effectiveness_score": 82.1,
+        "implementation_score": 79.8,
+        "control_family_scores": {
+            "AC": 75.2,
+            "AT": 85.1,
+            "AU": 82.3,
+            "CA": 78.9,
+            "CM": 71.5,
+            "CP": 69.8,
+            "IA": 88.2,
+            "IR": 65.4,
+            "MA": 79.1,
+            "MP": 83.7,
+            "PE": 92.3,
+            "PL": 87.6,
+            "PS": 90.1,
+            "RA": 74.8,
+            "SA": 68.9,
+            "SC": 76.5,
+            "SI": 73.2
+        },
+        "trend_analysis": {
+            "overall_trend": "improving",
+            "quarterly_scores": [72.1, 75.3, 76.8, 78.5],
+            "improvement_rate": 2.1
+        },
+        "benchmark_comparison": {
+            "industry_average": 74.2,
+            "peer_group_average": 76.8,
+            "percentile": 65
+        },
+        "executive_summary": "Compliance Assessment Executive Summary\n\nOverall Compliance Score: 78.5/100 (Strong)\n\nAssessment Results:\n- Total Controls Assessed: 1000\n- Total Findings Identified: 45\n- Compliance Level: Strong\n\nKey Observations:\n- Strong compliance posture with minor gaps in incident response and configuration management areas",
+        "key_strengths": [
+            "Excellent physical and environmental protection controls",
+            "Strong personnel security and identification/authentication",
+            "Well-established planning and awareness programs"
+        ],
+        "improvement_areas": [
+            "Incident response testing and procedures",
+            "Configuration management automation",
+            "System acquisition and development controls"
+        ],
+        "recommendations": [
+            "Implement regular incident response testing program",
+            "Enhance configuration management tooling",
+            "Strengthen secure development lifecycle processes"
+        ]
+    }
+
+@app.get("/api/v1/dashboards/compliance-summary")
+async def get_compliance_dashboard():
+    """Get compliance management dashboard summary"""
+    return {
+        "summary": {
+            "total_frameworks": 8,
+            "active_assessments": 3,
+            "total_controls": 2156,
+            "total_findings": 127,
+            "overdue_assessments": 1,
+            "overdue_remediations": 8,
+            "avg_compliance_score": 81.2,
+            "compliance_trend": "improving"
+        },
+        "frameworks_by_status": {
+            "compliant": 5,
+            "partially_compliant": 2,
+            "non_compliant": 1,
+            "not_assessed": 0
+        },
+        "controls_by_status": {
+            "compliant": 1723,
+            "partially_compliant": 285,
+            "non_compliant": 148,
+            "not_assessed": 0
+        },
+        "findings_by_severity": {
+            "critical": 8,
+            "high": 23,
+            "medium": 67,
+            "low": 29
+        },
+        "assessments_by_status": {
+            "completed": 12,
+            "in_progress": 3,
+            "planned": 2,
+            "overdue": 1
+        },
+        "top_frameworks_by_score": [
+            {"framework": "SOX", "score": 92.1, "status": "compliant"},
+            {"framework": "ISO 27001", "score": 85.2, "status": "compliant"},
+            {"framework": "NIST 800-53", "score": 78.5, "status": "partially_compliant"}
+        ],
+        "recent_assessments": [
+            {
+                "assessment_name": "Q1 2024 NIST Assessment",
+                "framework": "NIST 800-53",
+                "completion_date": "2024-01-20T00:00:00Z",
+                "score": 78.5
+            },
+            {
+                "assessment_name": "ISO 27001 Annual Review",
+                "framework": "ISO 27001",
+                "completion_date": "2024-01-15T00:00:00Z",
+                "score": 85.2
+            }
+        ],
+        "critical_findings": [
+            {
+                "finding_id": "FIND-2024-001",
+                "title": "Insufficient Access Control Documentation",
+                "severity": "high",
+                "framework": "NIST 800-53"
+            },
+            {
+                "finding_id": "FIND-2024-003",
+                "title": "Missing Encryption Key Management",
+                "severity": "critical",
+                "framework": "PCI-DSS"
+            }
+        ],
+        "compliance_metrics": {
+            "overall_compliance_percentage": 81.2,
+            "average_maturity_level": 3.1,
+            "control_effectiveness_percentage": 84.5,
+            "assessment_completion_rate": 0.92,
+            "remediation_success_rate": 0.87
+        }
+    }
+
+# ================================
+# Post-Incident Reviews and Lessons Learned Endpoints
+# ================================
+
+@app.get("/api/v1/incidents/{incident_id}/post-incident-review")
+async def get_post_incident_review(incident_id: int):
+    """Get post-incident review for a specific incident"""
+    if incident_id == 1:
+        return {
+            "id": 1,
+            "incident_id": 1,
+            "review_name": "Critical Data Breach - Customer Database Compromise Post-Incident Review",
+            "review_date": "2024-01-30T14:00:00Z",
+            "facilitator_id": 1,
+            "facilitator": {
+                "id": 1,
+                "email": "ciso@company.com",
+                "full_name": "Chief Information Security Officer"
+            },
+            "participants": [1, 3, 5, 7, 9, 12],
+            "participant_details": [
+                {"id": 1, "email": "ciso@company.com", "full_name": "Chief Information Security Officer", "role": "Facilitator"},
+                {"id": 3, "email": "security.lead@company.com", "full_name": "Security Team Lead", "role": "Primary Responder"},
+                {"id": 5, "email": "security.analyst@company.com", "full_name": "Security Analyst", "role": "Initial Reporter"},
+                {"id": 7, "email": "network.lead@company.com", "full_name": "Network Team Lead", "role": "Technical Expert"},
+                {"id": 9, "email": "legal.counsel@company.com", "full_name": "Legal Counsel", "role": "Legal Representative"},
+                {"id": 12, "email": "compliance.manager@company.com", "full_name": "Compliance Manager", "role": "Compliance Officer"}
+            ],
+            "timeline_analysis": {
+                "detection_time_minutes": 30,
+                "response_time_minutes": 15,
+                "containment_time_minutes": 240,
+                "resolution_time_minutes": 480,
+                "total_incident_duration_minutes": 525
+            },
+            "effectiveness_assessment": {
+                "response_effectiveness": "good",
+                "communication_effectiveness": "excellent",
+                "coordination_effectiveness": "good",
+                "tool_effectiveness": {
+                    "siem_system": "excellent",
+                    "incident_management_platform": "good",
+                    "forensics_tools": "fair",
+                    "communication_tools": "excellent"
+                }
+            },
+            "root_cause_analysis": {
+                "root_cause": "Unpatched SQL injection vulnerability in customer portal web application",
+                "contributing_factors": [
+                    "Delayed security patch management process",
+                    "Insufficient application security testing",
+                    "Lack of web application firewall for the customer portal",
+                    "Inadequate database access controls and monitoring"
+                ],
+                "attack_vectors": [
+                    "SQL injection through customer portal login form",
+                    "Privilege escalation via database service account",
+                    "Data exfiltration through compromised database connection"
+                ],
+                "vulnerabilities_exploited": [
+                    "CVE-2023-12345 - SQL injection in authentication module",
+                    "Excessive database service account privileges",
+                    "Missing database query logging and monitoring"
+                ]
+            },
+            "impact_assessment": {
+                "total_impact_cost": 2850000,
+                "cost_breakdown": {
+                    "incident_response_costs": 185000,
+                    "forensics_investigation": 75000,
+                    "system_remediation": 120000,
+                    "legal_and_regulatory": 300000,
+                    "customer_notification": 45000,
+                    "credit_monitoring_services": 250000,
+                    "business_disruption": 1200000,
+                    "regulatory_fines": 675000
+                },
+                "business_downtime_hours": 8.75,
+                "data_compromised": true,
+                "data_compromised_records": 50000,
+                "data_types_compromised": ["names", "addresses", "phone_numbers", "email_addresses", "account_numbers"],
+                "regulatory_fines": 675000,
+                "reputation_impact_assessment": "Significant negative impact on customer trust and brand reputation. Estimated 15% customer churn rate over next 6 months."
+            },
+            "successes": [
+                "SIEM system effectively detected the anomalous database access patterns",
+                "Incident response team was mobilized quickly within 15 minutes",
+                "Effective coordination between security, legal, and compliance teams",
+                "Transparent and timely customer communication strategy",
+                "Comprehensive forensics investigation preserved evidence integrity",
+                "Database was successfully contained and secured within 4 hours"
+            ],
+            "effective_controls": [
+                "Security Information and Event Management (SIEM) system",
+                "Database activity monitoring and alerting",
+                "Incident response team training and procedures",
+                "Legal and compliance notification processes",
+                "Customer communication templates and procedures",
+                "Forensics investigation capabilities"
+            ],
+            "good_decisions": [
+                "Immediate escalation to executive level due to data breach severity",
+                "Early engagement of legal counsel and compliance team",
+                "Decision to take affected systems offline for containment",
+                "Proactive customer notification beyond regulatory minimums",
+                "Comprehensive forensics investigation before system restoration"
+            ],
+            "gaps_identified": [
+                "Vulnerability management process delays",
+                "Lack of web application firewall protection",
+                "Insufficient application security testing",
+                "Missing database privilege segregation",
+                "Delayed threat intelligence integration",
+                "Inadequate security awareness training for developers"
+            ],
+            "improvement_opportunities": [
+                "Implement automated vulnerability scanning and patching",
+                "Deploy web application firewall for all public-facing applications",
+                "Establish regular penetration testing program",
+                "Implement database activity monitoring and data loss prevention",
+                "Enhance security training for development teams",
+                "Improve threat intelligence integration and sharing"
+            ],
+            "ineffective_controls": [
+                "Manual vulnerability patch management process",
+                "Basic application security testing procedures",
+                "Network perimeter security alone without application-layer protection",
+                "Generic database access controls without granular permissions"
+            ],
+            "recommendations": [
+                "Implement automated vulnerability management with priority-based patching",
+                "Deploy web application firewall (WAF) for all customer-facing applications",
+                "Establish DevSecOps program with security testing in CI/CD pipeline",
+                "Implement database access controls with least privilege principles",
+                "Enhance security monitoring with user behavior analytics",
+                "Create security champion program within development teams",
+                "Establish regular tabletop exercises for data breach scenarios"
+            ],
+            "action_items": [
+                {
+                    "id": 1,
+                    "title": "Deploy Web Application Firewall for Customer Portal",
+                    "description": "Implement and configure WAF to protect customer portal from common web attacks",
+                    "assigned_to": 7,
+                    "assigned_to_name": "Network Team Lead",
+                    "priority": "critical",
+                    "due_date": "2024-02-15T00:00:00Z",
+                    "status": "assigned",
+                    "estimated_effort_hours": 40,
+                    "category": "technical_control"
+                },
+                {
+                    "id": 2,
+                    "title": "Implement Automated Vulnerability Management System",
+                    "description": "Deploy automated vulnerability scanning and patch management solution",
+                    "assigned_to": 3,
+                    "assigned_to_name": "Security Team Lead",
+                    "priority": "high",
+                    "due_date": "2024-03-01T00:00:00Z",
+                    "status": "assigned",
+                    "estimated_effort_hours": 120,
+                    "category": "process_improvement"
+                },
+                {
+                    "id": 3,
+                    "title": "Establish DevSecOps Security Testing Program",
+                    "description": "Integrate security testing tools into development CI/CD pipeline",
+                    "assigned_to": 15,
+                    "assigned_to_name": "Development Manager",
+                    "priority": "high",
+                    "due_date": "2024-03-15T00:00:00Z",
+                    "status": "assigned",
+                    "estimated_effort_hours": 80,
+                    "category": "process_improvement"
+                },
+                {
+                    "id": 4,
+                    "title": "Enhance Database Access Controls",
+                    "description": "Implement least privilege database access controls and monitoring",
+                    "assigned_to": 11,
+                    "assigned_to_name": "Database Administrator",
+                    "priority": "high",
+                    "due_date": "2024-02-28T00:00:00Z",
+                    "status": "assigned",
+                    "estimated_effort_hours": 60,
+                    "category": "technical_control"
+                },
+                {
+                    "id": 5,
+                    "title": "Conduct Data Breach Tabletop Exercise",
+                    "description": "Plan and execute tabletop exercise for data breach response",
+                    "assigned_to": 1,
+                    "assigned_to_name": "Chief Information Security Officer",
+                    "priority": "medium",
+                    "due_date": "2024-04-01T00:00:00Z",
+                    "status": "assigned",
+                    "estimated_effort_hours": 24,
+                    "category": "training_exercise"
+                }
+            ],
+            "preventive_measures": [
+                "Implement security-first development lifecycle with mandatory security reviews",
+                "Deploy comprehensive application security testing (SAST, DAST, IAST)",
+                "Establish security architecture review board for new applications",
+                "Implement continuous security monitoring and threat hunting",
+                "Create security awareness program focused on secure coding practices"
+            ],
+            "detection_improvements": [
+                "Deploy user and entity behavior analytics (UEBA) for anomaly detection",
+                "Implement application-level monitoring and alerting",
+                "Enhance SIEM correlation rules for advanced persistent threats",
+                "Deploy data loss prevention (DLP) solutions for sensitive data protection",
+                "Establish threat intelligence sharing and integration capabilities"
+            ],
+            "follow_up_required": true,
+            "next_review_date": "2024-04-30T00:00:00Z",
+            "action_items_status": {
+                "total": 5,
+                "assigned": 5,
+                "in_progress": 0,
+                "completed": 0,
+                "overdue": 0
+            },
+            "executive_summary": "Post-Incident Review Summary\n\nIncident: Critical Data Breach affecting 50,000 customers\nTotal Cost Impact: $2.85M\nResponse Duration: 8.75 hours\n\nKey Findings:\n- Root cause: Unpatched SQL injection vulnerability\n- SIEM detection worked effectively (30 min detection time)\n- Strong incident response coordination\n- Need for improved vulnerability management and application security\n\nCritical Actions Required:\n1. Deploy Web Application Firewall (Due: Feb 15)\n2. Implement automated vulnerability management (Due: Mar 1)\n3. Establish DevSecOps security testing (Due: Mar 15)\n\nOverall Assessment: Response was effective but preventable through better security controls",
+            "detailed_report_path": "/reports/incidents/INC-20240125103000-A1B2C3D4-post-incident-review.pdf",
+            "supporting_documents": [
+                "/documents/forensics-investigation-report.pdf",
+                "/documents/legal-notification-summary.pdf",
+                "/documents/timeline-reconstruction.pdf",
+                "/documents/technical-remediation-plan.pdf"
+            ],
+            "approved_by": null,
+            "approved_at": null,
+            "distribution_list": ["executive-team", "security-team", "legal-team", "compliance-team"],
+            "confidentiality_level": "restricted",
+            "created_at": "2024-01-30T16:00:00Z",
+            "updated_at": "2024-01-30T18:30:00Z"
+        }
+    else:
+        return {"error": "Post-incident review not found", "detail": f"No post-incident review found for incident {incident_id}"}
+
+@app.post("/api/v1/incidents/{incident_id}/post-incident-review")
+async def create_post_incident_review(incident_id: int, review_data: dict):
+    """Create a new post-incident review"""
+    return {
+        "id": 999,
+        "incident_id": incident_id,
+        "review_name": review_data.get("review_name", f"Post-Incident Review for Incident {incident_id}"),
+        "review_date": review_data.get("review_date", datetime.now().isoformat()),
+        "facilitator_id": review_data.get("facilitator_id", 1),
+        "participants": review_data.get("participants", []),
+        "status": "draft",
+        "created_at": datetime.now().isoformat(),
+        "message": "Post-incident review created successfully"
+    }
+
+@app.put("/api/v1/post-incident-reviews/{review_id}")
+async def update_post_incident_review(review_id: int, review_data: dict):
+    """Update post-incident review details"""
+    return {
+        "id": review_id,
+        "message": "Post-incident review updated successfully",
+        "updated_fields": list(review_data.keys()),
+        "updated_at": datetime.now().isoformat()
+    }
+
+@app.post("/api/v1/post-incident-reviews/{review_id}/approve")
+async def approve_post_incident_review(review_id: int, approval_data: dict):
+    """Approve post-incident review for distribution"""
+    return {
+        "id": review_id,
+        "approved_by": approval_data.get("approved_by", 1),
+        "approved_at": datetime.now().isoformat(),
+        "status": "approved",
+        "distribution_initiated": True,
+        "message": "Post-incident review approved and distribution initiated"
+    }
+
+@app.get("/api/v1/post-incident-reviews/{review_id}/action-items")
+async def get_post_incident_action_items(review_id: int):
+    """Get action items from post-incident review"""
+    return {
+        "review_id": review_id,
+        "action_items": [
+            {
+                "id": 1,
+                "title": "Deploy Web Application Firewall for Customer Portal",
+                "description": "Implement and configure WAF to protect customer portal from common web attacks",
+                "assigned_to": 7,
+                "assigned_to_name": "Network Team Lead",
+                "priority": "critical",
+                "due_date": "2024-02-15T00:00:00Z",
+                "status": "in_progress",
+                "progress_percentage": 65,
+                "estimated_effort_hours": 40,
+                "actual_effort_hours": 26,
+                "category": "technical_control",
+                "created_at": "2024-01-30T16:00:00Z",
+                "started_at": "2024-02-01T09:00:00Z",
+                "last_update": "2024-02-10T14:30:00Z",
+                "updates": [
+                    {
+                        "date": "2024-02-10T14:30:00Z",
+                        "update": "WAF hardware installed and initial configuration completed. Working on rule customization.",
+                        "updated_by": "Network Team Lead"
+                    },
+                    {
+                        "date": "2024-02-05T11:00:00Z", 
+                        "update": "WAF solution procured and hardware received. Installation scheduled for Feb 8.",
+                        "updated_by": "Network Team Lead"
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "title": "Implement Automated Vulnerability Management System",
+                "description": "Deploy automated vulnerability scanning and patch management solution",
+                "assigned_to": 3,
+                "assigned_to_name": "Security Team Lead",
+                "priority": "high",
+                "due_date": "2024-03-01T00:00:00Z",
+                "status": "assigned",
+                "progress_percentage": 15,
+                "estimated_effort_hours": 120,
+                "actual_effort_hours": 18,
+                "category": "process_improvement",
+                "created_at": "2024-01-30T16:00:00Z",
+                "started_at": "2024-02-01T09:00:00Z",
+                "last_update": "2024-02-08T16:00:00Z",
+                "updates": [
+                    {
+                        "date": "2024-02-08T16:00:00Z",
+                        "update": "Completed vendor evaluation. Selected Qualys for vulnerability management. Working on procurement approval.",
+                        "updated_by": "Security Team Lead"
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "title": "Establish DevSecOps Security Testing Program",
+                "description": "Integrate security testing tools into development CI/CD pipeline",
+                "assigned_to": 15,
+                "assigned_to_name": "Development Manager",
+                "priority": "high",
+                "due_date": "2024-03-15T00:00:00Z",
+                "status": "assigned",
+                "progress_percentage": 0,
+                "estimated_effort_hours": 80,
+                "actual_effort_hours": 0,
+                "category": "process_improvement",
+                "created_at": "2024-01-30T16:00:00Z",
+                "last_update": "2024-01-30T16:00:00Z",
+                "updates": []
+            }
+        ],
+        "summary": {
+            "total_action_items": 3,
+            "by_status": {
+                "assigned": 2,
+                "in_progress": 1,
+                "completed": 0,
+                "overdue": 0
+            },
+            "by_priority": {
+                "critical": 1,
+                "high": 2,
+                "medium": 0,
+                "low": 0
+            },
+            "completion_rate": 21.7,
+            "overdue_items": 0,
+            "at_risk_items": 1
+        }
+    }
+
+@app.post("/api/v1/post-incident-reviews/{review_id}/action-items")
+async def create_action_item(review_id: int, action_item_data: dict):
+    """Create new action item from post-incident review"""
+    return {
+        "id": 999,
+        "review_id": review_id,
+        "title": action_item_data.get("title"),
+        "description": action_item_data.get("description"),
+        "assigned_to": action_item_data.get("assigned_to"),
+        "priority": action_item_data.get("priority", "medium"),
+        "due_date": action_item_data.get("due_date"),
+        "status": "assigned",
+        "created_at": datetime.now().isoformat(),
+        "message": "Action item created successfully"
+    }
+
+@app.put("/api/v1/action-items/{action_item_id}")
+async def update_action_item(action_item_id: int, update_data: dict):
+    """Update action item progress and details"""
+    return {
+        "id": action_item_id,
+        "status": update_data.get("status"),
+        "progress_percentage": update_data.get("progress_percentage"),
+        "actual_effort_hours": update_data.get("actual_effort_hours"),
+        "update_note": update_data.get("update_note"),
+        "updated_by": update_data.get("updated_by", 1),
+        "updated_at": datetime.now().isoformat(),
+        "message": "Action item updated successfully"
+    }
+
+@app.get("/api/v1/lessons-learned")
+async def get_lessons_learned(
+    category: str = None,
+    time_period: str = None,
+    severity: str = None,
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get consolidated lessons learned from post-incident reviews"""
+    
+    lessons = [
+        {
+            "id": 1,
+            "title": "Importance of Automated Vulnerability Management",
+            "lesson": "Manual vulnerability patching processes create significant delays that can be exploited by attackers. Automated vulnerability management with priority-based patching is essential for timely remediation.",
+            "incident_ids": [1, 4, 7],
+            "incident_titles": [
+                "Critical Data Breach - Customer Database Compromised",
+                "Web Application Security Incident",
+                "Server Compromise via Unpatched Vulnerability"
+            ],
+            "category": "vulnerability_management",
+            "severity_levels": ["critical", "high", "medium"],
+            "date_range": "2023-Q4 to 2024-Q1",
+            "occurrences": 3,
+            "business_impact": "High - Multiple incidents caused by delayed patching resulting in $4.2M total impact",
+            "recommended_actions": [
+                "Implement automated vulnerability scanning and assessment",
+                "Deploy patch management system with risk-based prioritization",
+                "Establish emergency patching procedures for critical vulnerabilities",
+                "Create vulnerability management metrics and reporting"
+            ],
+            "implementation_status": "in_progress",
+            "preventable_incidents": 3,
+            "cost_avoidance_potential": 4200000,
+            "knowledge_tags": ["patching", "automation", "vulnerability", "security-operations"],
+            "created_at": "2024-01-30T16:00:00Z",
+            "last_updated": "2024-02-10T14:00:00Z"
+        },
+        {
+            "id": 2,
+            "title": "Need for Application Layer Security Controls",
+            "lesson": "Network perimeter security alone is insufficient to protect against application-layer attacks. Web application firewalls and application security testing are critical for public-facing applications.",
+            "incident_ids": [1, 3, 6],
+            "incident_titles": [
+                "Critical Data Breach - Customer Database Compromised",
+                "SQL Injection Attack on Customer Portal",
+                "Cross-Site Scripting (XSS) Attack"
+            ],
+            "category": "application_security",
+            "severity_levels": ["critical", "high"],
+            "date_range": "2023-Q3 to 2024-Q1",
+            "occurrences": 3,
+            "business_impact": "Very High - Application attacks resulted in data breaches and service disruptions totaling $3.1M",
+            "recommended_actions": [
+                "Deploy web application firewall for all public-facing applications",
+                "Implement security testing in development lifecycle (SAST, DAST)",
+                "Establish security code review processes",
+                "Create application security training for developers"
+            ],
+            "implementation_status": "in_progress",
+            "preventable_incidents": 3,
+            "cost_avoidance_potential": 3100000,
+            "knowledge_tags": ["application-security", "waf", "development", "testing"],
+            "created_at": "2024-01-25T14:00:00Z",
+            "last_updated": "2024-02-08T10:00:00Z"
+        },
+        {
+            "id": 3,
+            "title": "Value of Early Executive Escalation",
+            "lesson": "Early escalation of security incidents to executive leadership, even if severity is uncertain, enables faster decision-making and resource allocation for effective incident response.",
+            "incident_ids": [1, 2, 8],
+            "incident_titles": [
+                "Critical Data Breach - Customer Database Compromised",
+                "Network Infrastructure Outage - Primary Data Center",
+                "Ransomware Attack on File Servers"
+            ],
+            "category": "incident_response",
+            "severity_levels": ["critical", "high"],
+            "date_range": "2023-Q4 to 2024-Q1",
+            "occurrences": 3,
+            "business_impact": "Medium - Improved response times and decision-making when executive escalation occurred early",
+            "recommended_actions": [
+                "Update incident escalation criteria to favor early escalation",
+                "Establish executive notification procedures for potential high-impact incidents",
+                "Create incident commander training program",
+                "Develop escalation decision support tools"
+            ],
+            "implementation_status": "planned",
+            "preventable_incidents": 0,
+            "cost_avoidance_potential": 800000,
+            "knowledge_tags": ["escalation", "leadership", "decision-making", "incident-management"],
+            "created_at": "2024-01-28T11:00:00Z",
+            "last_updated": "2024-02-01T09:00:00Z"
+        },
+        {
+            "id": 4,
+            "title": "Importance of Database Access Controls and Monitoring",
+            "lesson": "Generic database access controls without granular permissions and monitoring create blind spots that attackers can exploit for data exfiltration.",
+            "incident_ids": [1, 5],
+            "incident_titles": [
+                "Critical Data Breach - Customer Database Compromised",
+                "Insider Threat - Unauthorized Data Access"
+            ],
+            "category": "data_protection",
+            "severity_levels": ["critical", "high"],
+            "date_range": "2023-Q4 to 2024-Q1",
+            "occurrences": 2,
+            "business_impact": "Very High - Database compromises led to major data breaches with $3.8M total impact",
+            "recommended_actions": [
+                "Implement database activity monitoring and data loss prevention",
+                "Deploy least privilege access controls for database accounts",
+                "Establish database query logging and anomaly detection",
+                "Create data classification and protection policies"
+            ],
+            "implementation_status": "assigned",
+            "preventable_incidents": 2,
+            "cost_avoidance_potential": 3800000,
+            "knowledge_tags": ["database-security", "access-control", "monitoring", "data-protection"],
+            "created_at": "2024-01-30T17:00:00Z",
+            "last_updated": "2024-02-05T13:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_lessons = lessons
+    
+    if category:
+        filtered_lessons = [l for l in filtered_lessons if l["category"] == category]
+    if severity:
+        filtered_lessons = [l for l in filtered_lessons if severity in l["severity_levels"]]
+    
+    # Apply pagination
+    paginated_lessons = filtered_lessons[skip:skip + limit]
+    
+    return {
+        "items": paginated_lessons,
+        "total": len(filtered_lessons),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "total_lessons": len(filtered_lessons),
+            "by_category": {
+                "vulnerability_management": len([l for l in filtered_lessons if l["category"] == "vulnerability_management"]),
+                "application_security": len([l for l in filtered_lessons if l["category"] == "application_security"]),
+                "incident_response": len([l for l in filtered_lessons if l["category"] == "incident_response"]),
+                "data_protection": len([l for l in filtered_lessons if l["category"] == "data_protection"])
+            },
+            "by_implementation_status": {
+                "implemented": len([l for l in filtered_lessons if l["implementation_status"] == "implemented"]),
+                "in_progress": len([l for l in filtered_lessons if l["implementation_status"] == "in_progress"]),
+                "assigned": len([l for l in filtered_lessons if l["implementation_status"] == "assigned"]),
+                "planned": len([l for l in filtered_lessons if l["implementation_status"] == "planned"])
+            },
+            "total_preventable_incidents": sum(l["preventable_incidents"] for l in filtered_lessons),
+            "total_cost_avoidance_potential": sum(l["cost_avoidance_potential"] for l in filtered_lessons)
+        }
+    }
+
+@app.get("/api/v1/lessons-learned/trends")
+async def get_lessons_learned_trends():
+    """Get trends and analytics for lessons learned"""
+    return {
+        "trend_analysis": {
+            "lessons_by_quarter": {
+                "2023-Q3": 2,
+                "2023-Q4": 5,
+                "2024-Q1": 8,
+                "trend": "increasing"
+            },
+            "top_categories": [
+                {"category": "vulnerability_management", "count": 4, "percentage": 26.7},
+                {"category": "application_security", "count": 3, "percentage": 20.0},
+                {"category": "incident_response", "count": 3, "percentage": 20.0},
+                {"category": "data_protection", "count": 2, "percentage": 13.3}
+            ],
+            "implementation_progress": {
+                "implemented": 3,
+                "in_progress": 5,
+                "assigned": 4,
+                "planned": 3,
+                "completion_rate": 20.0
+            }
+        },
+        "impact_metrics": {
+            "total_incidents_analyzed": 15,
+            "preventable_incidents": 12,
+            "prevention_opportunity": 80.0,
+            "cost_impact_analyzed": 12500000,
+            "potential_cost_avoidance": 11800000,
+            "roi_of_lessons_learned": 94.4
+        },
+        "knowledge_management": {
+            "total_knowledge_items": 47,
+            "knowledge_by_type": {
+                "lessons_learned": 15,
+                "best_practices": 18,
+                "procedures": 14
+            },
+            "most_referenced_tags": [
+                {"tag": "vulnerability", "count": 8},
+                {"tag": "application-security", "count": 6},
+                {"tag": "incident-management", "count": 5},
+                {"tag": "monitoring", "count": 4}
+            ],
+            "knowledge_usage_metrics": {
+                "views_last_30_days": 284,
+                "searches_last_30_days": 97,
+                "downloads_last_30_days": 45
+            }
+        },
+        "effectiveness_metrics": {
+            "incident_recurrence_rate": 15.2,
+            "time_to_implement_lessons": {
+                "average_days": 45.3,
+                "median_days": 38.0,
+                "target_days": 30.0
+            },
+            "lessons_applied_successfully": 12,
+            "lessons_partially_applied": 5,
+            "lessons_not_yet_applied": 8
+        }
+    }
+
+@app.get("/api/v1/lessons-learned/knowledge-base")
+async def get_lessons_learned_knowledge_base(
+    search_query: str = None,
+    tags: str = None,
+    category: str = None
+):
+    """Search and browse lessons learned knowledge base"""
+    
+    knowledge_items = [
+        {
+            "id": 1,
+            "type": "lesson_learned",
+            "title": "Automated Vulnerability Management Best Practices",
+            "content": "Based on analysis of 3 major incidents caused by delayed patching, organizations should implement automated vulnerability management with risk-based prioritization. Key components include automated scanning, patch testing environments, and emergency patching procedures.",
+            "categories": ["vulnerability_management", "automation"],
+            "tags": ["patching", "automation", "vulnerability", "security-operations", "risk-management"],
+            "source_incidents": ["INC-20240125103000-A1B2C3D4", "INC-20231215140000-X1Y2Z3W4"],
+            "business_impact": "High",
+            "implementation_complexity": "Medium",
+            "cost_benefit_ratio": "Very High",
+            "related_frameworks": ["NIST", "ISO 27001", "CIS Controls"],
+            "author": "Security Team Lead",
+            "created_at": "2024-01-30T16:00:00Z",
+            "last_updated": "2024-02-10T14:00:00Z",
+            "views": 142,
+            "downloads": 23,
+            "rating": 4.8
+        },
+        {
+            "id": 2,
+            "type": "best_practice",
+            "title": "Web Application Firewall Deployment Guide",
+            "content": "Comprehensive guide for deploying web application firewalls based on lessons learned from SQL injection and XSS attacks. Includes configuration recommendations, rule customization, and monitoring best practices.",
+            "categories": ["application_security", "technical_controls"],
+            "tags": ["waf", "application-security", "sql-injection", "xss", "web-security"],
+            "source_incidents": ["INC-20240125103000-A1B2C3D4", "INC-20231201120000-B2C3D4E5"],
+            "business_impact": "High",
+            "implementation_complexity": "Medium",
+            "cost_benefit_ratio": "High",
+            "related_frameworks": ["OWASP", "NIST", "PCI-DSS"],
+            "author": "Network Team Lead",
+            "created_at": "2024-02-01T10:00:00Z",
+            "last_updated": "2024-02-08T15:30:00Z",
+            "views": 98,
+            "downloads": 18,
+            "rating": 4.6
+        },
+        {
+            "id": 3,
+            "type": "procedure",
+            "title": "Incident Escalation Decision Matrix",
+            "content": "Decision matrix and procedures for incident escalation based on severity, business impact, and regulatory requirements. Includes escalation timelines, notification templates, and decision criteria.",
+            "categories": ["incident_response", "escalation"],
+            "tags": ["escalation", "decision-making", "incident-management", "procedures"],
+            "source_incidents": ["INC-20240125103000-A1B2C3D4", "INC-20240124145000-B2C3D4E5"],
+            "business_impact": "Medium",
+            "implementation_complexity": "Low",
+            "cost_benefit_ratio": "High",
+            "related_frameworks": ["NIST", "ISO 27035"],
+            "author": "Chief Information Security Officer",
+            "created_at": "2024-01-28T11:00:00Z",
+            "last_updated": "2024-02-01T09:00:00Z",
+            "views": 76,
+            "downloads": 12,
+            "rating": 4.4
+        }
+    ]
+    
+    # Apply filters
+    filtered_items = knowledge_items
+    
+    if search_query:
+        filtered_items = [item for item in filtered_items 
+                         if search_query.lower() in item["title"].lower() or 
+                         search_query.lower() in item["content"].lower()]
+    if tags:
+        tag_list = [tag.strip() for tag in tags.split(",")]
+        filtered_items = [item for item in filtered_items 
+                         if any(tag in item["tags"] for tag in tag_list)]
+    if category:
+        filtered_items = [item for item in filtered_items if category in item["categories"]]
+    
+    return {
+        "items": filtered_items,
+        "total": len(filtered_items),
+        "facets": {
+            "types": {
+                "lesson_learned": len([i for i in knowledge_items if i["type"] == "lesson_learned"]),
+                "best_practice": len([i for i in knowledge_items if i["type"] == "best_practice"]),
+                "procedure": len([i for i in knowledge_items if i["type"] == "procedure"])
+            },
+            "categories": {
+                "vulnerability_management": len([i for i in knowledge_items if "vulnerability_management" in i["categories"]]),
+                "application_security": len([i for i in knowledge_items if "application_security" in i["categories"]]),
+                "incident_response": len([i for i in knowledge_items if "incident_response" in i["categories"]])
+            },
+            "popular_tags": [
+                {"tag": "vulnerability", "count": 2},
+                {"tag": "application-security", "count": 2},
+                {"tag": "incident-management", "count": 2},
+                {"tag": "automation", "count": 1}
+            ]
+        },
+        "recommendations": {
+            "trending_items": [1, 2],
+            "recently_updated": [2, 3],
+            "highest_rated": [1, 2, 3]
+        }
+    }
+
+@app.get("/api/v1/dashboards/incident-analytics")
+async def get_incident_analytics_dashboard():
+    """Get incident response analytics and metrics dashboard"""
+    return {
+        "summary": {
+            "total_incidents_ytd": 24,
+            "total_post_incident_reviews": 15,
+            "total_lessons_learned": 28,
+            "total_action_items": 45,
+            "action_items_completed": 32,
+            "action_item_completion_rate": 71.1,
+            "avg_review_completion_days": 12.5,
+            "cost_impact_prevented": 8400000
+        },
+        "incident_trends": {
+            "incidents_by_month": {
+                "2024-01": 6,
+                "2024-02": 4,
+                "2024-03": 8,
+                "2024-04": 6,
+                "trend": "stable"
+            },
+            "mttr_trend": {
+                "2024-01": 320,
+                "2024-02": 285,
+                "2024-03": 240,
+                "2024-04": 195,
+                "trend": "improving",
+                "improvement_percentage": 39.1
+            },
+            "severity_distribution": {
+                "critical": 3,
+                "high": 8,
+                "medium": 10,
+                "low": 3
+            }
+        },
+        "post_incident_review_metrics": {
+            "reviews_by_status": {
+                "completed": 12,
+                "in_progress": 2,
+                "draft": 1,
+                "overdue": 0
+            },
+            "review_completion_time": {
+                "avg_days": 12.5,
+                "median_days": 10.0,
+                "target_days": 14.0,
+                "on_time_percentage": 80.0
+            },
+            "participation_metrics": {
+                "avg_participants_per_review": 5.2,
+                "stakeholder_participation_rate": 92.3,
+                "executive_participation_rate": 78.6
+            }
+        },
+        "lessons_learned_effectiveness": {
+            "lessons_by_category": {
+                "vulnerability_management": 8,
+                "application_security": 6,
+                "incident_response": 5,
+                "data_protection": 4,
+                "compliance": 3,
+                "other": 2
+            },
+            "implementation_success_rate": 76.9,
+            "recurrence_prevention_rate": 84.6,
+            "knowledge_base_usage": {
+                "monthly_views": 428,
+                "monthly_searches": 147,
+                "monthly_downloads": 89,
+                "user_satisfaction": 4.3
+            }
+        },
+        "action_item_tracking": {
+            "by_priority": {
+                "critical": {"total": 8, "completed": 6, "completion_rate": 75.0},
+                "high": {"total": 15, "completed": 12, "completion_rate": 80.0},
+                "medium": {"total": 18, "completed": 12, "completion_rate": 66.7},
+                "low": {"total": 4, "completed": 2, "completion_rate": 50.0}
+            },
+            "by_category": {
+                "technical_control": {"total": 20, "completed": 15, "completion_rate": 75.0},
+                "process_improvement": {"total": 15, "completed": 10, "completion_rate": 66.7},
+                "training_exercise": {"total": 10, "completed": 7, "completion_rate": 70.0}
+            },
+            "overdue_items": 3,
+            "at_risk_items": 5
+        },
+        "cost_benefit_analysis": {
+            "total_incident_cost_ytd": 15200000,
+            "prevention_investments": 1800000,
+            "estimated_cost_avoided": 8400000,
+            "roi_percentage": 366.7,
+            "cost_per_prevented_incident": 150000
+        },
+        "continuous_improvement": {
+            "process_maturity_score": 3.2,
+            "improvement_trend": "positive",
+            "key_improvements": [
+                "Reduced average incident response time by 39%",
+                "Increased post-incident review completion rate to 80%",
+                "Implemented 76.9% of lessons learned recommendations",
+                "Achieved 84.6% recurrence prevention rate"
+            ],
+            "focus_areas": [
+                "Automated threat detection and response",
+                "Enhanced security awareness training",
+                "Supplier security risk management",
+                "Cloud security posture management"
+            ]
+        }
+    }
+
 if __name__ == "__main__":
     import random
     

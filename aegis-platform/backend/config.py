@@ -206,7 +206,8 @@ class Settings(BaseSettings):
     # ==============================================
     # Email Configuration
     # ==============================================
-    
+
+    ENABLE_EMAIL: bool = False
     SMTP_SERVER: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""

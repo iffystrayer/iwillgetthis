@@ -265,12 +265,12 @@ class EmailService:
     
     def __init__(self):
         self.enabled = settings.ENABLE_EMAIL
-        self.smtp_host = settings.SMTP_HOST
+        self.smtp_host = settings.SMTP_SERVER
         self.smtp_port = settings.SMTP_PORT
         self.smtp_username = settings.SMTP_USERNAME
         self.smtp_password = settings.SMTP_PASSWORD
         self.smtp_use_tls = settings.SMTP_USE_TLS
-        self.from_email = settings.FROM_EMAIL
+        self.from_email = settings.EMAIL_FROM
         
         if self.enabled and not all([self.smtp_host, self.from_email]):
             logger.warning("Email service enabled but missing configuration")
