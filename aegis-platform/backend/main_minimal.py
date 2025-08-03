@@ -552,9 +552,268 @@ async def calculate_batch_criticality():
         "results": results
     }
 
+# Asset Relationships and Dependencies Endpoints
+@app.get("/api/v1/assets/{asset_id}/relationships")
+async def get_asset_relationships(asset_id: int):
+    """Get relationships for a specific asset"""
+    # Mock relationship data
+    relationships = [
+        {
+            "id": 1,
+            "source_asset_id": asset_id,
+            "target_asset_id": 2,
+            "relationship_type": "depends_on",
+            "relationship_strength": "critical",
+            "description": "Database dependency for data storage",
+            "is_validated": True,
+            "target_asset": {
+                "id": 2,
+                "name": "Database Server",
+                "asset_type": "database",
+                "criticality": "critical"
+            }
+        },
+        {
+            "id": 2,
+            "source_asset_id": 3,
+            "target_asset_id": asset_id,
+            "relationship_type": "depends_on",
+            "relationship_strength": "strong",
+            "description": "Workstation connects to web server",
+            "is_validated": True,
+            "source_asset": {
+                "id": 3,
+                "name": "Development Workstation",
+                "asset_type": "workstation",
+                "criticality": "medium"
+            }
+        }
+    ]
+    
+    return {
+        "asset_id": asset_id,
+        "outgoing_relationships": [r for r in relationships if r["source_asset_id"] == asset_id],
+        "incoming_relationships": [r for r in relationships if r["target_asset_id"] == asset_id],
+        "total_dependencies": 1,
+        "total_dependents": 1
+    }
+
+@app.get("/api/v1/assets/{asset_id}/dependency-graph")
+async def get_asset_dependency_graph(asset_id: int, max_depth: int = 3):
+    """Get dependency graph for an asset"""
+    if asset_id == 1:
+        return {
+            "root_asset_id": asset_id,
+            "root_asset_name": "Production Web Server",
+            "dependencies": [
+                {
+                    "asset_id": 2,
+                    "asset_name": "Database Server",
+                    "asset_type": "database",
+                    "criticality": "critical",
+                    "environment": "production",
+                    "level": 1,
+                    "relationship_type": "depends_on",
+                    "relationship_strength": "critical",
+                    "impact_percentage": 90.0
+                }
+            ],
+            "dependents": [
+                {
+                    "asset_id": 3,
+                    "asset_name": "Development Workstation",
+                    "asset_type": "workstation",
+                    "criticality": "medium",
+                    "environment": "development",
+                    "level": 1,
+                    "relationship_type": "depends_on",
+                    "relationship_strength": "strong",
+                    "impact_percentage": 50.0
+                }
+            ],
+            "max_depth": 2,
+            "total_dependencies": 1,
+            "total_dependents": 1,
+            "critical_path_assets": [1, 2]
+        }
+    else:
+        return {
+            "root_asset_id": asset_id,
+            "root_asset_name": "Unknown Asset",
+            "dependencies": [],
+            "dependents": [],
+            "max_depth": 0,
+            "total_dependencies": 0,
+            "total_dependents": 0,
+            "critical_path_assets": []
+        }
+
+@app.get("/api/v1/assets/{asset_id}/impact-analysis")
+async def get_asset_impact_analysis(asset_id: int, scenario: str = "complete_failure"):
+    """Get impact analysis for asset failure scenarios"""
+    if asset_id == 1:
+        return {
+            "asset_id": asset_id,
+            "asset_name": "Production Web Server",
+            "scenario_name": scenario,
+            "affected_assets": [
+                {
+                    "asset_id": 3,
+                    "asset_name": "Development Workstation",
+                    "impact_level": "moderate",
+                    "estimated_downtime_minutes": 120,
+                    "estimated_revenue_impact": 25000.0
+                }
+            ],
+            "affected_services": [
+                {
+                    "service_name": "Web Application",
+                    "impact_level": "high",
+                    "affected_users": 1000
+                }
+            ],
+            "estimated_downtime_minutes": 240,
+            "estimated_revenue_impact": 50000.0,
+            "business_functions_affected": [
+                "Customer Services",
+                "Revenue Generation",
+                "IT Operations",
+                "Web Services"
+            ],
+            "recovery_steps": [
+                "1. Isolate failed asset: Production Web Server",
+                "2. Assess root cause of failure",
+                "3. Activate backup systems if available",
+                "4. Notify stakeholders of dependent service impacts",
+                "5. Implement temporary workarounds for critical dependents",
+                "6. Begin primary recovery procedures",
+                "7. Test functionality before bringing back online",
+                "8. Gradually restore dependent services",
+                "9. Conduct post-incident review"
+            ],
+            "estimated_recovery_time": 180,
+            "scenario_probability": 0.04
+        }
+    else:
+        return {
+            "asset_id": asset_id,
+            "asset_name": "Unknown Asset",
+            "scenario_name": scenario,
+            "affected_assets": [],
+            "affected_services": [],
+            "estimated_downtime_minutes": 0,
+            "estimated_revenue_impact": 0.0,
+            "business_functions_affected": [],
+            "recovery_steps": [],
+            "estimated_recovery_time": 0,
+            "scenario_probability": 0.01
+        }
+
+@app.get("/api/v1/assets/{asset_id}/risk-metrics")
+async def get_asset_risk_metrics(asset_id: int):
+    """Get risk metrics for an asset"""
+    if asset_id == 1:
+        return {
+            "asset_id": asset_id,
+            "asset_name": "Production Web Server",
+            "risk_metrics": {
+                "single_point_of_failure_risk": 0.6,
+                "cascade_failure_risk": 0.4,
+                "overall_dependency_risk": 0.5
+            },
+            "calculated_at": "2024-01-21T15:30:00Z"
+        }
+    else:
+        return {
+            "asset_id": asset_id,
+            "asset_name": "Unknown Asset",
+            "risk_metrics": {
+                "single_point_of_failure_risk": 0.1,
+                "cascade_failure_risk": 0.1,
+                "overall_dependency_risk": 0.1
+            },
+            "calculated_at": "2024-01-21T15:30:00Z"
+        }
+
+@app.post("/api/v1/assets/relationships")
+async def create_asset_relationship(relationship_data: dict):
+    """Create new asset relationship"""
+    return {
+        "id": 999,
+        "source_asset_id": relationship_data.get("source_asset_id"),
+        "target_asset_id": relationship_data.get("target_asset_id"),
+        "relationship_type": relationship_data.get("relationship_type", "depends_on"),
+        "relationship_strength": relationship_data.get("relationship_strength", "moderate"),
+        "description": relationship_data.get("description", ""),
+        "is_validated": False,
+        "created_at": "2024-01-21T15:30:00Z",
+        "success": True
+    }
+
+@app.post("/api/v1/assets/network-map")
+async def get_network_map(request_data: dict):
+    """Get network map for multiple assets"""
+    asset_ids = request_data.get("asset_ids", [1, 2, 3])
+    
+    return {
+        "nodes": [
+            {
+                "id": 1,
+                "name": "Production Web Server",
+                "type": "server",
+                "criticality": "critical",
+                "environment": "production",
+                "group": "Engineering"
+            },
+            {
+                "id": 2,
+                "name": "Database Server",
+                "type": "database",
+                "criticality": "critical",
+                "environment": "production",
+                "group": "Engineering"
+            },
+            {
+                "id": 3,
+                "name": "Development Workstation",
+                "type": "workstation",
+                "criticality": "medium",
+                "environment": "development",
+                "group": "Engineering"
+            }
+        ],
+        "edges": [
+            {
+                "source": 1,
+                "target": 2,
+                "type": "depends_on",
+                "strength": "critical",
+                "description": "Database dependency"
+            },
+            {
+                "source": 3,
+                "target": 1,
+                "type": "depends_on",
+                "strength": "strong",
+                "description": "Development access"
+            }
+        ],
+        "statistics": {
+            "total_nodes": 3,
+            "total_edges": 2,
+            "network_density": 0.33
+        }
+    }
+
 if __name__ == "__main__":
-    port = 8000
-    print(f"🚀 Starting server on port {port}")
+    import random
+    
+    # Use random 5-digit TCP port to avoid conflicts (as per user requirements)
+    port = random.randint(10000, 65535)
+    print(f"🚀 Starting Aegis Platform backend on port {port}")
+    print(f"📡 API will be available at: http://localhost:{port}")
+    print(f"📋 API documentation: http://localhost:{port}/docs")
+    
     uvicorn.run(
         "main_minimal:app",
         host="0.0.0.0", 

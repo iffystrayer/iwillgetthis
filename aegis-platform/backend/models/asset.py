@@ -85,3 +85,9 @@ class Asset(Base):
     assessments = relationship("Assessment", back_populates="asset")
     risks = relationship("Risk", back_populates="asset")
     vulnerability_data = relationship("VulnerabilityData", back_populates="asset")
+    
+    # Asset relationships and dependencies
+    outgoing_relationships = relationship("AssetRelationship", foreign_keys="AssetRelationship.source_asset_id", back_populates="source_asset")
+    incoming_relationships = relationship("AssetRelationship", foreign_keys="AssetRelationship.target_asset_id", back_populates="target_asset")
+    dependency_graph = relationship("AssetDependencyGraph", back_populates="asset", uselist=False)
+    impact_scenarios = relationship("AssetImpactScenario", back_populates="asset")
