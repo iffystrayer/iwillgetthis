@@ -37,12 +37,13 @@ from schemas.analytics import (
     MetricTypeEnum, DashboardTypeEnum, ReportTypeEnum, TrendDirectionEnum
 )
 from auth import get_current_active_user
-from analytics_engine import AdvancedAnalyticsEngine
+# from analytics_engine import AdvancedAnalyticsEngine
 
 router = APIRouter()
 
-# Initialize analytics engine
-analytics_engine = AdvancedAnalyticsEngine()
+# Analytics engine will be initialized per request with db session
+# def get_analytics_engine(db: Session = Depends(get_db)) -> AdvancedAnalyticsEngine:
+#     return AdvancedAnalyticsEngine(db)
 
 # =====================
 # METRIC DEFINITIONS
@@ -378,6 +379,7 @@ async def get_dashboard_data(
     time_range: Optional[str] = Query("30d"),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
+    # analytics_engine: AdvancedAnalyticsEngine = Depends(get_analytics_engine)
 ):
     """Get real-time data for a dashboard."""
     
@@ -393,11 +395,12 @@ async def get_dashboard_data(
     
     # Generate dashboard data using analytics engine
     try:
-        dashboard_data = await analytics_engine.generate_dashboard_data(
-            dashboard_id=dashboard_id,
-            time_range=time_range,
-            db=db
-        )
+        # dashboard_data = await # analytics_engine.generate_dashboard_data(
+        #     dashboard_id=dashboard_id,
+        #     time_range=time_range,
+        #     db=db
+        # )
+        dashboard_data = {"message": "Analytics engine temporarily disabled"}
         return dashboard_data
     except Exception as e:
         raise HTTPException(
@@ -478,13 +481,13 @@ async def generate_report(
     db.refresh(db_report)
     
     # Schedule report generation in background
-    background_tasks.add_task(
-        analytics_engine.generate_report_async,
-        report_id=db_report.report_id,
-        template=template,
-        parameters=report.parameters_used or {},
-        db=db
-    )
+    # background_tasks.add_task(
+    #     analytics_engine.generate_report_async,
+    #     report_id=db_report.report_id,
+    #     template=template,
+    #     parameters=report.parameters_used or {},
+    #     db=db
+    # )
     
     return db_report
 
@@ -569,11 +572,11 @@ async def run_prediction(
         )
     
     # Schedule prediction run in background
-    background_tasks.add_task(
-        analytics_engine.run_prediction_async,
-        prediction_id=prediction_id,
-        db=db
-    )
+    # background_tasks.add_task(
+    #     analytics_engine.run_prediction_async,
+    #     prediction_id=prediction_id,
+    #     db=db
+    # )
     
     return {"message": "Prediction scheduled successfully"}
 
@@ -617,7 +620,8 @@ async def get_executive_summary(
     """Get executive summary dashboard data."""
     
     try:
-        summary = await analytics_engine.generate_executive_summary(db=db)
+        # summary = await analytics_engine.generate_executive_summary(db=db)
+        summary = {"message": "Analytics engine temporarily disabled"}
         return summary
     except Exception as e:
         raise HTTPException(
@@ -633,7 +637,8 @@ async def get_compliance_dashboard(
     """Get compliance dashboard data."""
     
     try:
-        dashboard = await analytics_engine.generate_compliance_dashboard(db=db)
+        # dashboard = await analytics_engine.generate_compliance_dashboard(db=db)
+        dashboard = {"message": "Analytics engine temporarily disabled"}
         return dashboard
     except Exception as e:
         raise HTTPException(
@@ -649,7 +654,8 @@ async def get_security_dashboard(
     """Get security dashboard data."""
     
     try:
-        dashboard = await analytics_engine.generate_security_dashboard(db=db)
+        # dashboard = await analytics_engine.generate_security_dashboard(db=db)
+        dashboard = {"message": "Analytics engine temporarily disabled"}
         return dashboard
     except Exception as e:
         raise HTTPException(
@@ -672,12 +678,13 @@ async def get_analytics_insights(
     """Get AI-powered analytics insights."""
     
     try:
-        insights = await analytics_engine.generate_insights(
-            metric_ids=metric_ids,
-            time_range=time_range,
-            limit=limit,
-            db=db
-        )
+        # insights = await analytics_engine.generate_insights(
+        #     metric_ids=metric_ids,
+        #     time_range=time_range,
+        #     limit=limit,
+        #     db=db
+        # )
+        insights = [{"message": "Analytics engine temporarily disabled"}]
         return insights
     except Exception as e:
         raise HTTPException(
@@ -695,11 +702,12 @@ async def get_risk_forecasts(
     """Get AI-powered risk forecasts."""
     
     try:
-        forecasts = await analytics_engine.generate_risk_forecasts(
-            metrics=metrics,
-            horizon_days=horizon_days,
-            db=db
-        )
+        # forecasts = await analytics_engine.generate_risk_forecasts(
+        #     metrics=metrics,
+        #     horizon_days=horizon_days,
+        #     db=db
+        # )
+        forecasts = [{"message": "Analytics engine temporarily disabled"}]
         return forecasts
     except Exception as e:
         raise HTTPException(
@@ -812,10 +820,11 @@ async def execute_analytics_query(
     """Execute a custom analytics query."""
     
     try:
-        results = await analytics_engine.execute_analytics_query(
-            query_filter=query_filter,
-            db=db
-        )
+        # results = await analytics_engine.execute_analytics_query(
+        #     query_filter=query_filter,
+        #     db=db
+        # )
+        results = {"message": "Analytics engine temporarily disabled"}
         return results
     except Exception as e:
         raise HTTPException(

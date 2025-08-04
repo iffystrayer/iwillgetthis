@@ -1,0 +1,111 @@
+{
+  "summary": {
+    "total_tests": 14,
+    "passed": 5,
+    "failed": 9,
+    "warnings": 0,
+    "success_rate": 35.71,
+    "timestamp": "2025-08-02T23:09:47.764579"
+  },
+  "test_results": [
+    {
+      "test_name": "Health Check",
+      "status": "PASS",
+      "details": "Service is healthy",
+      "timestamp": "2025-08-02T23:09:42.625949",
+      "response_data": null
+    },
+    {
+      "test_name": "Authentication - Login",
+      "status": "FAIL",
+      "details": "HTTP 500: Internal Server Error",
+      "timestamp": "2025-08-02T23:09:43.185073",
+      "response_data": null
+    },
+    {
+      "test_name": "User Management - List Users",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:43.691886",
+      "response_data": null
+    },
+    {
+      "test_name": "Asset Management - List Assets",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:44.195433",
+      "response_data": null
+    },
+    {
+      "test_name": "Risk Management - List Risks",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:44.707615",
+      "response_data": null
+    },
+    {
+      "test_name": "Task Management - List Tasks",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:45.216699",
+      "response_data": null
+    },
+    {
+      "test_name": "Evidence Management - List Evidence",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:45.726453",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - Overview",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:46.231696",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - CISO Cockpit",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:46.233787",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - Analyst Workbench",
+      "status": "FAIL",
+      "details": "HTTP 403",
+      "timestamp": "2025-08-02T23:09:46.235744",
+      "response_data": null
+    },
+    {
+      "test_name": "AI Integration - Evidence Analysis",
+      "status": "PASS",
+      "details": "Evidence analysis endpoint accessible",
+      "timestamp": "2025-08-02T23:09:46.746451",
+      "response_data": null
+    },
+    {
+      "test_name": "AI Integration - Risk Generation",
+      "status": "PASS",
+      "details": "Risk generation endpoint accessible",
+      "timestamp": "2025-08-02T23:09:46.751557",
+      "response_data": null
+    },
+    {
+      "test_name": "Frontend - Main Page",
+      "status": "PASS",
+      "details": "Frontend application accessible",
+      "timestamp": "2025-08-02T23:09:47.259349",
+      "response_data": null
+    },
+    {
+      "test_name": "Frontend - React App",
+      "status": "PASS",
+      "details": "React application detected",
+      "timestamp": "2025-08-02T23:09:47.259405",
+      "response_data": null
+    }
+  ],
+  "test_data": {}
+}

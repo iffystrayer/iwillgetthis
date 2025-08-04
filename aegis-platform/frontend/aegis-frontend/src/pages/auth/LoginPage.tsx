@@ -58,8 +58,8 @@ export default function LoginPage() {
 
     try {
       const authResponse = await authLogin(data.email, data.password);
-      // The signIn function already handles setting user and tokens
-      // login(authResponse.user);
+      // Update the auth context state with the user data
+      login(authResponse.user);
       toast.success('Login successful!');
       navigate(from, { replace: true });
     } catch (err: any) {

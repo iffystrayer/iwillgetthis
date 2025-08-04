@@ -1,0 +1,167 @@
+{
+  "summary": {
+    "total_tests": 22,
+    "passed": 4,
+    "failed": 18,
+    "skipped": 0,
+    "success_rate": 18.18,
+    "timestamp": "2025-08-02T23:01:14.658731"
+  },
+  "test_results": [
+    {
+      "test_name": "Health Check",
+      "status": "PASS",
+      "details": "Service is healthy",
+      "timestamp": "2025-08-02T23:01:07.388854",
+      "response_data": null
+    },
+    {
+      "test_name": "Authentication - Login",
+      "status": "FAIL",
+      "details": "HTTP 404: {\"detail\":\"Not Found\"}",
+      "timestamp": "2025-08-02T23:01:07.902838",
+      "response_data": null
+    },
+    {
+      "test_name": "Database - Connectivity",
+      "status": "FAIL",
+      "details": "Cannot query database",
+      "timestamp": "2025-08-02T23:01:08.413527",
+      "response_data": null
+    },
+    {
+      "test_name": "User Management - List Users",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:08.922666",
+      "response_data": null
+    },
+    {
+      "test_name": "Asset Management - List Assets",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:09.431401",
+      "response_data": null
+    },
+    {
+      "test_name": "Risk Management - List Risks",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:09.944239",
+      "response_data": null
+    },
+    {
+      "test_name": "Compliance - NIST CSF",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:10.454271",
+      "response_data": null
+    },
+    {
+      "test_name": "Compliance - CIS Controls",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:10.457148",
+      "response_data": null
+    },
+    {
+      "test_name": "Compliance - Status",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:10.460537",
+      "response_data": null
+    },
+    {
+      "test_name": "Task Management - List Tasks",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:10.969153",
+      "response_data": null
+    },
+    {
+      "test_name": "Evidence Management - List Evidence",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:11.480177",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - Main Dashboard",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:11.988713",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - Metrics",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:11.990852",
+      "response_data": null
+    },
+    {
+      "test_name": "Dashboard - Reports",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:11.993124",
+      "response_data": null
+    },
+    {
+      "test_name": "AI Integration - Providers",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:12.502154",
+      "response_data": null
+    },
+    {
+      "test_name": "AI Integration - Analysis",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:12.505172",
+      "response_data": null
+    },
+    {
+      "test_name": "External Integrations - OpenVAS",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:13.014529",
+      "response_data": null
+    },
+    {
+      "test_name": "External Integrations - OpenCTI",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-08-02T23:01:13.016832",
+      "response_data": null
+    },
+    {
+      "test_name": "API Documentation - Swagger UI",
+      "status": "PASS",
+      "details": "Swagger UI accessible",
+      "timestamp": "2025-08-02T23:01:13.529126",
+      "response_data": null
+    },
+    {
+      "test_name": "API Documentation - OpenAPI JSON",
+      "status": "PASS",
+      "details": "OpenAPI spec accessible",
+      "timestamp": "2025-08-02T23:01:13.645583",
+      "response_data": null
+    },
+    {
+      "test_name": "Frontend - Main Page",
+      "status": "PASS",
+      "details": "Frontend application accessible",
+      "timestamp": "2025-08-02T23:01:14.157307",
+      "response_data": null
+    },
+    {
+      "test_name": "Frontend - Branding",
+      "status": "FAIL",
+      "details": "Aegis branding not found",
+      "timestamp": "2025-08-02T23:01:14.157530",
+      "response_data": null
+    }
+  ],
+  "test_data": {}
+}

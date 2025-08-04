@@ -100,13 +100,16 @@ export const refreshUserData = async (): Promise<User | null> => {
 export const hasPermission = (user: User | null, permission: string): boolean => {
   if (!user) return false;
   
+  // Handle permission format: "module_action" (e.g., "assets_read")
+  const [module, action] = permission.split('_');
+  if (!module || !action) return false;
+  
   // Check if user has the required permission
   if (user.roles && user.roles.length > 0) {
     return user.roles.some(role => {
-      if (role.permissions) {
-        return Object.values(role.permissions).some((perms: any) => 
-          Array.isArray(perms) && perms.includes(permission)
-        );
+      if (role.permissions && role.permissions[module]) {
+        const modulePermissions = role.permissions[module];
+        return Array.isArray(modulePermissions) && modulePermissions.includes(action);
       }
       return false;
     });

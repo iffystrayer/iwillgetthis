@@ -1,513 +1,208 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { ApiResponse, AuthTokens, QueryParams } from '@/types';
-import { mockApiClient } from './mockApi';
 
-// Check if we should use mock API
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true' || !import.meta.env.VITE_API_URL;
-
-// API availability tracker
-let apiAvailable = !USE_MOCK_API;
-
-// Create axios instance
+// Create axios instance - ALWAYS use real backend
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:30641/api/v1',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Set up request interceptor for the main API instance
-if (!USE_MOCK_API) {
-  api.interceptors.request.use(
-    (config) => {
-      const token = Cookies.get('access_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
+// Request interceptor - add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  );
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-  // Response interceptor for error handling and token refresh
-  api.interceptors.response.use(
-    (response: AxiosResponse) => {
-      return response;
-    },
-    async (error: AxiosError) => {
-      const originalRequest = error.config;
-      
-      if (error.response?.status === 401 && originalRequest) {
-        // Try to refresh token
-        const refreshToken = Cookies.get('refresh_token');
-        if (refreshToken) {
-          try {
-            const response = await axios.post(
-              `${api.defaults.baseURL}/auth/refresh`,
-              { refresh_token: refreshToken }
-            );
-            
-            const tokens: AuthTokens = response.data;
-            Cookies.set('access_token', tokens.access_token, { expires: 1 });
-            Cookies.set('refresh_token', tokens.refresh_token, { expires: 7 });
-            
-            // Retry original request with new token
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`;
-            }
-            return api(originalRequest);
-          } catch (refreshError) {
-            // Refresh failed, redirect to login
-            Cookies.remove('access_token');
-            Cookies.remove('refresh_token');
-            window.location.href = '/login';
-            return Promise.reject(refreshError);
+// Response interceptor for error handling and token refresh
+api.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response;
+  },
+  async (error: AxiosError) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && originalRequest) {
+      // Try to refresh token
+      const refreshToken = Cookies.get('refresh_token');
+      if (refreshToken) {
+        try {
+          const response = await axios.post(
+            `${api.defaults.baseURL}/auth/refresh`,
+            { refresh_token: refreshToken }
+          );
+          
+          const tokens: AuthTokens = response.data;
+          Cookies.set('access_token', tokens.access_token, { expires: 1 });
+          Cookies.set('refresh_token', tokens.refresh_token, { expires: 7 });
+          
+          // Retry original request with new token
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`;
           }
-        } else {
-          // No refresh token, redirect to login
+          return api(originalRequest);
+        } catch (refreshError) {
+          // Refresh failed, redirect to login
+          Cookies.remove('access_token');
+          Cookies.remove('refresh_token');
           window.location.href = '/login';
+          return Promise.reject(refreshError);
         }
+      } else {
+        // No refresh token, redirect to login
+        Cookies.remove('access_token');
+        Cookies.remove('refresh_token');
+        window.location.href = '/login';
       }
-      
-      return Promise.reject(error);
     }
-  );
-}
+    
+    return Promise.reject(error);
+  }
+);
 
-// Generic API functions with fallback to mock
-export const apiClient = {
-  get: async <T>(url: string, params?: QueryParams): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.get<T>(url, params);
-    }
-    
-    try {
-      const response = await api.get(url, { params });
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.get<T>(url, params);
-    }
-  },
-  
-  post: async <T>(url: string, data?: any): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.post<T>(url, data);
-    }
-    
-    try {
-      const response = await api.post(url, data);
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.post<T>(url, data);
-    }
-  },
-  
-  put: async <T>(url: string, data?: any): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.put<T>(url, data);
-    }
-    
-    try {
-      const response = await api.put(url, data);
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.put<T>(url, data);
-    }
-  },
-  
-  patch: async <T>(url: string, data?: any): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.patch<T>(url, data);
-    }
-    
-    try {
-      const response = await api.patch(url, data);
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.patch<T>(url, data);
-    }
-  },
-  
-  delete: async <T>(url: string): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.delete<T>(url);
-    }
-    
-    try {
-      const response = await api.delete(url);
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.delete<T>(url);
-    }
-  },
-  
-  upload: async <T>(url: string, formData: FormData): Promise<T> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.upload<T>(url, formData);
-    }
-    
-    try {
-      const response = await api.post(url, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.warn('API request failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.upload<T>(url, formData);
-    }
-  },
+// Helper function for API calls
+const apiCall = async <T = any>(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  endpoint: string,
+  data?: any,
+  params?: QueryParams
+): Promise<T> => {
+  try {
+    const response = await api({
+      method,
+      url: endpoint,
+      data,
+      params,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`API ${method} ${endpoint} failed:`, error);
+    throw error;
+  }
 };
 
 // Authentication API
 export const authApi = {
-  login: async (email: string, password: string): Promise<AuthTokens> => {
-    if (USE_MOCK_API || !apiAvailable) {
-      return mockApiClient.post('/auth/login', { username: email, password });
-    }
-    
-    try {
-      const formData = new FormData();
-      formData.append('username', email);
-      formData.append('password', password);
-      
-      const response = await api.post('/auth/login', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.warn('Login API failed, falling back to mock:', error);
-      apiAvailable = false;
-      return mockApiClient.post('/auth/login', { username: email, password });
-    }
+  login: async (email: string, password: string) => {
+    return apiCall<{ access_token: string; refresh_token: string; user: any }>('POST', '/auth/login', {
+      username: email,
+      password,
+    });
   },
-  
-  register: async (userData: {
-    email: string;
-    username: string;
-    full_name: string;
-    password: string;
-  }) => {
-    return apiClient.post('/auth/register', userData);
+
+  register: async (userData: any) => {
+    return apiCall('POST', '/auth/register', userData);
   },
-  
-  getCurrentUser: () => {
-    return apiClient.get('/auth/me');
+
+  logout: async () => {
+    return apiCall('POST', '/auth/logout');
   },
-  
-  logout: () => {
-    return apiClient.post('/auth/logout');
+
+  getCurrentUser: async () => {
+    return apiCall('GET', '/auth/me');
   },
-  
-  refreshToken: (refreshToken: string) => {
-    return apiClient.post('/auth/refresh', { refresh_token: refreshToken });
+
+  refreshToken: async (refreshToken: string) => {
+    return apiCall<AuthTokens>('POST', '/auth/refresh', { refresh_token: refreshToken });
   },
 };
 
 // Assets API
 export const assetsApi = {
-  getAssets: (params?: QueryParams) => {
-    return apiClient.get('/assets/', params);
-  },
-  
-  getAsset: (id: number) => {
-    return apiClient.get(`/assets/${id}`);
-  },
-  
-  createAsset: (data: any) => {
-    return apiClient.post('/assets/', data);
-  },
-  
-  updateAsset: (id: number, data: any) => {
-    return apiClient.put(`/assets/${id}`, data);
-  },
-  
-  deleteAsset: (id: number) => {
-    return apiClient.delete(`/assets/${id}`);
-  },
-  
-  importAssets: (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return apiClient.upload('/assets/import', formData);
-  },
-  
-  getAssetCategories: () => {
-    return apiClient.get('/assets/categories/');
-  },
-  
-  getAssetsSummary: () => {
-    return apiClient.get('/assets/summary');
-  },
+  getAll: (params?: QueryParams) => apiCall('GET', '/assets', undefined, params),
+  getById: (id: string) => apiCall('GET', `/assets/${id}`),
+  create: (data: any) => apiCall('POST', '/assets', data),
+  update: (id: string, data: any) => apiCall('PUT', `/assets/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/assets/${id}`),
 };
 
 // Risks API
 export const risksApi = {
-  getRisks: (params?: QueryParams) => {
-    return apiClient.get('/risks/', params);
-  },
-  
-  getRisk: (id: number) => {
-    return apiClient.get(`/risks/${id}`);
-  },
-  
-  createRisk: (data: any) => {
-    return apiClient.post('/risks/', data);
-  },
-  
-  updateRisk: (id: number, data: any) => {
-    return apiClient.put(`/risks/${id}`, data);
-  },
-  
-  deleteRisk: (id: number) => {
-    return apiClient.delete(`/risks/${id}`);
-  },
-  
-  getRiskSummary: () => {
-    return apiClient.get('/risks/summary');
-  },
-  
-  getRiskMatrices: () => {
-    return apiClient.get('/risks/matrices/');
-  },
+  getAll: (params?: QueryParams) => apiCall('GET', '/risks', undefined, params),
+  getById: (id: string) => apiCall('GET', `/risks/${id}`),
+  create: (data: any) => apiCall('POST', '/risks', data),
+  update: (id: string, data: any) => apiCall('PUT', `/risks/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/risks/${id}`),
 };
 
 // Tasks API
 export const tasksApi = {
-  getTasks: (params?: QueryParams) => {
-    return apiClient.get('/tasks/', params);
-  },
-  
-  getMyTasks: (status?: string) => {
-    return apiClient.get('/tasks/my-tasks', { status });
-  },
-  
-  getTask: (id: number) => {
-    return apiClient.get(`/tasks/${id}`);
-  },
-  
-  createTask: (data: any) => {
-    return apiClient.post('/tasks/', data);
-  },
-  
-  updateTask: (id: number, data: any) => {
-    return apiClient.put(`/tasks/${id}`, data);
-  },
-  
-  approveTask: (id: number, comments?: string) => {
-    return apiClient.post(`/tasks/${id}/approve`, { approval_comments: comments });
-  },
-  
-  rejectTask: (id: number, comments: string) => {
-    return apiClient.post(`/tasks/${id}/reject`, { rejection_comments: comments });
-  },
-  
-  getTasksSummary: () => {
-    return apiClient.get('/tasks/summary');
-  },
+  getAll: (params?: QueryParams) => apiCall('GET', '/tasks', undefined, params),
+  getById: (id: string) => apiCall('GET', `/tasks/${id}`),
+  create: (data: any) => apiCall('POST', '/tasks', data),
+  update: (id: string, data: any) => apiCall('PUT', `/tasks/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/tasks/${id}`),
 };
 
 // Assessments API
 export const assessmentsApi = {
-  getAssessments: (params?: QueryParams) => {
-    return apiClient.get('/assessments/', params);
-  },
-  
-  getAssessment: (id: number) => {
-    return apiClient.get(`/assessments/${id}`);
-  },
-  
-  createAssessment: (data: any) => {
-    return apiClient.post('/assessments/', data);
-  },
-  
-  updateAssessment: (id: number, data: any) => {
-    return apiClient.put(`/assessments/${id}`, data);
-  },
-  
-  getAssessmentControls: (assessmentId: number) => {
-    return apiClient.get(`/assessments/${assessmentId}/controls`);
-  },
-  
-  updateAssessmentControl: (assessmentId: number, controlId: number, data: any) => {
-    return apiClient.put(`/assessments/${assessmentId}/controls/${controlId}`, data);
-  },
-  
-  getAssessmentSummary: (assessmentId: number) => {
-    return apiClient.get(`/assessments/${assessmentId}/summary`);
-  },
-};
-
-// Frameworks API
-export const frameworksApi = {
-  getFrameworks: (params?: QueryParams) => {
-    return apiClient.get('/frameworks/', params);
-  },
-  
-  getFramework: (id: number) => {
-    return apiClient.get(`/frameworks/${id}`);
-  },
-  
-  getFrameworkControls: (frameworkId: number, params?: QueryParams) => {
-    return apiClient.get(`/frameworks/${frameworkId}/controls`, params);
-  },
-};
-
-// Dashboard API
-export const dashboardApi = {
-  getOverview: () => {
-    return apiClient.get('/dashboards/overview');
-  },
-  
-  getCisoCockpit: () => {
-    return apiClient.get('/dashboards/ciso-cockpit');
-  },
-  
-  getAnalystWorkbench: () => {
-    return apiClient.get('/dashboards/analyst-workbench');
-  },
-  
-  getSystemOwnerInbox: () => {
-    return apiClient.get('/dashboards/system-owner-inbox');
-  },
+  getAll: (params?: QueryParams) => apiCall('GET', '/assessments', undefined, params),
+  getById: (id: string) => apiCall('GET', `/assessments/${id}`),
+  create: (data: any) => apiCall('POST', '/assessments', data),
+  update: (id: string, data: any) => apiCall('PUT', `/assessments/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/assessments/${id}`),
 };
 
 // Evidence API
 export const evidenceApi = {
-  getEvidence: (params?: QueryParams) => {
-    return apiClient.get('/evidence/', params);
-  },
-  
-  getEvidenceItem: (id: number) => {
-    return apiClient.get(`/evidence/${id}`);
-  },
-  
-  uploadEvidence: (file: File, metadata: any) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    Object.entries(metadata).forEach(([key, value]) => {
-      formData.append(key, value as string);
-    });
-    return apiClient.upload('/evidence/upload', formData);
-  },
-  
-  updateEvidence: (id: number, data: any) => {
-    return apiClient.put(`/evidence/${id}`, data);
-  },
-  
-  reviewEvidence: (id: number, approved: boolean, comments?: string) => {
-    return apiClient.post(`/evidence/${id}/review`, { approved, comments });
-  },
+  getAll: (params?: QueryParams) => apiCall('GET', '/evidence', undefined, params),
+  getById: (id: string) => apiCall('GET', `/evidence/${id}`),
+  create: (data: any) => apiCall('POST', '/evidence', data),
+  update: (id: string, data: any) => apiCall('PUT', `/evidence/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/evidence/${id}`),
 };
 
-// AI Services API
+// Reports API
+export const reportsApi = {
+  getAll: (params?: QueryParams) => apiCall('GET', '/reports', undefined, params),
+  getById: (id: string) => apiCall('GET', `/reports/${id}`),
+  generate: (data: any) => apiCall('POST', '/reports/generate', data),
+};
+
+// Dashboard API
+export const dashboardApi = {
+  getOverview: () => apiCall('GET', '/dashboards/overview'),
+  getMetrics: () => apiCall('GET', '/dashboards/metrics'),
+  getRecentActivity: () => apiCall('GET', '/dashboards/recent-activity'),
+  getCisoCockpit: () => apiCall('GET', '/dashboards/ciso-cockpit'),
+  getAnalystWorkbench: () => apiCall('GET', '/dashboards/analyst-workbench'),
+};
+
+// Users API
+export const usersApi = {
+  getAll: (params?: QueryParams) => apiCall('GET', '/users', undefined, params),
+  getById: (id: string) => apiCall('GET', `/users/${id}`),
+  create: (data: any) => apiCall('POST', '/users', data),
+  update: (id: string, data: any) => apiCall('PUT', `/users/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/users/${id}`),
+};
+
+// AI API
 export const aiApi = {
-  analyzeEvidence: (evidenceId: number) => {
-    return apiClient.post(`/ai/analyze-evidence`, { evidence_id: evidenceId });
-  },
-  
-  generateNarrative: (assessmentControlId: number) => {
-    return apiClient.post(`/ai/generate-narrative`, { assessment_control_id: assessmentControlId });
-  },
-  
-  generateRiskStatement: (riskId: number) => {
-    return apiClient.post(`/ai/generate-risk-statement`, { risk_id: riskId });
-  },
-  
-  suggestRemediation: (taskId: number) => {
-    return apiClient.post(`/ai/suggest-remediation`, { task_id: taskId });
-  },
-  
-  generateExecutiveSummary: () => {
-    return apiClient.post('/ai/generate-executive-summary');
-  },
-  
-  getServiceStatus: () => {
-    return apiClient.get('/ai/service-status');
-  },
-  
-  // AI Provider Management
-  getProvidersStatus: () => {
-    return apiClient.get('/ai/providers/status');
-  },
-  
-  testProvider: (providerName: string, testMessage: string) => {
-    return apiClient.post('/ai/providers/test', { provider_name: providerName, test_message: testMessage });
-  },
-  
-  getRecommendedProvider: (taskType: string) => {
-    return apiClient.get(`/ai/providers/recommended?task_type=${taskType}`);
-  },
-  
-  getUsageSummary: () => {
-    return apiClient.get('/ai/usage/summary');
-  },
-  
-  // Enhanced AI Functions
-  analyzeEvidenceEnhanced: (data: any) => {
-    return apiClient.post('/ai/analyze-evidence', data);
-  },
-  
-  generateNarrativeEnhanced: (data: any) => {
-    return apiClient.post('/ai/generate-narrative', data);
-  },
-  
-  generateRisk: (data: any) => {
-    return apiClient.post('/ai/generate-risk', data);
-  },
-  
-  generateRemediation: (data: any) => {
-    return apiClient.post('/ai/generate-remediation', data);
-  },
+  getProviders: () => apiCall('GET', '/ai/providers'),
+  getProviderStatus: (providerId: string) => apiCall('GET', `/ai/providers/${providerId}/status`),
+  getProvidersStatus: () => apiCall('GET', '/ai/providers/status'),
+  getRecommendedProvider: (taskType?: string) => apiCall('GET', '/ai/providers/recommended', undefined, { task_type: taskType }),
+  analyzeEvidence: (data: any) => apiCall('POST', '/ai/analyze-evidence', data),
+  analyzeEvidenceEnhanced: (data: any) => apiCall('POST', '/ai/analyze-evidence-enhanced', data),
+  generateRisk: (data: any) => apiCall('POST', '/ai/generate-risk', data),
+  generateRemediation: (data: any) => apiCall('POST', '/ai/generate-remediation', data),
+  generateNarrativeEnhanced: (data: any) => apiCall('POST', '/ai/generate-narrative-enhanced', data),
+  testProvider: (providerId: string, message?: string) => apiCall('POST', `/ai/providers/${providerId}/test`, { message }),
+  getAnalytics: () => apiCall('GET', '/ai/analytics'),
+  getUsageSummary: () => apiCall('GET', '/ai/usage-summary'),
 };
 
-// Integrations API
-export const integrationsApi = {
-  getIntegrations: () => {
-    return apiClient.get('/integrations/');
-  },
-  
-  configureOpenVas: (config: any) => {
-    return apiClient.post('/integrations/openvas/configure', config);
-  },
-  
-  configureOpenCti: (config: any) => {
-    return apiClient.post('/integrations/opencti/configure', config);
-  },
-  
-  testConnection: (integrationId: number) => {
-    return apiClient.post(`/integrations/test-connection/${integrationId}`);
-  },
-  
-  syncData: (integrationId: number) => {
-    return apiClient.post(`/integrations/sync/${integrationId}`);
-  },
-  
-  getVulnerabilities: (params?: QueryParams) => {
-    return apiClient.get('/integrations/vulnerabilities', params);
-  },
-  
-  getThreatIntelligence: (params?: QueryParams) => {
-    return apiClient.get('/integrations/threat-intelligence', params);
-  },
-};
-
-export default apiClient;
+// Default export
+export default api;
