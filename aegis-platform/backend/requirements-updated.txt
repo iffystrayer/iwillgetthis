@@ -1,0 +1,115 @@
+# Core FastAPI and Web Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+starlette>=0.40.0
+
+# Database and ORM
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+
+# Authentication and Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+cryptography>=41.0.0
+
+# Data Validation and Serialization
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+email-validator>=2.1.0
+
+# File Handling and Multipart
+python-multipart>=0.0.6
+aiofiles>=23.2.1
+
+# HTTP Client and Requests
+httpx>=0.25.2
+requests>=2.31.0
+
+# Configuration and Environment
+python-dotenv>=1.0.0
+
+# Testing Framework
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Data Processing and Analytics
+pandas>=2.2.0
+numpy>=1.24.0
+
+# Excel and Office Documents
+openpyxl>=3.1.2
+
+# PDF Generation and Reports
+reportlab>=4.0.7
+weasyprint>=60.2
+
+# Template Engine
+jinja2>=3.1.2
+
+# Image Processing
+pillow>=10.1.0
+
+# Markup and Text Processing
+markdown>=3.5.1
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+
+# Caching and Background Tasks
+redis>=4.2.0,<5.0.0
+celery>=5.3.4
+
+# API Rate Limiting and Caching
+fastapi-limiter>=0.1.5
+fastapi-cache2>=0.2.1
+
+# CORS Support
+fastapi-cors>=0.0.6
+
+# Async HTTP and SMTP
+aiohttp>=3.9.0
+aiosmtplib>=3.0.1
+
+# Logging and Monitoring
+structlog>=23.2.0
+
+# Task Scheduling
+apscheduler>=3.10.4
+
+# Date and Time Utilities
+python-dateutil>=2.8.2
+
+# File Type Detection
+python-magic>=0.4.27
+
+# AI and Machine Learning (Optional - for advanced features)
+openai>=1.0.0
+google-generativeai>=0.7.0
+google-cloud-aiplatform>=1.38.0
+litellm>=1.35.0
+
+# Development and Testing Dependencies
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
+pre-commit>=3.4.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.2.0
+
+# Environment and Deployment
+gunicorn>=21.2.0
+docker>=6.1.0
+
+# Security Scanning and Vulnerability Management
+bandit>=1.7.5
+safety>=2.4.0
+
+# Performance Monitoring
+prometheus-client>=0.17.0
+
+# Additional Utilities
+click>=8.1.0
+typer>=0.9.0
+rich>=13.5.0
