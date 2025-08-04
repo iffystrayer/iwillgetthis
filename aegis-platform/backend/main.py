@@ -10,10 +10,13 @@ import logging
 from config import settings
 from database import engine, Base
 from enhanced_ai_service import enhanced_ai_service
+
+# Import models to ensure they are registered with Base metadata
+from models import analytics
 from routers import (
     auth, users, assets, frameworks, assessments, 
     risks, tasks, evidence, integrations, reports, 
-    dashboards, ai_services
+    dashboards, ai_services, analytics
 )
 from health import router as health_router
 
@@ -111,6 +114,7 @@ app.include_router(integrations.router, prefix="/api/v1/integrations", tags=["In
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(dashboards.router, prefix="/api/v1/dashboards", tags=["Dashboards"])
 app.include_router(ai_services.router, prefix="/api/v1/ai", tags=["AI Services"])
+app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 
 
 @app.get("/", tags=["Root"])
@@ -126,6 +130,9 @@ async def root():
             "Task Management & POA&M",
             "Evidence Management",
             "AI-Powered Analytics",
+            "Advanced Analytics & Reporting Engine",
+            "Predictive Risk Analytics",
+            "Executive Dashboards",
             "External Integrations (OpenVAS, OpenCTI)",
             "Automated Reporting"
         ],
@@ -152,7 +159,8 @@ async def api_info():
             "frameworks": "/api/v1/frameworks",
             "dashboards": "/api/v1/dashboards",
             "ai_services": "/api/v1/ai",
-            "integrations": "/api/v1/integrations"
+            "integrations": "/api/v1/integrations",
+            "analytics": "/api/v1/analytics"
         }
     }
 

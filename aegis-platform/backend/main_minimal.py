@@ -5964,6 +5964,3378 @@ async def get_incident_analytics_dashboard():
         }
     }
 
+
+# ==========================================
+# POST-INCIDENT ANALYSIS & LESSONS LEARNED
+# ==========================================
+
+@app.get("/api/v1/lessons-learned/comprehensive")
+async def get_lessons_learned_comprehensive(
+    category: str = None,
+    implementation_status: str = None,
+    severity_prevented: str = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """Get comprehensive lessons learned with detailed filtering"""
+    # Mock comprehensive lessons learned data
+    lessons = [
+        {
+            "id": 1,
+            "lesson_title": "Multi-Factor Authentication Bypass Prevention",
+            "lesson_summary": "Implementing device trust verification prevents sophisticated MFA bypass attacks",
+            "lesson_category": "authentication",
+            "what_happened": "Attackers bypassed MFA using session hijacking techniques on compromised corporate devices",
+            "why_it_happened": "Lack of device trust verification allowed attackers to leverage existing authenticated sessions",
+            "what_we_learned": "Device trust and session integrity verification are critical additional layers beyond standard MFA",
+            "severity_prevented": "high",
+            "implementation_status": "implemented",
+            "cost_savings_estimated": 2500000,
+            "effectiveness_verified": True,
+            "confidence_level": "high",
+            "keywords": ["mfa", "authentication", "device_trust", "session_security"],
+            "identified_at": "2024-03-15T10:30:00Z",
+            "implementation_date": "2024-05-20T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "lesson_title": "Cloud Storage Misconfiguration Detection",
+            "lesson_summary": "Automated cloud security posture monitoring prevents data exposure incidents",
+            "lesson_category": "cloud_security",
+            "what_happened": "Misconfigured S3 bucket exposed sensitive customer data due to overly permissive access policies",
+            "why_it_happened": "Manual cloud configuration process lacked automated security validation",
+            "what_we_learned": "Continuous cloud security posture management with automated remediation is essential",
+            "severity_prevented": "critical",
+            "implementation_status": "in_progress",
+            "cost_savings_estimated": 5000000,
+            "effectiveness_verified": False,
+            "confidence_level": "medium",
+            "keywords": ["cloud", "s3", "misconfiguration", "cspm", "automation"],
+            "identified_at": "2024-02-20T14:15:00Z",
+            "implementation_date": None
+        },
+        {
+            "id": 3,
+            "lesson_title": "Phishing Email Detection Enhancement",
+            "lesson_summary": "Advanced threat protection with behavioral analysis significantly reduces successful phishing attacks",
+            "lesson_category": "email_security",
+            "what_happened": "Sophisticated phishing campaign bypassed traditional email security filters",
+            "why_it_happened": "Email security relied primarily on signature-based detection without behavioral analysis",
+            "what_we_learned": "Behavioral analysis and user activity monitoring are crucial for detecting advanced phishing",
+            "severity_prevented": "medium",
+            "implementation_status": "verified",
+            "cost_savings_estimated": 800000,
+            "effectiveness_verified": True,
+            "recurrence_prevented": True,
+            "confidence_level": "high",
+            "keywords": ["phishing", "email", "behavioral_analysis", "atp"],
+            "identified_at": "2024-01-10T09:45:00Z",
+            "implementation_date": "2024-03-01T00:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_lessons = lessons
+    if category:
+        filtered_lessons = [l for l in filtered_lessons if l["lesson_category"] == category]
+    if implementation_status:
+        filtered_lessons = [l for l in filtered_lessons if l["implementation_status"] == implementation_status]
+    if severity_prevented:
+        filtered_lessons = [l for l in filtered_lessons if l["severity_prevented"] == severity_prevented]
+    
+    # Apply pagination
+    total = len(filtered_lessons)
+    paginated_lessons = filtered_lessons[offset:offset + limit]
+    
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": paginated_lessons,
+        "categories": ["authentication", "cloud_security", "email_security", "network_security", "data_protection"],
+        "implementation_statuses": ["identified", "planned", "in_progress", "implemented", "verified"],
+        "severity_levels": ["low", "medium", "high", "critical"]
+    }
+
+
+@app.post("/api/v1/lessons-learned")
+async def create_lesson_learned(lesson_data: dict):
+    """Create a new lesson learned"""
+    # Mock lesson learned creation
+    new_lesson = {
+        "id": 99,
+        "lesson_title": lesson_data.get("lesson_title"),
+        "lesson_summary": lesson_data.get("lesson_summary"),
+        "lesson_category": lesson_data.get("lesson_category"),
+        "implementation_status": "identified",
+        "confidence_level": lesson_data.get("confidence_level", "medium"),
+        "identified_at": "2024-08-03T16:30:00Z",
+        "created_at": "2024-08-03T16:30:00Z"
+    }
+    
+    return {
+        "success": True,
+        "lesson": new_lesson,
+        "message": "Lesson learned created successfully"
+    }
+
+
+@app.put("/api/v1/lessons-learned/{lesson_id}")
+async def update_lesson_learned(lesson_id: int, lesson_data: dict):
+    """Update an existing lesson learned"""
+    # Mock lesson learned update
+    return {
+        "success": True,
+        "lesson_id": lesson_id,
+        "updated_fields": list(lesson_data.keys()),
+        "message": "Lesson learned updated successfully"
+    }
+
+
+@app.post("/api/v1/lessons-learned/{lesson_id}/verify")
+async def verify_lesson_effectiveness(lesson_id: int, verification_data: dict):
+    """Verify the effectiveness of a lesson learned implementation"""
+    return {
+        "success": True,
+        "lesson_id": lesson_id,
+        "verification": {
+            "effectiveness_verified": True,
+            "verification_date": "2024-08-03T16:30:00Z",
+            "verification_method": verification_data.get("verification_method"),
+            "recurrence_prevented": verification_data.get("recurrence_prevented", True),
+            "actual_cost_savings": verification_data.get("actual_cost_savings")
+        },
+        "message": "Lesson effectiveness verified successfully"
+    }
+
+
+@app.get("/api/v1/action-items")
+async def get_action_items(
+    status: str = None,
+    priority: str = None,
+    assigned_to: int = None,
+    due_soon: bool = None,
+    overdue: bool = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """Get action items with comprehensive filtering"""
+    # Mock action items data
+    action_items = [
+        {
+            "id": 1,
+            "title": "Implement Zero Trust Network Architecture",
+            "description": "Deploy comprehensive zero trust network segmentation to prevent lateral movement",
+            "action_type": "technical_control",
+            "priority": "high",
+            "status": "in_progress",
+            "assigned_to": 5,
+            "assigned_by": 1,
+            "due_date": "2024-09-15T00:00:00Z",
+            "progress_percentage": 65,
+            "estimated_effort_hours": 160,
+            "actual_effort_hours": 104,
+            "source": "post_incident_review",
+            "incident_id": 12,
+            "created_at": "2024-06-01T10:00:00Z"
+        },
+        {
+            "id": 2,
+            "title": "Enhanced Security Awareness Training Program",
+            "description": "Develop and deploy advanced phishing simulation and security awareness training",
+            "action_type": "training",
+            "priority": "medium",
+            "status": "completed",
+            "assigned_to": 8,
+            "assigned_by": 2,
+            "due_date": "2024-07-30T00:00:00Z",
+            "progress_percentage": 100,
+            "estimated_effort_hours": 80,
+            "actual_effort_hours": 95,
+            "effectiveness_rating": 4,
+            "completed_at": "2024-07-25T16:30:00Z",
+            "source": "lesson_learned",
+            "lesson_learned_id": 3,
+            "created_at": "2024-05-15T14:20:00Z"
+        },
+        {
+            "id": 3,
+            "title": "Cloud Security Posture Management Implementation",
+            "description": "Deploy automated CSPM solution for continuous cloud security monitoring",
+            "action_type": "technical_control",
+            "priority": "critical",
+            "status": "open",
+            "assigned_to": 3,
+            "assigned_by": 1,
+            "due_date": "2024-08-20T00:00:00Z",
+            "progress_percentage": 0,
+            "estimated_effort_hours": 120,
+            "source": "post_incident_review",
+            "post_incident_review_id": 5,
+            "created_at": "2024-07-01T09:15:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_items = action_items
+    if status:
+        filtered_items = [item for item in filtered_items if item["status"] == status]
+    if priority:
+        filtered_items = [item for item in filtered_items if item["priority"] == priority]
+    if assigned_to:
+        filtered_items = [item for item in filtered_items if item["assigned_to"] == assigned_to]
+    
+    # Apply date filters
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    if due_soon:
+        soon_date = now + timedelta(days=7)
+        filtered_items = [item for item in filtered_items 
+                         if datetime.fromisoformat(item["due_date"].replace('Z', '+00:00')) <= soon_date]
+    if overdue:
+        filtered_items = [item for item in filtered_items 
+                         if datetime.fromisoformat(item["due_date"].replace('Z', '+00:00')) < now]
+    
+    # Apply pagination
+    total = len(filtered_items)
+    paginated_items = filtered_items[offset:offset + limit]
+    
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": paginated_items,
+        "summary": {
+            "by_status": {
+                "open": len([item for item in action_items if item["status"] == "open"]),
+                "in_progress": len([item for item in action_items if item["status"] == "in_progress"]),
+                "completed": len([item for item in action_items if item["status"] == "completed"])
+            },
+            "by_priority": {
+                "critical": len([item for item in action_items if item["priority"] == "critical"]),
+                "high": len([item for item in action_items if item["priority"] == "high"]),
+                "medium": len([item for item in action_items if item["priority"] == "medium"]),
+                "low": len([item for item in action_items if item["priority"] == "low"])
+            },
+            "overdue_count": len([item for item in action_items 
+                                 if datetime.fromisoformat(item["due_date"].replace('Z', '+00:00')) < now]),
+            "due_soon_count": len([item for item in action_items 
+                                  if datetime.fromisoformat(item["due_date"].replace('Z', '+00:00')) <= now + timedelta(days=7)])
+        }
+    }
+
+
+@app.post("/api/v1/action-items")
+async def create_action_item(action_item_data: dict):
+    """Create a new action item"""
+    # Mock action item creation
+    new_item = {
+        "id": 99,
+        "title": action_item_data.get("title"),
+        "description": action_item_data.get("description"),
+        "priority": action_item_data.get("priority", "medium"),
+        "status": "open",
+        "assigned_to": action_item_data.get("assigned_to"),
+        "assigned_by": action_item_data.get("assigned_by"),
+        "due_date": action_item_data.get("due_date"),
+        "progress_percentage": 0,
+        "created_at": "2024-08-03T16:30:00Z"
+    }
+    
+    return {
+        "success": True,
+        "action_item": new_item,
+        "message": "Action item created successfully"
+    }
+
+
+@app.put("/api/v1/action-items/{action_item_id}")
+async def update_action_item(action_item_id: int, update_data: dict):
+    """Update an existing action item"""
+    return {
+        "success": True,
+        "action_item_id": action_item_id,
+        "updated_fields": list(update_data.keys()),
+        "message": "Action item updated successfully"
+    }
+
+
+@app.post("/api/v1/action-items/{action_item_id}/complete")
+async def complete_action_item(action_item_id: int, completion_data: dict):
+    """Mark an action item as completed"""
+    return {
+        "success": True,
+        "action_item_id": action_item_id,
+        "completion": {
+            "status": "completed",
+            "completed_at": "2024-08-03T16:30:00Z",
+            "actual_effort_hours": completion_data.get("actual_effort_hours"),
+            "effectiveness_rating": completion_data.get("effectiveness_rating"),
+            "completion_notes": completion_data.get("completion_notes")
+        },
+        "message": "Action item marked as completed"
+    }
+
+
+@app.get("/api/v1/knowledge-articles")
+async def get_knowledge_articles(
+    category: str = None,
+    article_type: str = None,
+    published: bool = None,
+    search: str = None,
+    limit: int = 20,
+    offset: int = 0
+):
+    """Get knowledge base articles with filtering and search"""
+    # Mock knowledge articles data
+    articles = [
+        {
+            "id": 1,
+            "title": "Incident Response Playbook: Data Breach",
+            "article_type": "playbook",
+            "category": "incident_response",
+            "summary": "Comprehensive step-by-step guide for responding to data breach incidents",
+            "published": True,
+            "author": {"id": 1, "name": "Security Team"},
+            "view_count": 245,
+            "usefulness_rating": 4.7,
+            "created_at": "2024-01-15T10:00:00Z",
+            "last_reviewed": "2024-06-01T14:30:00Z",
+            "tags": ["data_breach", "incident_response", "playbook", "gdpr"]
+        },
+        {
+            "id": 2,
+            "title": "Multi-Factor Authentication Implementation Guide",
+            "article_type": "guide",
+            "category": "authentication",
+            "summary": "Best practices for implementing and managing multi-factor authentication",
+            "published": True,
+            "author": {"id": 3, "name": "Identity Team"},
+            "view_count": 189,
+            "usefulness_rating": 4.5,
+            "created_at": "2024-02-20T11:15:00Z",
+            "last_reviewed": "2024-07-15T09:45:00Z",
+            "tags": ["mfa", "authentication", "identity", "security_controls"]
+        },
+        {
+            "id": 3,
+            "title": "Cloud Security Configuration Checklist",
+            "article_type": "checklist",
+            "category": "cloud_security",
+            "summary": "Essential security configurations for major cloud service providers",
+            "published": False,
+            "author": {"id": 5, "name": "Cloud Team"},
+            "view_count": 67,
+            "usefulness_rating": 4.2,
+            "created_at": "2024-03-10T15:30:00Z",
+            "last_reviewed": None,
+            "tags": ["cloud", "aws", "azure", "gcp", "configuration"]
+        }
+    ]
+    
+    # Apply filters
+    filtered_articles = articles
+    if category:
+        filtered_articles = [a for a in filtered_articles if a["category"] == category]
+    if article_type:
+        filtered_articles = [a for a in filtered_articles if a["article_type"] == article_type]
+    if published is not None:
+        filtered_articles = [a for a in filtered_articles if a["published"] == published]
+    if search:
+        search_lower = search.lower()
+        filtered_articles = [a for a in filtered_articles 
+                           if search_lower in a["title"].lower() or 
+                           search_lower in a["summary"].lower() or
+                           any(search_lower in tag for tag in a["tags"])]
+    
+    # Apply pagination
+    total = len(filtered_articles)
+    paginated_articles = filtered_articles[offset:offset + limit]
+    
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": paginated_articles,
+        "categories": ["incident_response", "authentication", "cloud_security", "network_security", "data_protection"],
+        "article_types": ["playbook", "guide", "checklist", "procedure", "reference"],
+        "facets": {
+            "categories": [
+                {"category": "incident_response", "count": 1},
+                {"category": "authentication", "count": 1},
+                {"category": "cloud_security", "count": 1}
+            ],
+            "article_types": [
+                {"type": "playbook", "count": 1},
+                {"type": "guide", "count": 1},
+                {"type": "checklist", "count": 1}
+            ]
+        }
+    }
+
+
+@app.post("/api/v1/knowledge-articles")
+async def create_knowledge_article(article_data: dict):
+    """Create a new knowledge base article"""
+    # Mock article creation
+    new_article = {
+        "id": 99,
+        "title": article_data.get("title"),
+        "article_type": article_data.get("article_type"),
+        "category": article_data.get("category"),
+        "summary": article_data.get("summary"),
+        "content": article_data.get("content"),
+        "published": False,
+        "author_id": article_data.get("author_id"),
+        "view_count": 0,
+        "created_at": "2024-08-03T16:30:00Z"
+    }
+    
+    return {
+        "success": True,
+        "article": new_article,
+        "message": "Knowledge article created successfully"
+    }
+
+
+@app.get("/api/v1/knowledge-articles/{article_id}")
+async def get_knowledge_article(article_id: int):
+    """Get a specific knowledge article with full content"""
+    # Mock article retrieval
+    article = {
+        "id": article_id,
+        "title": "Incident Response Playbook: Data Breach",
+        "article_type": "playbook",
+        "category": "incident_response",
+        "summary": "Comprehensive step-by-step guide for responding to data breach incidents",
+        "content": "# Data Breach Incident Response Playbook\n\n## Immediate Actions (0-1 hours)\n\n1. **Containment**\n   - Isolate affected systems\n   - Preserve evidence\n   - Document initial findings\n\n2. **Assessment**\n   - Determine scope of breach\n   - Identify compromised data\n   - Assess business impact\n\n## Detailed Response Procedures...",
+        "published": True,
+        "author": {"id": 1, "name": "Security Team", "email": "security@company.com"},
+        "view_count": 246,  # Incremented
+        "usefulness_rating": 4.7,
+        "created_at": "2024-01-15T10:00:00Z",
+        "updated_at": "2024-06-01T14:30:00Z",
+        "last_reviewed": "2024-06-01T14:30:00Z",
+        "tags": ["data_breach", "incident_response", "playbook", "gdpr"],
+        "related_articles": [2, 5, 8],
+        "prerequisites": ["Basic incident response training", "GDPR compliance knowledge"],
+        "target_audience": ["security_analysts", "incident_responders", "compliance_team"],
+        "version": "2.1"
+    }
+    
+    return article
+
+
+@app.put("/api/v1/knowledge-articles/{article_id}")
+async def update_knowledge_article(article_id: int, update_data: dict):
+    """Update an existing knowledge article"""
+    return {
+        "success": True,
+        "article_id": article_id,
+        "updated_fields": list(update_data.keys()),
+        "new_version": "2.2",
+        "message": "Knowledge article updated successfully"
+    }
+
+
+@app.post("/api/v1/knowledge-articles/{article_id}/publish")
+async def publish_knowledge_article(article_id: int):
+    """Publish a knowledge article"""
+    return {
+        "success": True,
+        "article_id": article_id,
+        "published_at": "2024-08-03T16:30:00Z",
+        "message": "Knowledge article published successfully"
+    }
+
+
+@app.post("/api/v1/knowledge-articles/search")
+async def search_knowledge_base(search_request: dict):
+    """Advanced search in knowledge base with faceted results"""
+    query = search_request.get("query", "")
+    categories = search_request.get("categories", [])
+    article_types = search_request.get("article_types", [])
+    
+    # Mock search results
+    results = [
+        {
+            "id": 1,
+            "title": "Incident Response Playbook: Data Breach",
+            "summary": "Comprehensive step-by-step guide for responding to data breach incidents",
+            "category": "incident_response",
+            "article_type": "playbook",
+            "relevance_score": 0.95,
+            "highlighted_snippets": [
+                "...comprehensive step-by-step guide for responding to <mark>data breach</mark> incidents...",
+                "...immediate containment procedures for <mark>data breach</mark> scenarios..."
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Data Classification and Handling Procedures",
+            "summary": "Guidelines for proper data classification and secure handling practices",
+            "category": "data_protection",
+            "article_type": "procedure",
+            "relevance_score": 0.87,
+            "highlighted_snippets": [
+                "...proper <mark>data</mark> classification methodology...",
+                "...secure handling of sensitive <mark>data</mark>..."
+            ]
+        }
+    ]
+    
+    return {
+        "total_results": len(results),
+        "query": query,
+        "results": results,
+        "search_suggestions": ["data protection", "breach notification", "incident containment"],
+        "related_searches": ["data breach response", "incident playbooks", "security procedures"],
+        "facets": {
+            "categories": [
+                {"name": "incident_response", "count": 1, "selected": "incident_response" in categories},
+                {"name": "data_protection", "count": 1, "selected": "data_protection" in categories}
+            ],
+            "article_types": [
+                {"name": "playbook", "count": 1, "selected": "playbook" in article_types},
+                {"name": "procedure", "count": 1, "selected": "procedure" in article_types}
+            ]
+        },
+        "search_metadata": {
+            "search_time_ms": 45,
+            "total_articles_indexed": 127,
+            "last_index_update": "2024-08-03T12:00:00Z"
+        }
+    }
+
+
+@app.get("/api/v1/trend-analyses")
+async def get_trend_analyses(
+    analysis_type: str = None,
+    time_period: str = None,
+    limit: int = 20,
+    offset: int = 0
+):
+    """Get trend analyses with filtering"""
+    # Mock trend analyses data
+    analyses = [
+        {
+            "id": 1,
+            "analysis_name": "Q2 2024 Security Incident Trends",
+            "analysis_type": "incident_trends",
+            "time_period_start": "2024-04-01T00:00:00Z",
+            "time_period_end": "2024-06-30T23:59:59Z",
+            "analyst": {"id": 2, "name": "Analytics Team"},
+            "key_trends": [
+                "23% increase in phishing attempts",
+                "Shift toward cloud-based attack vectors",
+                "Reduced mean time to detection by 18%"
+            ],
+            "confidence_level": "high",
+            "approved": True,
+            "analysis_date": "2024-07-15T10:00:00Z",
+            "created_at": "2024-07-10T14:30:00Z"
+        },
+        {
+            "id": 2,
+            "analysis_name": "Lessons Learned Effectiveness Review",
+            "analysis_type": "lesson_effectiveness",
+            "time_period_start": "2024-01-01T00:00:00Z",
+            "time_period_end": "2024-06-30T23:59:59Z",
+            "analyst": {"id": 3, "name": "Process Improvement Team"},
+            "key_trends": [
+                "76.9% implementation success rate for lessons learned",
+                "84.6% recurrence prevention rate",
+                "Technical controls show highest effectiveness"
+            ],
+            "confidence_level": "high",
+            "approved": True,
+            "analysis_date": "2024-07-20T15:00:00Z",
+            "created_at": "2024-07-15T09:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    filtered_analyses = analyses
+    if analysis_type:
+        filtered_analyses = [a for a in filtered_analyses if a["analysis_type"] == analysis_type]
+    
+    # Apply pagination
+    total = len(filtered_analyses)
+    paginated_analyses = filtered_analyses[offset:offset + limit]
+    
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": paginated_analyses,
+        "analysis_types": ["incident_trends", "lesson_effectiveness", "response_performance", "cost_analysis"]
+    }
+
+
+@app.post("/api/v1/trend-analyses")
+async def create_trend_analysis(analysis_data: dict):
+    """Create a new trend analysis"""
+    # Mock trend analysis creation
+    new_analysis = {
+        "id": 99,
+        "analysis_name": analysis_data.get("analysis_name"),
+        "analysis_type": analysis_data.get("analysis_type"),
+        "time_period_start": analysis_data.get("time_period_start"),
+        "time_period_end": analysis_data.get("time_period_end"),
+        "analyst_id": analysis_data.get("analyst_id"),
+        "confidence_level": "medium",
+        "approved": False,
+        "analysis_date": "2024-08-03T16:30:00Z",
+        "created_at": "2024-08-03T16:30:00Z"
+    }
+    
+    return {
+        "success": True,
+        "analysis": new_analysis,
+        "message": "Trend analysis created successfully"
+    }
+
+
+@app.get("/api/v1/trend-analyses/{analysis_id}")
+async def get_trend_analysis(analysis_id: int):
+    """Get detailed trend analysis"""
+    # Mock detailed trend analysis
+    analysis = {
+        "id": analysis_id,
+        "analysis_name": "Q2 2024 Security Incident Trends",
+        "analysis_type": "incident_trends",
+        "time_period_start": "2024-04-01T00:00:00Z",
+        "time_period_end": "2024-06-30T23:59:59Z",
+        "analyst": {"id": 2, "name": "Analytics Team"},
+        "methodology": "Statistical analysis of incident data with trend identification using time series analysis",
+        "key_trends": [
+            "23% increase in phishing attempts targeting remote workers",
+            "Shift toward cloud-based attack vectors (45% of incidents)",
+            "Reduced mean time to detection by 18% due to improved monitoring"
+        ],
+        "emerging_patterns": [
+            "Coordinated attacks during business hours",
+            "Increased targeting of SaaS applications",
+            "Supply chain attack attempts"
+        ],
+        "incident_volume_trend": {
+            "april": 28,
+            "may": 32,
+            "june": 34,
+            "trend": "increasing"
+        },
+        "severity_distribution_trend": {
+            "critical": {"q2": 8, "q1": 12, "change": -33.3},
+            "high": {"q2": 15, "q1": 18, "change": -16.7},
+            "medium": {"q2": 45, "q1": 38, "change": 18.4},
+            "low": {"q2": 26, "q1": 22, "change": 18.2}
+        },
+        "strategic_recommendations": [
+            "Enhance remote worker security training",
+            "Implement advanced cloud security monitoring",
+            "Develop supply chain security assessment program"
+        ],
+        "confidence_level": "high",
+        "limitations": "Analysis limited to detected incidents; may not capture all threats",
+        "business_impact": "Recommendations could reduce incident volume by estimated 25-30%",
+        "approved": True,
+        "approved_by": {"id": 1, "name": "CISO"},
+        "approved_at": "2024-07-16T11:00:00Z"
+    }
+    
+    return analysis
+
+
+@app.get("/api/v1/dashboards/post-incident-analytics")
+async def get_post_incident_analytics_dashboard():
+    """Comprehensive post-incident analytics dashboard"""
+    return {
+        "lessons_learned_summary": {
+            "total_lessons": 28,
+            "lessons_this_quarter": 8,
+            "implemented_lessons": 22,
+            "verified_effectiveness": 18,
+            "lessons_by_category": {
+                "authentication": 5,
+                "cloud_security": 6,
+                "email_security": 4,
+                "network_security": 7,
+                "data_protection": 6
+            },
+            "implementation_status_distribution": {
+                "identified": 3,
+                "planned": 2,
+                "in_progress": 5,
+                "implemented": 10,
+                "verified": 8
+            },
+            "total_cost_savings": 12500000,
+            "recurrence_prevention_rate": 84.6
+        },
+        "knowledge_base_summary": {
+            "total_articles": 127,
+            "published_articles": 98,
+            "articles_this_month": 12,
+            "pending_review": 15,
+            "articles_by_category": {
+                "incident_response": 25,
+                "security_procedures": 30,
+                "compliance": 18,
+                "technical_guides": 35,
+                "training_materials": 19
+            },
+            "most_viewed_articles": [
+                {"id": 1, "title": "Incident Response Playbook: Data Breach", "views": 246},
+                {"id": 2, "title": "Multi-Factor Authentication Implementation", "views": 189},
+                {"id": 3, "title": "Cloud Security Best Practices", "views": 167}
+            ],
+            "search_activity": {
+                "monthly_searches": 847,
+                "top_search_terms": ["incident response", "data breach", "mfa", "cloud security"],
+                "search_success_rate": 78.5
+            }
+        },
+        "action_items_summary": {
+            "total_active": 45,
+            "completed_this_quarter": 23,
+            "overdue": 3,
+            "due_this_week": 8,
+            "by_priority": {
+                "critical": {"total": 8, "completed": 6, "in_progress": 2},
+                "high": {"total": 15, "completed": 12, "in_progress": 3},
+                "medium": {"total": 18, "completed": 12, "in_progress": 6},
+                "low": {"total": 4, "completed": 2, "in_progress": 2}
+            },
+            "completion_rate_trend": {
+                "q1_2024": 72.5,
+                "q2_2024": 78.9,
+                "trend": "improving"
+            }
+        },
+        "trend_analysis_summary": {
+            "completed_analyses": 6,
+            "analyses_this_quarter": 2,
+            "key_insights": [
+                "Incident volume trending downward (-15% YoY)",
+                "Mean time to resolution improved by 23%",
+                "Lessons learned implementation rate above target (76.9%)"
+            ],
+            "upcoming_analyses": [
+                {"name": "Q3 Vulnerability Trends", "due": "2024-10-15"},
+                {"name": "Cloud Security Posture Review", "due": "2024-11-01"}
+            ]
+        },
+        "effectiveness_metrics": {
+            "post_incident_review_completion_rate": 89.2,
+            "lessons_learned_implementation_rate": 76.9,
+            "knowledge_base_utilization_rate": 65.4,
+            "recurrence_prevention_rate": 84.6,
+            "cost_benefit_analysis": {
+                "total_prevention_investment": 1800000,
+                "estimated_cost_avoided": 8400000,
+                "roi_percentage": 366.7
+            }
+        },
+        "recent_activities": [
+            {
+                "type": "lesson_learned",
+                "title": "Multi-Factor Authentication Bypass Prevention",
+                "date": "2024-08-01T10:30:00Z",
+                "status": "implemented"
+            },
+            {
+                "type": "knowledge_article",
+                "title": "Cloud Security Configuration Checklist",
+                "date": "2024-07-28T14:15:00Z",
+                "status": "published"
+            },
+            {
+                "type": "trend_analysis",
+                "title": "Q2 2024 Security Incident Trends",
+                "date": "2024-07-15T10:00:00Z",
+                "status": "approved"
+            }
+        ]
+    }
+
+# =============================================================================
+# TRAINING MANAGEMENT API ENDPOINTS
+# =============================================================================
+
+# Training Program Management
+@app.get("/api/v1/training/programs")
+async def get_training_programs(
+    skip: int = 0,
+    limit: int = 20,
+    program_type: str = None,
+    priority: str = None,
+    mandatory: bool = None,
+    active: bool = None,
+    target_role: str = None,
+    target_department: str = None
+):
+    """Get training programs with filtering and pagination"""
+    programs = [
+        {
+            "id": 1,
+            "program_id": "PROG-A1B2C3D4",
+            "name": "Cybersecurity Awareness Training",
+            "description": "Comprehensive cybersecurity awareness training covering phishing, social engineering, password security, and data protection",
+            "version": "2.1",
+            "program_type": "mandatory",
+            "priority": "high",
+            "duration_hours": 8.0,
+            "target_roles": ["all_employees"],
+            "target_departments": ["all"],
+            "prerequisite_programs": [],
+            "required_certifications": [],
+            "mandatory": True,
+            "recurring": True,
+            "recurrence_months": 12,
+            "grace_period_days": 30,
+            "learning_objectives": [
+                "Identify common phishing and social engineering attacks",
+                "Apply secure password practices",
+                "Understand data classification and handling procedures",
+                "Follow incident reporting procedures"
+            ],
+            "competencies_addressed": ["security_awareness", "phishing_detection", "data_protection"],
+            "compliance_frameworks": ["ISO27001", "NIST_CSF", "SOC2"],
+            "active": True,
+            "auto_enroll": True,
+            "approval_required": False,
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-15T10:30:00Z",
+            "created_by": "admin@company.com",
+            "updated_by": "admin@company.com"
+        },
+        {
+            "id": 2,
+            "program_id": "PROG-B2C3D4E5",
+            "name": "Advanced Threat Detection",
+            "description": "Advanced training for security analysts on threat detection, incident analysis, and response procedures",
+            "version": "1.0",
+            "program_type": "skill_building",
+            "priority": "high",
+            "duration_hours": 24.0,
+            "target_roles": ["security_analyst", "soc_analyst", "incident_responder"],
+            "target_departments": ["security", "it"],
+            "prerequisite_programs": ["PROG-A1B2C3D4"],
+            "required_certifications": [],
+            "mandatory": False,
+            "recurring": False,
+            "recurrence_months": None,
+            "grace_period_days": 60,
+            "learning_objectives": [
+                "Master advanced threat hunting techniques",
+                "Analyze complex security incidents",
+                "Implement effective response strategies",
+                "Use SIEM and threat intelligence tools"
+            ],
+            "competencies_addressed": ["threat_hunting", "incident_analysis", "siem_operation"],
+            "compliance_frameworks": ["NIST_CSF"],
+            "active": True,
+            "auto_enroll": False,
+            "approval_required": True,
+            "created_at": "2024-01-10T00:00:00Z",
+            "updated_at": "2024-01-20T14:22:00Z",
+            "created_by": "security.lead@company.com",
+            "updated_by": "security.lead@company.com"
+        },
+        {
+            "id": 3,
+            "program_id": "PROG-C3D4E5F6",
+            "name": "GDPR Compliance Training",
+            "description": "Data protection and GDPR compliance training for all staff handling personal data",
+            "version": "1.2",
+            "program_type": "certification",
+            "priority": "critical",
+            "duration_hours": 6.0,
+            "target_roles": ["data_handler", "hr", "sales", "marketing"],
+            "target_departments": ["hr", "sales", "marketing", "support"],
+            "prerequisite_programs": [],
+            "required_certifications": [],
+            "mandatory": True,
+            "recurring": True,
+            "recurrence_months": 24,
+            "grace_period_days": 15,
+            "learning_objectives": [
+                "Understand GDPR principles and requirements",
+                "Implement data protection by design",
+                "Handle data subject requests properly",
+                "Recognize and report data breaches"
+            ],
+            "competencies_addressed": ["gdpr_compliance", "data_protection", "privacy"],
+            "compliance_frameworks": ["GDPR", "ISO27001"],
+            "active": True,
+            "auto_enroll": True,
+            "approval_required": False,
+            "created_at": "2024-01-05T00:00:00Z",
+            "updated_at": "2024-01-25T09:15:00Z",
+            "created_by": "compliance@company.com",
+            "updated_by": "compliance@company.com"
+        }
+    ]
+    
+    # Apply filters
+    filtered_programs = programs
+    if program_type:
+        filtered_programs = [p for p in filtered_programs if p["program_type"] == program_type]
+    if priority:
+        filtered_programs = [p for p in filtered_programs if p["priority"] == priority]
+    if mandatory is not None:
+        filtered_programs = [p for p in filtered_programs if p["mandatory"] == mandatory]
+    if active is not None:
+        filtered_programs = [p for p in filtered_programs if p["active"] == active]
+    if target_role:
+        filtered_programs = [p for p in filtered_programs if target_role in p["target_roles"] or "all_employees" in p["target_roles"]]
+    if target_department:
+        filtered_programs = [p for p in filtered_programs if target_department in p["target_departments"] or "all" in p["target_departments"]]
+    
+    paginated_programs = filtered_programs[skip:skip + limit]
+    
+    return {
+        "items": paginated_programs,
+        "total": len(filtered_programs),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "mandatory": len([p for p in filtered_programs if p["mandatory"]]),
+            "optional": len([p for p in filtered_programs if not p["mandatory"]]),
+            "active": len([p for p in filtered_programs if p["active"]]),
+            "recurring": len([p for p in filtered_programs if p["recurring"]])
+        }
+    }
+
+@app.post("/api/v1/training/programs")
+async def create_training_program(program_data: dict):
+    """Create a new training program"""
+    import random
+    return {
+        "id": random.randint(100, 999),
+        "program_id": f"PROG-{random.randint(10000000, 99999999):08X}",
+        "name": program_data.get("name"),
+        "description": program_data.get("description"),
+        "program_type": program_data.get("program_type", "optional"),
+        "priority": program_data.get("priority", "medium"),
+        "created_at": datetime.now().isoformat(),
+        "message": "Training program created successfully"
+    }
+
+@app.get("/api/v1/training/programs/{program_id}")
+async def get_training_program(program_id: int):
+    """Get specific training program details"""
+    if program_id == 1:
+        return {
+            "id": 1,
+            "program_id": "PROG-A1B2C3D4",
+            "name": "Cybersecurity Awareness Training",
+            "description": "Comprehensive cybersecurity awareness training covering phishing, social engineering, password security, and data protection",
+            "version": "2.1",
+            "program_type": "mandatory",
+            "priority": "high",
+            "duration_hours": 8.0,
+            "target_roles": ["all_employees"],
+            "target_departments": ["all"],
+            "courses": [
+                {
+                    "id": 1,
+                    "course_id": "COURSE-12345678",
+                    "title": "Phishing Awareness",
+                    "duration_minutes": 120,
+                    "sequence_order": 1,
+                    "passing_score": 80.0
+                },
+                {
+                    "id": 2,
+                    "course_id": "COURSE-23456789",
+                    "title": "Password Security",
+                    "duration_minutes": 90,
+                    "sequence_order": 2,
+                    "passing_score": 75.0
+                }
+            ],
+            "enrollment_statistics": {
+                "total_enrolled": 1250,
+                "completed": 987,
+                "in_progress": 145,
+                "not_started": 118,
+                "completion_rate": 78.96
+            }
+        }
+    return {"error": "Training program not found"}
+
+# Training Enrollments
+@app.get("/api/v1/training/enrollments")
+async def get_training_enrollments(
+    skip: int = 0,
+    limit: int = 20,
+    status: str = None,
+    user_role: str = None,
+    department: str = None,
+    overdue: bool = None,
+    program_id: int = None
+):
+    """Get training enrollments with filtering"""
+    enrollments = [
+        {
+            "id": 1,
+            "enrollment_id": "ENROLL-A1B2C3D4",
+            "program_id": 1,
+            "program_name": "Cybersecurity Awareness Training",
+            "user_id": "user123",
+            "user_email": "john.doe@company.com",
+            "user_name": "John Doe",
+            "user_role": "developer",
+            "department": "engineering",
+            "enrollment_date": "2024-01-15T00:00:00Z",
+            "due_date": "2024-02-15T00:00:00Z",
+            "assigned_by": "hr@company.com",
+            "enrollment_type": "auto",
+            "status": "in_progress",
+            "progress_percentage": 65.0,
+            "started_date": "2024-01-20T09:00:00Z",
+            "completed_date": None,
+            "last_accessed": "2024-01-25T14:30:00Z",
+            "final_score": None,
+            "certificate_issued": False,
+            "attempts_count": 1,
+            "is_overdue": False
+        },
+        {
+            "id": 2,
+            "enrollment_id": "ENROLL-B2C3D4E5",
+            "program_id": 1,
+            "program_name": "Cybersecurity Awareness Training",
+            "user_id": "user456",
+            "user_email": "jane.smith@company.com",
+            "user_name": "Jane Smith",
+            "user_role": "analyst",
+            "department": "security",
+            "enrollment_date": "2024-01-10T00:00:00Z",
+            "due_date": "2024-02-10T00:00:00Z",
+            "assigned_by": "security.lead@company.com",
+            "enrollment_type": "manual",
+            "status": "completed",
+            "progress_percentage": 100.0,
+            "started_date": "2024-01-12T10:00:00Z",
+            "completed_date": "2024-01-22T16:45:00Z",
+            "last_accessed": "2024-01-22T16:45:00Z",
+            "final_score": 92.5,
+            "certificate_issued": True,
+            "certificate_id": "CERT-B2C3D4E5",
+            "attempts_count": 1,
+            "is_overdue": False
+        }
+    ]
+    
+    # Apply filters
+    filtered_enrollments = enrollments
+    if status:
+        filtered_enrollments = [e for e in filtered_enrollments if e["status"] == status]
+    if user_role:
+        filtered_enrollments = [e for e in filtered_enrollments if e["user_role"] == user_role]
+    if department:
+        filtered_enrollments = [e for e in filtered_enrollments if e["department"] == department]
+    if program_id:
+        filtered_enrollments = [e for e in filtered_enrollments if e["program_id"] == program_id]
+    if overdue is not None:
+        filtered_enrollments = [e for e in filtered_enrollments if e["is_overdue"] == overdue]
+    
+    paginated_enrollments = filtered_enrollments[skip:skip + limit]
+    
+    return {
+        "items": paginated_enrollments,
+        "total": len(filtered_enrollments),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "completed": len([e for e in filtered_enrollments if e["status"] == "completed"]),
+            "in_progress": len([e for e in filtered_enrollments if e["status"] == "in_progress"]),
+            "not_started": len([e for e in filtered_enrollments if e["status"] == "not_started"]),
+            "overdue": len([e for e in filtered_enrollments if e["is_overdue"]])
+        }
+    }
+
+@app.post("/api/v1/training/enrollments")
+async def create_training_enrollment(enrollment_data: dict):
+    """Create a new training enrollment"""
+    import random
+    return {
+        "id": random.randint(100, 999),
+        "enrollment_id": f"ENROLL-{random.randint(10000000, 99999999):08X}",
+        "program_id": enrollment_data.get("program_id"),
+        "user_id": enrollment_data.get("user_id"),
+        "user_email": enrollment_data.get("user_email"),
+        "enrollment_date": datetime.now().isoformat(),
+        "status": "not_started",
+        "message": "Training enrollment created successfully"
+    }
+
+# Phishing Simulations and Awareness Campaigns
+@app.get("/api/v1/training/campaigns")
+async def get_awareness_campaigns(
+    skip: int = 0,
+    limit: int = 20,
+    status: str = None,
+    campaign_type: str = None,
+    target_department: str = None
+):
+    """Get awareness campaigns with filtering"""
+    campaigns = [
+        {
+            "id": 1,
+            "campaign_id": "CAMP-A1B2C3D4",
+            "name": "Q1 2024 Phishing Simulation",
+            "description": "Quarterly phishing simulation targeting all employees with sophisticated email templates",
+            "campaign_type": "phishing",
+            "status": "completed",
+            "scheduled_start": "2024-01-15T09:00:00Z",
+            "scheduled_end": "2024-01-22T17:00:00Z",
+            "actual_start": "2024-01-15T09:00:00Z",
+            "actual_end": "2024-01-22T17:00:00Z",
+            "target_users": [],
+            "target_departments": ["all"],
+            "target_roles": ["all_employees"],
+            "total_recipients": 1250,
+            "delivered_count": 1245,
+            "opened_count": 387,
+            "clicked_count": 89,
+            "reported_count": 156,
+            "failed_count": 5,
+            "success_rate": 71.2,
+            "click_rate": 7.1,
+            "report_rate": 12.5,
+            "created_by": "security.awareness@company.com",
+            "approved_by": "ciso@company.com",
+            "approval_date": "2024-01-10T10:00:00Z",
+            "tags": ["quarterly", "phishing", "company-wide"]
+        },
+        {
+            "id": 2,
+            "campaign_id": "CAMP-B2C3D4E5",
+            "name": "Executive Security Briefing",
+            "description": "Monthly security awareness briefing for executive leadership team",
+            "campaign_type": "awareness",
+            "status": "active",
+            "scheduled_start": "2024-01-25T10:00:00Z",
+            "scheduled_end": "2024-01-25T11:00:00Z",
+            "actual_start": "2024-01-25T10:00:00Z",
+            "actual_end": None,
+            "target_users": ["ceo", "cto", "cfo", "ciso"],
+            "target_departments": ["executive"],
+            "target_roles": ["c_level"],
+            "total_recipients": 4,
+            "delivered_count": 4,
+            "opened_count": 4,
+            "clicked_count": 0,
+            "reported_count": 0,
+            "failed_count": 0,
+            "success_rate": 100.0,
+            "click_rate": 0.0,
+            "report_rate": 0.0,
+            "created_by": "security.awareness@company.com",
+            "approved_by": "ciso@company.com",
+            "approval_date": "2024-01-20T14:00:00Z",
+            "tags": ["monthly", "executive", "briefing"]
+        }
+    ]
+    
+    # Apply filters
+    filtered_campaigns = campaigns
+    if status:
+        filtered_campaigns = [c for c in filtered_campaigns if c["status"] == status]
+    if campaign_type:
+        filtered_campaigns = [c for c in filtered_campaigns if c["campaign_type"] == campaign_type]
+    if target_department:
+        filtered_campaigns = [c for c in filtered_campaigns if target_department in c["target_departments"] or "all" in c["target_departments"]]
+    
+    paginated_campaigns = filtered_campaigns[skip:skip + limit]
+    
+    return {
+        "items": paginated_campaigns,
+        "total": len(filtered_campaigns),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "active": len([c for c in filtered_campaigns if c["status"] == "active"]),
+            "completed": len([c for c in filtered_campaigns if c["status"] == "completed"]),
+            "scheduled": len([c for c in filtered_campaigns if c["status"] == "scheduled"]),
+            "phishing": len([c for c in filtered_campaigns if c["campaign_type"] == "phishing"])
+        }
+    }
+
+@app.get("/api/v1/training/campaigns/{campaign_id}/results")
+async def get_campaign_results(campaign_id: int):
+    """Get detailed results for a specific campaign"""
+    if campaign_id == 1:
+        return {
+            "campaign_id": campaign_id,
+            "campaign_name": "Q1 2024 Phishing Simulation",
+            "overall_metrics": {
+                "total_recipients": 1250,
+                "delivered_count": 1245,
+                "opened_count": 387,
+                "clicked_count": 89,
+                "reported_count": 156,
+                "failed_count": 5,
+                "success_rate": 71.2,
+                "click_rate": 7.1,
+                "report_rate": 12.5
+            },
+            "department_breakdown": [
+                {
+                    "department": "engineering",
+                    "recipients": 450,
+                    "clicked": 28,
+                    "reported": 67,
+                    "click_rate": 6.2,
+                    "report_rate": 14.9
+                },
+                {
+                    "department": "sales",
+                    "recipients": 200,
+                    "clicked": 18,
+                    "reported": 22,
+                    "click_rate": 9.0,
+                    "report_rate": 11.0
+                },
+                {
+                    "department": "hr",
+                    "recipients": 50,
+                    "clicked": 8,
+                    "reported": 12,
+                    "click_rate": 16.0,
+                    "report_rate": 24.0
+                }
+            ],
+            "risk_users": [
+                {
+                    "user_id": "user789",
+                    "user_email": "risky.user@company.com",
+                    "department": "sales",
+                    "clicked": True,
+                    "reported": False,
+                    "response_time_seconds": 45,
+                    "training_assigned": True
+                }
+            ],
+            "simulation_details": {
+                "template_name": "Invoice Payment Request",
+                "difficulty_level": "intermediate",
+                "attack_vector": "email",
+                "indicators": ["urgent_language", "external_sender", "suspicious_link"]
+            }
+        }
+    return {"error": "Campaign results not found"}
+
+@app.post("/api/v1/training/campaigns")
+async def create_awareness_campaign(campaign_data: dict):
+    """Create a new awareness campaign"""
+    import random
+    return {
+        "id": random.randint(100, 999),
+        "campaign_id": f"CAMP-{random.randint(10000000, 99999999):08X}",
+        "name": campaign_data.get("name"),
+        "campaign_type": campaign_data.get("campaign_type", "awareness"),
+        "status": "draft",
+        "created_at": datetime.now().isoformat(),
+        "message": "Awareness campaign created successfully"
+    }
+
+# Security Competencies and Assessments
+@app.get("/api/v1/training/competencies")
+async def get_security_competencies(
+    skip: int = 0,
+    limit: int = 20,
+    skill_level: str = None,
+    domain: str = None,
+    active: bool = None
+):
+    """Get security competencies with filtering"""
+    competencies = [
+        {
+            "id": 1,
+            "competency_id": "COMP-A1B2C3D4",
+            "name": "Phishing Detection",
+            "description": "Ability to identify and respond to phishing attempts across various communication channels",
+            "category": "awareness",
+            "skill_level": "beginner",
+            "domain": "email_security",
+            "framework_reference": "NIST-NICE-SP-RSK-001",
+            "applicable_roles": ["all_employees"],
+            "applicable_departments": ["all"],
+            "assessment_methods": ["simulation", "quiz"],
+            "proficiency_indicators": [
+                "Correctly identifies 90% of phishing emails",
+                "Reports suspicious emails within 15 minutes",
+                "Completes phishing training with 85% score"
+            ],
+            "active": True,
+            "version": "1.0"
+        },
+        {
+            "id": 2,
+            "competency_id": "COMP-B2C3D4E5",
+            "name": "Incident Response Coordination",
+            "description": "Advanced skills in coordinating and managing security incident response activities",
+            "category": "technical",
+            "skill_level": "advanced",
+            "domain": "incident_response",
+            "framework_reference": "NIST-NICE-IN-IR-001",
+            "applicable_roles": ["incident_responder", "security_analyst", "soc_manager"],
+            "applicable_departments": ["security", "it"],
+            "assessment_methods": ["practical", "simulation"],
+            "proficiency_indicators": [
+                "Successfully coordinates major incident response within 4 hours",
+                "Maintains accurate incident documentation",
+                "Effectively communicates with stakeholders during incidents"
+            ],
+            "active": True,
+            "version": "2.0"
+        }
+    ]
+    
+    # Apply filters
+    filtered_competencies = competencies
+    if skill_level:
+        filtered_competencies = [c for c in filtered_competencies if c["skill_level"] == skill_level]
+    if domain:
+        filtered_competencies = [c for c in filtered_competencies if c["domain"] == domain]
+    if active is not None:
+        filtered_competencies = [c for c in filtered_competencies if c["active"] == active]
+    
+    paginated_competencies = filtered_competencies[skip:skip + limit]
+    
+    return {
+        "items": paginated_competencies,
+        "total": len(filtered_competencies),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "beginner": len([c for c in filtered_competencies if c["skill_level"] == "beginner"]),
+            "intermediate": len([c for c in filtered_competencies if c["skill_level"] == "intermediate"]),
+            "advanced": len([c for c in filtered_competencies if c["skill_level"] == "advanced"]),
+            "expert": len([c for c in filtered_competencies if c["skill_level"] == "expert"])
+        }
+    }
+
+@app.get("/api/v1/training/user-competencies/{user_id}")
+async def get_user_competencies(user_id: str):
+    """Get competency status for a specific user"""
+    return {
+        "user_id": user_id,
+        "competencies": [
+            {
+                "competency_id": "COMP-A1B2C3D4",
+                "competency_name": "Phishing Detection",
+                "current_level": "intermediate",
+                "target_level": "advanced",
+                "proficient": True,
+                "last_assessed": "2024-01-20T10:00:00Z",
+                "last_assessment_score": 87.5,
+                "assessment_count": 3,
+                "training_hours": 4.5,
+                "expires_at": "2025-01-20T10:00:00Z",
+                "renewal_required": False
+            },
+            {
+                "competency_id": "COMP-B2C3D4E5",
+                "competency_name": "Incident Response Coordination",
+                "current_level": "beginner",
+                "target_level": "intermediate",
+                "proficient": False,
+                "last_assessed": None,
+                "last_assessment_score": None,
+                "assessment_count": 0,
+                "training_hours": 0.0,
+                "expires_at": None,
+                "renewal_required": False,
+                "next_assessment_due": "2024-02-15T00:00:00Z"
+            }
+        ],
+        "summary": {
+            "total_competencies": 2,
+            "proficient_competencies": 1,
+            "assessments_due": 1,
+            "certifications_expiring_soon": 0
+        }
+    }
+
+# Training Certifications
+@app.get("/api/v1/training/certifications")
+async def get_training_certifications(
+    skip: int = 0,
+    limit: int = 20,
+    certification_type: str = None,
+    active: bool = None
+):
+    """Get training certifications with filtering"""
+    certifications = [
+        {
+            "id": 1,
+            "certification_id": "CERT-A1B2C3D4",
+            "name": "Cybersecurity Awareness Certification",
+            "description": "Certification for completing comprehensive cybersecurity awareness training",
+            "issuing_organization": "Aegis Security Training",
+            "certification_type": "internal",
+            "required_training_programs": [1],
+            "required_competencies": [1],
+            "validity_period_months": 12,
+            "renewal_required": True,
+            "renewal_grace_period_days": 30,
+            "continuing_education_required": False,
+            "compliance_frameworks": ["ISO27001", "SOC2"],
+            "minimum_score": 80.0,
+            "assessment_required": True,
+            "practical_demonstration": False,
+            "active": True
+        },
+        {
+            "id": 2,
+            "certification_id": "CERT-B2C3D4E5",
+            "name": "Advanced Incident Response Certification",
+            "description": "Advanced certification for incident response specialists",
+            "issuing_organization": "Aegis Security Training",
+            "certification_type": "internal",
+            "required_training_programs": [2],
+            "required_competencies": [2],
+            "validity_period_months": 24,
+            "renewal_required": True,
+            "renewal_grace_period_days": 60,
+            "continuing_education_required": True,
+            "compliance_frameworks": ["NIST_CSF"],
+            "minimum_score": 85.0,
+            "assessment_required": True,
+            "practical_demonstration": True,
+            "active": True
+        }
+    ]
+    
+    # Apply filters
+    filtered_certifications = certifications
+    if certification_type:
+        filtered_certifications = [c for c in filtered_certifications if c["certification_type"] == certification_type]
+    if active is not None:
+        filtered_certifications = [c for c in filtered_certifications if c["active"] == active]
+    
+    paginated_certifications = filtered_certifications[skip:skip + limit]
+    
+    return {
+        "items": paginated_certifications,
+        "total": len(filtered_certifications),
+        "skip": skip,
+        "limit": limit,
+        "summary": {
+            "internal": len([c for c in filtered_certifications if c["certification_type"] == "internal"]),
+            "external": len([c for c in filtered_certifications if c["certification_type"] == "external"]),
+            "regulatory": len([c for c in filtered_certifications if c["certification_type"] == "regulatory"])
+        }
+    }
+
+@app.get("/api/v1/training/user-certifications/{user_id}")
+async def get_user_certifications(user_id: str):
+    """Get certification status for a specific user"""
+    return {
+        "user_id": user_id,
+        "certifications": [
+            {
+                "certification_id": "CERT-A1B2C3D4",
+                "certification_name": "Cybersecurity Awareness Certification",
+                "status": "completed",
+                "earned_date": "2024-01-22T16:45:00Z",
+                "expires_date": "2025-01-22T16:45:00Z",
+                "certificate_number": "CSA-2024-001234",
+                "digital_badge_url": "https://badges.company.com/csa-001234",
+                "final_score": 92.5,
+                "verified": True,
+                "renewal_due_date": "2025-01-22T16:45:00Z",
+                "renewal_reminders_sent": 0,
+                "days_until_expiration": 362
+            },
+            {
+                "certification_id": "CERT-B2C3D4E5",
+                "certification_name": "Advanced Incident Response Certification",
+                "status": "in_progress",
+                "earned_date": None,
+                "expires_date": None,
+                "certificate_number": None,
+                "digital_badge_url": None,
+                "final_score": None,
+                "verified": False,
+                "renewal_due_date": None,
+                "renewal_reminders_sent": 0,
+                "progress_percentage": 45.0
+            }
+        ],
+        "summary": {
+            "total_certifications": 2,
+            "earned_certifications": 1,
+            "in_progress_certifications": 1,
+            "expiring_soon": 0
+        }
+    }
+
+# Training Analytics and Dashboard
+@app.get("/api/v1/dashboards/training")
+async def get_training_dashboard():
+    """Get training management dashboard summary"""
+    return {
+        "overview_metrics": {
+            "total_programs": 25,
+            "active_programs": 18,
+            "total_enrollments": 3420,
+            "completed_enrollments": 2756,
+            "completion_rate": 80.6,
+            "average_score": 84.2,
+            "overdue_trainings": 145,
+            "certificates_issued": 2156,
+            "active_campaigns": 3,
+            "this_month_enrollments": 247
+        },
+        "phishing_simulation_results": {
+            "total_simulations": 12,
+            "total_recipients": 15000,
+            "overall_click_rate": 8.3,
+            "overall_report_rate": 15.7,
+            "improvement_rate": 12.4,
+            "high_risk_users": 89,
+            "training_assignments": 156
+        },
+        "compliance_training": {
+            "mandatory_completion_rate": 92.3,
+            "gdpr_compliance_rate": 96.8,
+            "security_awareness_rate": 89.1,
+            "overdue_mandatory": 78,
+            "expiring_certifications": 23
+        },
+        "competency_analysis": {
+            "total_competencies": 45,
+            "assessed_users": 1250,
+            "proficient_users": 987,
+            "proficiency_rate": 78.9,
+            "skills_gaps": 15,
+            "assessment_completion_rate": 85.2
+        },
+        "training_trends": {
+            "monthly_completions": [180, 195, 220, 247],
+            "monthly_enrollments": [250, 280, 310, 295],
+            "phishing_click_rates": [12.3, 10.8, 9.2, 8.3],
+            "competency_improvements": [15, 22, 18, 25]
+        },
+        "department_performance": [
+            {"department": "engineering", "completion_rate": 87.2, "avg_score": 86.1},
+            {"department": "sales", "completion_rate": 79.8, "avg_score": 82.3},
+            {"department": "hr", "completion_rate": 95.1, "avg_score": 91.4},
+            {"department": "finance", "completion_rate": 88.7, "avg_score": 84.9}
+        ]
+    }
+
+@app.get("/api/v1/training/analytics/user-progress/{user_id}")
+async def get_user_training_progress(user_id: str):
+    """Get detailed training progress for a specific user"""
+    return {
+        "user_id": user_id,
+        "user_email": "john.doe@company.com",
+        "user_name": "John Doe",
+        "active_training": [
+            {
+                "program_id": 1,
+                "program_name": "Cybersecurity Awareness Training",
+                "enrollment_id": "ENROLL-A1B2C3D4",
+                "progress_percentage": 65.0,
+                "due_date": "2024-02-15T00:00:00Z",
+                "days_until_due": 21,
+                "last_accessed": "2024-01-25T14:30:00Z"
+            }
+        ],
+        "completed_training": [
+            {
+                "program_id": 3,
+                "program_name": "GDPR Compliance Training",
+                "completion_date": "2024-01-10T16:30:00Z",
+                "final_score": 89.5,
+                "certificate_id": "CERT-GDPR-001"
+            }
+        ],
+        "recent_phishing_results": [
+            {
+                "campaign_id": 1,
+                "campaign_name": "Q1 2024 Phishing Simulation",
+                "result": "reported",
+                "response_time_seconds": 127,
+                "risk_level": "low"
+            }
+        ],
+        "competency_summary": [
+            {
+                "competency_name": "Phishing Detection",
+                "current_level": "intermediate",
+                "proficient": True,
+                "last_assessment_score": 87.5
+            }
+        ],
+        "certifications": [
+            {
+                "certification_name": "Cybersecurity Awareness Certification",
+                "status": "earned",
+                "expires_date": "2025-01-22T16:45:00Z"
+            }
+        ],
+        "summary": {
+            "total_programs_enrolled": 2,
+            "completed_programs": 1,
+            "completion_rate": 50.0,
+            "average_score": 89.5,
+            "overdue_trainings": 0,
+            "certifications_earned": 1
+        }
+    }
+
+# ===================== Business Continuity and Disaster Recovery API Endpoints =====================
+
+# Business Continuity Plans
+@app.get("/api/v1/continuity/plans")
+async def get_continuity_plans(
+    status: str = None,
+    business_unit: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get business continuity plans with filtering"""
+    plans = [
+        {
+            "id": 1,
+            "plan_id": "BCP-001",
+            "name": "IT Systems Business Continuity Plan",
+            "description": "Comprehensive continuity plan for critical IT systems",
+            "version": "2.1",
+            "status": "active",
+            "scope": "All IT infrastructure and applications",
+            "business_units": ["IT", "Operations", "Customer Service"],
+            "geographic_scope": ["Primary Data Center", "DR Site"],
+            "objectives": "Ensure 99.9% uptime for critical systems",
+            "next_review_date": "2024-12-15T00:00:00Z",
+            "created_at": "2024-01-15T09:00:00Z",
+            "created_by": "john.doe@company.com"
+        },
+        {
+            "id": 2,
+            "plan_id": "BCP-002",
+            "name": "Facilities Emergency Response Plan",
+            "description": "Business continuity for physical facilities",
+            "version": "1.3",
+            "status": "active",
+            "scope": "All office locations and facilities",
+            "business_units": ["Facilities", "HR", "Security"],
+            "geographic_scope": ["HQ Building", "Branch Offices"],
+            "objectives": "Maintain operations during facility disruptions",
+            "next_review_date": "2024-11-30T00:00:00Z",
+            "created_at": "2024-02-10T10:30:00Z",
+            "created_by": "jane.smith@company.com"
+        }
+    ]
+    
+    # Apply filters
+    if status:
+        plans = [p for p in plans if p["status"] == status]
+    if business_unit:
+        plans = [p for p in plans if business_unit in p["business_units"]]
+    
+    return {
+        "plans": plans[skip:skip+limit],
+        "total": len(plans),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/continuity/plans")
+async def create_continuity_plan():
+    """Create a new business continuity plan"""
+    return {
+        "id": 3,
+        "plan_id": "BCP-003",
+        "name": "New Business Continuity Plan",
+        "status": "draft",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Business continuity plan created successfully"
+    }
+
+@app.get("/api/v1/continuity/plans/{plan_id}")
+async def get_continuity_plan(plan_id: str):
+    """Get detailed continuity plan"""
+    return {
+        "id": 1,
+        "plan_id": plan_id,
+        "name": "IT Systems Business Continuity Plan",
+        "description": "Comprehensive continuity plan for critical IT systems",
+        "version": "2.1",
+        "status": "active",
+        "scope": "All IT infrastructure and applications",
+        "business_units": ["IT", "Operations", "Customer Service"],
+        "geographic_scope": ["Primary Data Center", "DR Site"],
+        "objectives": "Ensure 99.9% uptime for critical systems",
+        "assumptions": "Power and network connectivity available at DR site",
+        "dependencies": {
+            "systems": ["ERP", "CRM", "Email"],
+            "suppliers": ["Cloud Provider", "ISP"],
+            "personnel": ["IT Staff", "Operations Team"]
+        },
+        "approved_by": "cto@company.com",
+        "approved_date": "2024-03-01T00:00:00Z",
+        "next_review_date": "2024-12-15T00:00:00Z",
+        "review_frequency_months": 12,
+        "created_at": "2024-01-15T09:00:00Z",
+        "updated_at": "2024-03-01T10:15:00Z",
+        "created_by": "john.doe@company.com",
+        "updated_by": "cto@company.com"
+    }
+
+@app.put("/api/v1/continuity/plans/{plan_id}")
+async def update_continuity_plan(plan_id: str):
+    """Update continuity plan"""
+    return {
+        "plan_id": plan_id,
+        "updated_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Business continuity plan updated successfully"
+    }
+
+# Business Impact Analysis
+@app.get("/api/v1/continuity/plans/{plan_id}/business-impact")
+async def get_business_impact_analyses(plan_id: str):
+    """Get business impact analyses for a plan"""
+    return {
+        "analyses": [
+            {
+                "id": 1,
+                "analysis_id": "BIA-001",
+                "business_process": "Customer Order Processing",
+                "process_owner": "operations.manager@company.com",
+                "department": "Operations",
+                "impact_level": "severe",
+                "rto_hours": 2.0,
+                "rpo_hours": 0.5,
+                "financial_impact_hourly": 50000.0,
+                "financial_impact_daily": 1200000.0,
+                "minimum_service_level": 25.0,
+                "critical_dependencies": {
+                    "systems": ["ERP", "Payment Gateway"],
+                    "personnel": ["Order Processing Team"],
+                    "facilities": ["Primary Data Center"]
+                },
+                "peak_periods": ["Black Friday", "Holiday Season"],
+                "created_at": "2024-01-20T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "analysis_id": "BIA-002",
+                "business_process": "Customer Support Services",
+                "process_owner": "support.manager@company.com",
+                "department": "Customer Service",
+                "impact_level": "significant",
+                "rto_hours": 4.0,
+                "rpo_hours": 1.0,
+                "financial_impact_hourly": 15000.0,
+                "financial_impact_daily": 360000.0,
+                "minimum_service_level": 50.0,
+                "critical_dependencies": {
+                    "systems": ["CRM", "Phone System"],
+                    "personnel": ["Support Team"],
+                    "facilities": ["Call Center"]
+                },
+                "peak_periods": ["Monday Mornings", "Product Launches"],
+                "created_at": "2024-01-22T14:30:00Z"
+            }
+        ],
+        "total": 2
+    }
+
+@app.post("/api/v1/continuity/plans/{plan_id}/business-impact")
+async def create_business_impact_analysis(plan_id: str):
+    """Create business impact analysis"""
+    return {
+        "id": 3,
+        "analysis_id": "BIA-003",
+        "business_process": "New Business Process",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Business impact analysis created successfully"
+    }
+
+# Disaster Recovery Procedures
+@app.get("/api/v1/continuity/plans/{plan_id}/procedures")
+async def get_recovery_procedures(plan_id: str, priority: str = None, category: str = None):
+    """Get disaster recovery procedures for a plan"""
+    procedures = [
+        {
+            "id": 1,
+            "procedure_id": "DRP-001",
+            "name": "Database Server Recovery",
+            "description": "Restore primary database server operations",
+            "category": "IT Systems",
+            "priority": "critical",
+            "target_rto_hours": 1.0,
+            "target_rpo_hours": 0.25,
+            "estimated_recovery_time": 0.8,
+            "automated": True,
+            "last_tested": "2024-07-15T10:00:00Z",
+            "test_success_rate": 95.0,
+            "recovery_steps": [
+                {"step_number": 1, "description": "Assess database server status", "estimated_duration_minutes": 10},
+                {"step_number": 2, "description": "Initiate failover to backup server", "estimated_duration_minutes": 15},
+                {"step_number": 3, "description": "Verify data integrity", "estimated_duration_minutes": 20},
+                {"step_number": 4, "description": "Update DNS records", "estimated_duration_minutes": 5}
+            ],
+            "required_personnel": ["Database Administrator", "Network Engineer"],
+            "created_at": "2024-01-25T09:00:00Z"
+        },
+        {
+            "id": 2,
+            "procedure_id": "DRP-002",
+            "name": "Web Application Recovery",
+            "description": "Restore web application services",
+            "category": "IT Systems",
+            "priority": "high",
+            "target_rto_hours": 2.0,
+            "target_rpo_hours": 0.5,
+            "estimated_recovery_time": 1.5,
+            "automated": False,
+            "last_tested": "2024-06-20T14:00:00Z",
+            "test_success_rate": 88.0,
+            "recovery_steps": [
+                {"step_number": 1, "description": "Check application server status", "estimated_duration_minutes": 15},
+                {"step_number": 2, "description": "Deploy from backup images", "estimated_duration_minutes": 45},
+                {"step_number": 3, "description": "Restore application configuration", "estimated_duration_minutes": 30},
+                {"step_number": 4, "description": "Perform functional testing", "estimated_duration_minutes": 30}
+            ],
+            "required_personnel": ["Application Administrator", "DevOps Engineer"],
+            "created_at": "2024-01-28T11:15:00Z"
+        }
+    ]
+    
+    # Apply filters
+    if priority:
+        procedures = [p for p in procedures if p["priority"] == priority]
+    if category:
+        procedures = [p for p in procedures if p["category"] == category]
+    
+    return {
+        "procedures": procedures,
+        "total": len(procedures)
+    }
+
+@app.post("/api/v1/continuity/plans/{plan_id}/procedures")
+async def create_recovery_procedure(plan_id: str):
+    """Create disaster recovery procedure"""
+    return {
+        "id": 3,
+        "procedure_id": "DRP-003",
+        "name": "New Recovery Procedure",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Recovery procedure created successfully"
+    }
+
+@app.get("/api/v1/continuity/procedures/{procedure_id}")
+async def get_recovery_procedure(procedure_id: str):
+    """Get detailed recovery procedure"""
+    return {
+        "id": 1,
+        "procedure_id": procedure_id,
+        "name": "Database Server Recovery",
+        "description": "Restore primary database server operations",
+        "category": "IT Systems",
+        "priority": "critical",
+        "target_rto_hours": 1.0,
+        "target_rpo_hours": 0.25,
+        "estimated_recovery_time": 0.8,
+        "preparation_steps": [
+            {
+                "step_number": 1,
+                "description": "Verify backup systems are operational",
+                "responsible_role": "Database Administrator",
+                "automated": True,
+                "validation_criteria": "Backup system health check passes"
+            }
+        ],
+        "activation_triggers": [
+            "Primary database server failure",
+            "Data center power outage affecting database tier",
+            "Network connectivity loss to database server"
+        ],
+        "recovery_steps": [
+            {
+                "step_number": 1,
+                "description": "Assess database server status",
+                "estimated_duration_minutes": 10,
+                "responsible_role": "Database Administrator",
+                "automated": False,
+                "validation_criteria": "Server status confirmed as down"
+            },
+            {
+                "step_number": 2,
+                "description": "Initiate failover to backup server",
+                "estimated_duration_minutes": 15,
+                "responsible_role": "Database Administrator",
+                "automated": True,
+                "script_path": "/scripts/db_failover.sh",
+                "validation_criteria": "Backup server accepting connections"
+            }
+        ],
+        "validation_steps": [
+            {
+                "step_number": 1,
+                "description": "Verify database connectivity",
+                "estimated_duration_minutes": 5,
+                "validation_criteria": "Application can connect to database"
+            }
+        ],
+        "required_personnel": ["Database Administrator", "Network Engineer"],
+        "required_equipment": ["Backup Database Server", "Network Monitoring Tools"],
+        "required_facilities": ["Secondary Data Center"],
+        "estimated_cost": 5000.0,
+        "automated": True,
+        "automation_script": "/scripts/db_recovery_automation.sh",
+        "manual_intervention_required": True,
+        "test_frequency_months": 3,
+        "last_tested": "2024-07-15T10:00:00Z",
+        "test_success_rate": 95.0,
+        "created_at": "2024-01-25T09:00:00Z",
+        "updated_at": "2024-07-15T11:30:00Z"
+    }
+
+# Continuity Testing
+@app.get("/api/v1/continuity/tests")
+async def get_continuity_tests(
+    status: str = None,
+    test_type: str = None,
+    plan_id: str = None,
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get continuity tests with filtering"""
+    tests = [
+        {
+            "id": 1,
+            "test_id": "CT-001",
+            "name": "Q3 2024 Database Recovery Test",
+            "description": "Comprehensive test of database recovery procedures",
+            "test_type": "Full Test",
+            "continuity_plan_id": 1,
+            "status": "completed",
+            "scheduled_date": "2024-07-15T10:00:00Z",
+            "actual_start_time": "2024-07-15T10:05:00Z",
+            "actual_end_time": "2024-07-15T11:30:00Z",
+            "test_coordinator": "test.coordinator@company.com",
+            "overall_success": True,
+            "rto_achieved": 0.8,
+            "rpo_achieved": 0.2,
+            "participants": ["Database Administrator", "Network Engineer", "Operations Manager"],
+            "scenarios_tested": 3,
+            "scenarios_passed": 3,
+            "created_at": "2024-06-15T14:00:00Z"
+        },
+        {
+            "id": 2,
+            "test_id": "CT-002",
+            "name": "Facilities Evacuation Tabletop",
+            "description": "Tabletop exercise for facility emergency procedures",
+            "test_type": "Tabletop",
+            "continuity_plan_id": 2,
+            "status": "completed",
+            "scheduled_date": "2024-06-20T14:00:00Z",
+            "actual_start_time": "2024-06-20T14:10:00Z",
+            "actual_end_time": "2024-06-20T16:00:00Z",
+            "test_coordinator": "facilities.manager@company.com",
+            "overall_success": True,
+            "rto_achieved": None,  # Not applicable for tabletop
+            "rpo_achieved": None,
+            "participants": ["Facilities Manager", "HR Director", "Security Chief", "Floor Wardens"],
+            "scenarios_tested": 2,
+            "scenarios_passed": 2,
+            "created_at": "2024-05-20T10:30:00Z"
+        }
+    ]
+    
+    # Apply filters
+    if status:
+        tests = [t for t in tests if t["status"] == status]
+    if test_type:
+        tests = [t for t in tests if t["test_type"] == test_type]
+    if plan_id:
+        tests = [t for t in tests if str(t["continuity_plan_id"]) == plan_id]
+    
+    return {
+        "tests": tests[skip:skip+limit],
+        "total": len(tests),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/continuity/tests")
+async def schedule_continuity_test():
+    """Schedule a new continuity test"""
+    return {
+        "id": 3,
+        "test_id": "CT-003",
+        "name": "New Continuity Test",
+        "status": "planned",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Continuity test scheduled successfully"
+    }
+
+@app.get("/api/v1/continuity/tests/{test_id}")
+async def get_continuity_test(test_id: str):
+    """Get detailed continuity test"""
+    return {
+        "id": 1,
+        "test_id": test_id,
+        "name": "Q3 2024 Database Recovery Test",
+        "description": "Comprehensive test of database recovery procedures",
+        "test_type": "Full Test",
+        "scope": "Database recovery and application failover",
+        "continuity_plan_id": 1,
+        "status": "completed",
+        "scheduled_date": "2024-07-15T10:00:00Z",
+        "actual_start_time": "2024-07-15T10:05:00Z",
+        "actual_end_time": "2024-07-15T11:30:00Z",
+        "test_coordinator": "test.coordinator@company.com",
+        "participants": ["Database Administrator", "Network Engineer", "Operations Manager"],
+        "observers": ["CTO", "Compliance Officer"],
+        "objectives": [
+            {
+                "objective": "Verify database failover capability",
+                "success_criteria": "Failover completes within RTO",
+                "measurement_method": "Automated monitoring"
+            },
+            {
+                "objective": "Test application recovery procedures",
+                "success_criteria": "Applications restore functionality",
+                "measurement_method": "Functional testing"
+            }
+        ],
+        "scenarios": [
+            {
+                "name": "Primary Database Failure",
+                "description": "Simulate complete failure of primary database",
+                "type": "full_test",
+                "target_rto_hours": 1.0,
+                "target_rpo_hours": 0.25,
+                "procedures_to_test": ["DRP-001"],
+                "result": {
+                    "success": True,
+                    "rto_achieved": 0.8,
+                    "rpo_achieved": 0.2,
+                    "issues": []
+                }
+            }
+        ],
+        "overall_success": True,
+        "rto_achieved": 0.8,
+        "rpo_achieved": 0.2,
+        "issues_identified": [],
+        "recommendations": [
+            "Consider automating DNS update process",
+            "Review backup verification procedures"
+        ],
+        "test_report": "Test completed successfully with all objectives met. Database failover performed within target RTO.",
+        "lessons_learned": "Automated failover scripts performed well. Manual verification steps could be streamlined.",
+        "action_items": [
+            {
+                "item": "Automate DNS update process",
+                "assigned_to": "Network Engineer",
+                "due_date": "2024-08-15T00:00:00Z",
+                "priority": "medium"
+            }
+        ],
+        "created_at": "2024-06-15T14:00:00Z",
+        "updated_at": "2024-07-15T12:00:00Z"
+    }
+
+@app.post("/api/v1/continuity/tests/{test_id}/execute")
+async def execute_continuity_test(test_id: str):
+    """Execute a scheduled continuity test"""
+    return {
+        "test_id": test_id,
+        "execution_started": datetime.utcnow().isoformat() + "Z",
+        "status": "in_progress",
+        "message": "Test execution initiated successfully"
+    }
+
+# Plan Activation
+@app.get("/api/v1/continuity/activations")
+async def get_plan_activations(active_only: bool = True, skip: int = 0, limit: int = 50):
+    """Get plan activations"""
+    activations = [
+        {
+            "id": 1,
+            "activation_id": "PA-001",
+            "continuity_plan_id": 1,
+            "trigger_event": "Primary data center power outage",
+            "activation_level": "partial_activation",
+            "activated_by": "operations.manager@company.com",
+            "activation_reason": "Extended power outage affecting critical systems",
+            "activation_time": "2024-07-20T14:30:00Z",
+            "expected_duration": 8.0,
+            "affected_business_units": ["IT", "Operations", "Customer Service"],
+            "current_status": "In Progress",
+            "completion_percentage": 65.0,
+            "deactivation_time": None,
+            "created_at": "2024-07-20T14:30:00Z"
+        }
+    ]
+    
+    if active_only:
+        activations = [a for a in activations if a["deactivation_time"] is None]
+    
+    return {
+        "activations": activations[skip:skip+limit],
+        "total": len(activations),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/continuity/plans/{plan_id}/activate")
+async def activate_continuity_plan(plan_id: str):
+    """Activate a business continuity plan"""
+    return {
+        "activation_id": "PA-002",
+        "plan_id": plan_id,
+        "activation_time": datetime.utcnow().isoformat() + "Z",
+        "status": "activated",
+        "message": "Business continuity plan activated successfully"
+    }
+
+@app.get("/api/v1/continuity/activations/{activation_id}")
+async def get_plan_activation(activation_id: str):
+    """Get detailed plan activation"""
+    return {
+        "id": 1,
+        "activation_id": activation_id,
+        "continuity_plan_id": 1,
+        "trigger_event": "Primary data center power outage",
+        "activation_level": "partial_activation",
+        "activated_by": "operations.manager@company.com",
+        "activation_reason": "Extended power outage affecting critical systems",
+        "activation_time": "2024-07-20T14:30:00Z",
+        "expected_duration": 8.0,
+        "affected_business_units": ["IT", "Operations", "Customer Service"],
+        "activated_procedures": ["DRP-001", "DRP-002"],
+        "personnel_notified": [
+            "Database Administrator",
+            "Network Engineer", 
+            "Operations Manager",
+            "Customer Service Manager"
+        ],
+        "current_status": "In Progress",
+        "completion_percentage": 65.0,
+        "stakeholder_notifications": [
+            {
+                "type": "email",
+                "recipients": ["management@company.com"],
+                "sent_at": "2024-07-20T14:35:00Z",
+                "subject": "Business Continuity Plan Activated"
+            }
+        ],
+        "communication_log": [
+            {
+                "timestamp": "2024-07-20T14:30:00Z",
+                "type": "activation",
+                "message": "Plan activated due to power outage",
+                "user": "operations.manager@company.com"
+            },
+            {
+                "timestamp": "2024-07-20T15:15:00Z",
+                "type": "update", 
+                "message": "Database failover completed successfully",
+                "user": "database.admin@company.com"
+            }
+        ],
+        "success_metrics": {
+            "procedures_executed": 2,
+            "procedures_successful": 2,
+            "systems_recovered": ["Database", "Web Application"],
+            "users_affected": 1200,
+            "service_downtime_minutes": 45
+        },
+        "actual_rto": 0.75,
+        "actual_rpo": 0.1,
+        "lessons_learned": "Response was effective. Consider automating notification process.",
+        "deactivated_by": None,
+        "deactivation_time": None,
+        "deactivation_reason": None,
+        "created_at": "2024-07-20T14:30:00Z",
+        "updated_at": "2024-07-20T18:45:00Z"
+    }
+
+@app.put("/api/v1/continuity/activations/{activation_id}/deactivate")
+async def deactivate_plan(activation_id: str):
+    """Deactivate a business continuity plan"""
+    return {
+        "activation_id": activation_id,
+        "deactivation_time": datetime.utcnow().isoformat() + "Z",
+        "status": "deactivated",
+        "message": "Business continuity plan deactivated successfully"
+    }
+
+# Procedure Execution
+@app.get("/api/v1/continuity/executions")
+async def get_procedure_executions(
+    procedure_id: int = None,
+    activation_id: int = None,
+    status: str = None,
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get procedure executions"""
+    executions = [
+        {
+            "id": 1,
+            "execution_id": "PE-001",
+            "procedure_id": 1,
+            "activation_id": 1,
+            "executed_by": "database.admin@company.com",
+            "execution_context": "Actual Incident",
+            "start_time": "2024-07-20T15:00:00Z",
+            "end_time": "2024-07-20T15:45:00Z",
+            "duration_minutes": 45.0,
+            "status": "Completed",
+            "successful": True,
+            "rto_met": True,
+            "rpo_met": True,
+            "actual_recovery_time": 0.75,
+            "actual_data_loss": 0.1,
+            "created_at": "2024-07-20T15:00:00Z"
+        }
+    ]
+    
+    # Apply filters
+    if procedure_id:
+        executions = [e for e in executions if e["procedure_id"] == procedure_id]
+    if activation_id:
+        executions = [e for e in executions if e["activation_id"] == activation_id]
+    if status:
+        executions = [e for e in executions if e["status"] == status]
+    
+    return {
+        "executions": executions[skip:skip+limit],
+        "total": len(executions),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/continuity/procedures/{procedure_id}/execute")
+async def execute_recovery_procedure(procedure_id: str):
+    """Execute a disaster recovery procedure"""
+    return {
+        "execution_id": "PE-002",
+        "procedure_id": procedure_id,
+        "start_time": datetime.utcnow().isoformat() + "Z",
+        "status": "Started",
+        "message": "Recovery procedure execution initiated"
+    }
+
+@app.get("/api/v1/continuity/executions/{execution_id}")
+async def get_procedure_execution(execution_id: str):
+    """Get detailed procedure execution"""
+    return {
+        "id": 1,
+        "execution_id": execution_id,
+        "procedure_id": 1,
+        "activation_id": 1,
+        "executed_by": "database.admin@company.com",
+        "execution_context": "Actual Incident",
+        "start_time": "2024-07-20T15:00:00Z",
+        "end_time": "2024-07-20T15:45:00Z",
+        "duration_minutes": 45.0,
+        "status": "Completed",
+        "completion_percentage": 100.0,
+        "successful": True,
+        "rto_met": True,
+        "rpo_met": True,
+        "issues_encountered": [],
+        "deviations_from_plan": None,
+        "execution_log": [
+            {
+                "step_number": 1,
+                "step_type": "recovery",
+                "description": "Assess database server status",
+                "start_time": "2024-07-20T15:00:00Z",
+                "end_time": "2024-07-20T15:10:00Z",
+                "success": True
+            },
+            {
+                "step_number": 2,
+                "step_type": "recovery",
+                "description": "Initiate failover to backup server",
+                "start_time": "2024-07-20T15:10:00Z",
+                "end_time": "2024-07-20T15:25:00Z",
+                "success": True
+            }
+        ],
+        "notes": "Execution proceeded smoothly with all steps completed successfully",
+        "evidence_collected": [
+            {
+                "type": "screenshot",
+                "description": "Database failover confirmation",
+                "timestamp": "2024-07-20T15:25:00Z"
+            }
+        ],
+        "actual_recovery_time": 0.75,
+        "actual_data_loss": 0.1,
+        "resource_utilization": {
+            "cpu": "65%",
+            "memory": "78%",
+            "network": "45%"
+        },
+        "created_at": "2024-07-20T15:00:00Z",
+        "updated_at": "2024-07-20T15:45:00Z"
+    }
+
+# Metrics and Analytics
+@app.get("/api/v1/continuity/metrics")
+async def get_continuity_metrics():
+    """Get continuity metrics and KPIs"""
+    return {
+        "rto_metrics": {
+            "average_rto_hours": 1.2,
+            "target_rto_hours": 2.0,
+            "rto_compliance_rate": 95.5,
+            "procedures_meeting_rto": 18,
+            "total_procedures": 20
+        },
+        "rpo_metrics": {
+            "average_rpo_hours": 0.3,
+            "target_rpo_hours": 0.5,
+            "rpo_compliance_rate": 98.2,
+            "procedures_meeting_rpo": 19,
+            "total_procedures": 20
+        },
+        "test_metrics": {
+            "tests_completed_this_quarter": 8,
+            "test_success_rate": 87.5,
+            "overdue_tests": 2,
+            "scheduled_tests_next_month": 4
+        },
+        "plan_metrics": {
+            "active_plans": 3,
+            "plans_needing_review": 1,
+            "plans_activated_this_year": 2,
+            "average_activation_response_time": 15.5
+        }
+    }
+
+@app.get("/api/v1/continuity/dashboard")
+async def get_continuity_dashboard():
+    """Get comprehensive continuity management dashboard"""
+    return {
+        "summary": {
+            "total_plans": 3,
+            "active_plans": 3,
+            "total_procedures": 20,
+            "recent_tests": 8,
+            "active_activations": 0,
+            "overdue_reviews": 1
+        },
+        "active_plans": [
+            {
+                "plan_id": "BCP-001",
+                "name": "IT Systems Business Continuity Plan",
+                "business_units": ["IT", "Operations"],
+                "last_tested": "2024-07-15T10:00:00Z",
+                "next_review": "2024-12-15T00:00:00Z"
+            },
+            {
+                "plan_id": "BCP-002", 
+                "name": "Facilities Emergency Response Plan",
+                "business_units": ["Facilities", "HR"],
+                "last_tested": "2024-06-20T14:00:00Z",
+                "next_review": "2024-11-30T00:00:00Z"
+            }
+        ],
+        "recent_tests": [
+            {
+                "test_id": "CT-001",
+                "name": "Q3 2024 Database Recovery Test",
+                "test_type": "Full Test",
+                "date": "2024-07-15T10:00:00Z",
+                "success": True,
+                "rto_achieved": 0.8
+            },
+            {
+                "test_id": "CT-002",
+                "name": "Facilities Evacuation Tabletop",
+                "test_type": "Tabletop",
+                "date": "2024-06-20T14:00:00Z",
+                "success": True,
+                "rto_achieved": None
+            }
+        ],
+        "active_activations": [],
+        "metrics": {
+            "plans_tracked": 3,
+            "average_rto": 1.2,
+            "average_rpo": 0.3,
+            "compliance_rate": 95.5,
+            "critical_issues": []
+        },
+        "upcoming_tests": [
+            {
+                "test_id": "CT-003",
+                "name": "Q4 Application Recovery Test",
+                "scheduled_date": "2024-10-15T10:00:00Z",
+                "test_type": "Simulation"
+            }
+        ],
+        "overdue_reviews": [
+            {
+                "plan_id": "BCP-003",
+                "name": "Legacy Systems Continuity Plan",
+                "review_due_date": "2024-06-30T00:00:00Z",
+                "days_overdue": 45
+            }
+        ]
+    }
+
+# Resources Management
+@app.get("/api/v1/continuity/resources")
+async def get_continuity_resources(
+    resource_type: str = None,
+    available: bool = None,
+    skip: int = 0,
+    limit: int = 50
+):
+    """Get continuity resources"""
+    resources = [
+        {
+            "id": 1,
+            "resource_id": "CR-001",
+            "name": "Backup Data Center",
+            "resource_type": "Facility",
+            "category": "Infrastructure",
+            "description": "Secondary data center for disaster recovery",
+            "available": True,
+            "capacity": 100.0,
+            "current_utilization": 25.0,
+            "location": "West Coast Facility",
+            "criticality_level": "Critical",
+            "created_at": "2024-01-10T09:00:00Z"
+        },
+        {
+            "id": 2,
+            "resource_id": "CR-002",
+            "name": "Emergency Communication System",
+            "resource_type": "Equipment",
+            "category": "Communication",
+            "description": "Satellite communication system for emergencies",
+            "available": True,
+            "capacity": 50.0,
+            "current_utilization": 0.0,
+            "location": "Mobile Unit",
+            "criticality_level": "Important",
+            "created_at": "2024-01-15T11:30:00Z"
+        }
+    ]
+    
+    # Apply filters
+    if resource_type:
+        resources = [r for r in resources if r["resource_type"] == resource_type]
+    if available is not None:
+        resources = [r for r in resources if r["available"] == available]
+    
+    return {
+        "resources": resources[skip:skip+limit],
+        "total": len(resources),
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/continuity/resources")
+async def create_continuity_resource():
+    """Create a new continuity resource"""
+    return {
+        "id": 3,
+        "resource_id": "CR-003",
+        "name": "New Continuity Resource",
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "message": "Continuity resource created successfully"
+    }
+
+@app.get("/api/v1/continuity/resources/{resource_id}")
+async def get_continuity_resource(resource_id: str):
+    """Get detailed continuity resource"""
+    return {
+        "id": 1,
+        "resource_id": resource_id,
+        "name": "Backup Data Center",
+        "resource_type": "Facility",
+        "category": "Infrastructure",
+        "description": "Secondary data center for disaster recovery operations",
+        "available": True,
+        "capacity": 100.0,
+        "current_utilization": 25.0,
+        "location": "West Coast Facility - 123 Business Park Dr",
+        "contact_information": {
+            "facility_manager": "facility.manager@company.com",
+            "phone": "+1-555-0123",
+            "emergency_contact": "+1-555-0199"
+        },
+        "specifications": {
+            "power_capacity": "2MW",
+            "cooling_capacity": "500 tons",
+            "floor_space": "10,000 sq ft",
+            "network_bandwidth": "10 Gbps"
+        },
+        "capabilities": [
+            "Full server hosting",
+            "Network equipment hosting",
+            "24/7 monitoring",
+            "Environmental controls"
+        ],
+        "limitations": [
+            "Limited parking",
+            "No helicopter landing pad",
+            "Single fiber connection"
+        ],
+        "maintenance_schedule": [
+            {
+                "type": "HVAC maintenance",
+                "frequency": "Monthly",
+                "next_date": "2024-09-15T10:00:00Z"
+            }
+        ],
+        "last_maintenance": "2024-08-15T10:00:00Z",
+        "next_maintenance": "2024-09-15T10:00:00Z",
+        "replacement_date": "2030-12-31T00:00:00Z",
+        "acquisition_cost": 5000000.0,
+        "maintenance_cost_annual": 500000.0,
+        "replacement_cost": 8000000.0,
+        "criticality_level": "Critical",
+        "dependencies": [
+            "Power grid connection",
+            "Internet service provider",
+            "Physical security system"
+        ],
+        "dependents": [
+            "Primary business applications",
+            "Customer-facing services",
+            "Internal IT systems"
+        ],
+        "backup_resources": ["CR-004", "CR-005"],
+        "alternative_sources": ["Cloud provider resources", "Partner facility agreements"],
+        "created_at": "2024-01-10T09:00:00Z",
+        "updated_at": "2024-08-15T11:00:00Z"
+    }
+
+# ====================================
+# THIRD-PARTY RISK MANAGEMENT ENDPOINTS
+# ====================================
+
+@app.get("/api/v1/vendors")
+async def get_vendors(
+    tier: str = None,
+    status: str = None,
+    risk_level: str = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get all vendors with optional filtering"""
+    return {
+        "vendors": [
+            {
+                "id": 1,
+                "vendor_id": "VEN-A1B2C3D4",
+                "name": "CloudTech Solutions",
+                "legal_name": "CloudTech Solutions Inc.",
+                "vendor_type": "software",
+                "tier": "critical",
+                "status": "active",
+                "criticality": "high",
+                "industry": "Cloud Services",
+                "services_provided": ["Cloud Infrastructure", "Data Storage", "API Services"],
+                "contract_value_annual": 500000.0,
+                "overall_risk_score": 75.2,
+                "last_risk_assessment": "2024-07-15T10:00:00Z",
+                "next_assessment_due": "2025-01-15T10:00:00Z",
+                "relationship_manager": "John Smith",
+                "contract_end_date": "2025-12-31T23:59:59Z",
+                "created_at": "2023-01-15T09:00:00Z",
+                "updated_at": "2024-08-01T14:30:00Z"
+            },
+            {
+                "id": 2,
+                "vendor_id": "VEN-E5F6G7H8",
+                "name": "SecureAuth Systems",
+                "legal_name": "SecureAuth Systems Ltd",
+                "vendor_type": "security",
+                "tier": "high",
+                "status": "active",
+                "criticality": "medium",
+                "industry": "Cybersecurity",
+                "services_provided": ["Identity Management", "Multi-Factor Authentication"],
+                "contract_value_annual": 120000.0,
+                "overall_risk_score": 85.6,
+                "last_risk_assessment": "2024-06-20T10:00:00Z",
+                "next_assessment_due": "2024-12-20T10:00:00Z",
+                "relationship_manager": "Sarah Johnson",
+                "contract_end_date": "2025-06-30T23:59:59Z",
+                "created_at": "2023-03-10T11:00:00Z",
+                "updated_at": "2024-07-25T16:15:00Z"
+            },
+            {
+                "id": 3,
+                "vendor_id": "VEN-I9J0K1L2",
+                "name": "DataProcess Corp",
+                "legal_name": "DataProcess Corporation",
+                "vendor_type": "service",
+                "tier": "medium",
+                "status": "active",
+                "criticality": "low",
+                "industry": "Data Processing",
+                "services_provided": ["Data Analytics", "Reporting Services"],
+                "contract_value_annual": 75000.0,
+                "overall_risk_score": 68.3,
+                "last_risk_assessment": "2024-05-10T10:00:00Z",
+                "next_assessment_due": "2024-11-10T10:00:00Z",
+                "relationship_manager": "Mike Davis",
+                "contract_end_date": "2024-12-31T23:59:59Z",
+                "created_at": "2023-05-20T13:00:00Z",
+                "updated_at": "2024-08-10T10:45:00Z"
+            }
+        ],
+        "total": 3,
+        "skip": skip,
+        "limit": limit
+    }
+
+@app.post("/api/v1/vendors")
+async def create_vendor(vendor_data: dict):
+    """Create a new vendor"""
+    return {
+        "id": 4,
+        "vendor_id": "VEN-M3N4O5P6",
+        "name": vendor_data.get("name"),
+        "status": "prospect",
+        "tier": vendor_data.get("tier", "low"),
+        "overall_risk_score": 0.0,
+        "created_at": "2024-08-15T12:00:00Z",
+        "message": "Vendor created successfully"
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}")
+async def get_vendor(vendor_id: str):
+    """Get detailed vendor information"""
+    return {
+        "id": 1,
+        "vendor_id": vendor_id,
+        "name": "CloudTech Solutions",
+        "legal_name": "CloudTech Solutions Inc.",
+        "business_name": "CloudTech",
+        "vendor_type": "software",
+        "primary_contact_name": "Alex Rodriguez",
+        "primary_contact_email": "alex.rodriguez@cloudtech.com",
+        "primary_contact_phone": "+1-555-0123",
+        "website": "https://www.cloudtech.com",
+        "industry": "Cloud Services",
+        "business_model": "SaaS",
+        "number_of_employees": 1250,
+        "annual_revenue": 50000000.0,
+        "founding_year": 2015,
+        "headquarters_address": {
+            "street": "123 Tech Boulevard",
+            "city": "San Francisco",
+            "state": "CA",
+            "country": "USA",
+            "postal_code": "94105"
+        },
+        "tier": "critical",
+        "status": "active",
+        "criticality": "high",
+        "services_provided": ["Cloud Infrastructure", "Data Storage", "API Services", "CDN"],
+        "service_categories": ["Infrastructure", "Platform", "Storage"],
+        "data_types_accessed": ["Customer Data", "Financial Records", "System Logs"],
+        "systems_accessed": ["Production Database", "API Gateway", "Monitoring Systems"],
+        "contract_value_annual": 500000.0,
+        "contract_value_total": 1500000.0,
+        "payment_terms": "Net 30",
+        "overall_risk_score": 75.2,
+        "last_risk_assessment": "2024-07-15T10:00:00Z",
+        "next_assessment_due": "2025-01-15T10:00:00Z",
+        "certifications": [
+            {"name": "ISO 27001", "valid_until": "2025-06-30T23:59:59Z"},
+            {"name": "SOC 2 Type II", "valid_until": "2025-03-31T23:59:59Z"}
+        ],
+        "compliance_frameworks": ["GDPR", "SOX", "HIPAA"],
+        "security_attestations": [
+            {"type": "Penetration Test", "date": "2024-05-15T10:00:00Z", "result": "Passed"}
+        ],
+        "relationship_manager": "John Smith",
+        "vendor_account_manager": "Lisa Chen",
+        "escalation_contacts": [
+            {"name": "Mike Johnson", "role": "VP Engineering", "email": "mike.j@cloudtech.com", "phone": "+1-555-0124"}
+        ],
+        "onboarding_date": "2023-01-15T09:00:00Z",
+        "contract_start_date": "2023-02-01T00:00:00Z",
+        "contract_end_date": "2025-12-31T23:59:59Z",
+        "termination_notice_period": 90,
+        "tags": ["critical-vendor", "cloud-provider", "high-volume"],
+        "created_at": "2023-01-15T09:00:00Z",
+        "updated_at": "2024-08-01T14:30:00Z"
+    }
+
+@app.put("/api/v1/vendors/{vendor_id}")
+async def update_vendor(vendor_id: str, vendor_data: dict):
+    """Update vendor information"""
+    return {
+        "vendor_id": vendor_id,
+        "message": "Vendor updated successfully",
+        "updated_fields": list(vendor_data.keys()),
+        "updated_at": "2024-08-15T12:30:00Z"
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/assessments")
+async def get_vendor_assessments(vendor_id: str):
+    """Get all risk assessments for a vendor"""
+    return {
+        "vendor_id": vendor_id,
+        "assessments": [
+            {
+                "id": 1,
+                "assessment_id": "VRA-A1B2C3D4",
+                "assessment_name": "Annual Risk Assessment 2024",
+                "assessment_type": "annual",
+                "status": "completed",
+                "assessment_start_date": "2024-07-01T09:00:00Z",
+                "assessment_end_date": "2024-07-15T17:00:00Z",
+                "overall_risk_score": 75.2,
+                "overall_risk_level": "medium",
+                "category_scores": {
+                    "information_security": 78.5,
+                    "data_protection": 82.1,
+                    "operational": 71.3,
+                    "financial": 79.8,
+                    "compliance": 85.2,
+                    "business_continuity": 68.9
+                },
+                "assessor": "Jane Wilson",
+                "next_assessment_due": "2025-01-15T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "assessment_id": "VRA-E5F6G7H8",
+                "assessment_name": "Triggered Assessment - Security Incident",
+                "assessment_type": "triggered",
+                "status": "in_progress",
+                "assessment_start_date": "2024-08-01T10:00:00Z",
+                "progress_percentage": 65.0,
+                "assessor": "Security Team",
+                "created_at": "2024-08-01T10:00:00Z"
+            }
+        ],
+        "total": 2
+    }
+
+@app.post("/api/v1/vendors/{vendor_id}/assessments")
+async def create_vendor_assessment(vendor_id: str, assessment_data: dict):
+    """Create a new vendor risk assessment"""
+    return {
+        "id": 3,
+        "assessment_id": "VRA-I9J0K1L2",
+        "vendor_id": vendor_id,
+        "assessment_name": assessment_data.get("assessment_name"),
+        "assessment_type": assessment_data.get("assessment_type", "periodic"),
+        "status": "not_started",
+        "assessment_start_date": "2024-08-15T09:00:00Z",
+        "due_date": assessment_data.get("due_date"),
+        "created_at": "2024-08-15T12:00:00Z",
+        "message": "Assessment created successfully"
+    }
+
+@app.get("/api/v1/assessments/{assessment_id}")
+async def get_assessment_details(assessment_id: str):
+    """Get detailed assessment information"""
+    return {
+        "id": 1,
+        "assessment_id": assessment_id,
+        "vendor_id": 1,
+        "vendor_name": "CloudTech Solutions",
+        "assessment_name": "Annual Risk Assessment 2024",
+        "assessment_type": "annual",
+        "assessment_methodology": "questionnaire",
+        "scope_description": "Comprehensive security, operational, and compliance assessment",
+        "status": "completed",
+        "progress_percentage": 100.0,
+        "assessment_start_date": "2024-07-01T09:00:00Z",
+        "assessment_end_date": "2024-07-15T17:00:00Z",
+        "due_date": "2024-07-31T23:59:59Z",
+        "overall_risk_score": 75.2,
+        "overall_risk_level": "medium",
+        "previous_risk_score": 72.8,
+        "risk_trend": "improving",
+        "category_scores": {
+            "information_security": 78.5,
+            "data_protection": 82.1,
+            "operational": 71.3,
+            "financial": 79.8,
+            "compliance": 85.2,
+            "business_continuity": 68.9,
+            "reputational": 74.6
+        },
+        "strengths": [
+            "Strong ISO 27001 implementation",
+            "Excellent incident response procedures",
+            "Regular security training program"
+        ],
+        "weaknesses": [
+            "Limited disaster recovery testing",
+            "Inconsistent change management processes",
+            "Gaps in third-party vendor management"
+        ],
+        "gaps": [
+            "Missing backup site validation",
+            "Incomplete business continuity documentation"
+        ],
+        "recommendations": [
+            "Implement quarterly DR testing",
+            "Enhance change management automation",
+            "Establish vendor risk assessment program"
+        ],
+        "questionnaire_responses": {
+            "sec_001": true,
+            "sec_002": false,
+            "dp_001": true,
+            "fin_001": "A-"
+        },
+        "site_visit_conducted": true,
+        "site_visit_findings": [
+            "Physical security controls adequate",
+            "Environmental controls properly maintained"
+        ],
+        "reviewed_by": "Jane Wilson",
+        "review_date": "2024-07-16T10:00:00Z",
+        "approved_by": "David Lee",
+        "approval_date": "2024-07-17T14:00:00Z",
+        "next_assessment_due": "2025-01-15T10:00:00Z",
+        "created_at": "2024-07-01T09:00:00Z",
+        "updated_at": "2024-07-17T14:00:00Z"
+    }
+
+@app.put("/api/v1/assessments/{assessment_id}")
+async def update_assessment(assessment_id: str, assessment_data: dict):
+    """Update assessment information"""
+    return {
+        "assessment_id": assessment_id,
+        "message": "Assessment updated successfully",
+        "updated_fields": list(assessment_data.keys()),
+        "updated_at": "2024-08-15T12:30:00Z"
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/contracts")
+async def get_vendor_contracts(vendor_id: str):
+    """Get all contracts for a vendor"""
+    return {
+        "vendor_id": vendor_id,
+        "contracts": [
+            {
+                "id": 1,
+                "contract_id": "VCT-A1B2C3D4",
+                "contract_name": "Master Service Agreement",
+                "contract_type": "MSA",
+                "contract_number": "MSA-2023-001",
+                "status": "active",
+                "effective_date": "2023-02-01T00:00:00Z",
+                "expiration_date": "2025-12-31T23:59:59Z",
+                "auto_renewal": true,
+                "renewal_notice_days": 90,
+                "contract_value": 1500000.0,
+                "currency": "USD",
+                "payment_terms": "Net 30",
+                "contract_owner": "Legal Team",
+                "business_owner": "IT Director",
+                "renewal_alerts_sent": 0,
+                "created_at": "2023-01-20T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "contract_id": "VCT-E5F6G7H8",
+                "contract_name": "Data Processing Agreement",
+                "contract_type": "DPA",
+                "status": "active",
+                "effective_date": "2023-02-01T00:00:00Z",
+                "expiration_date": "2025-12-31T23:59:59Z",
+                "contract_owner": "Privacy Officer",
+                "business_owner": "Data Protection Team",
+                "created_at": "2023-02-01T09:00:00Z"
+            }
+        ],
+        "total": 2
+    }
+
+@app.post("/api/v1/vendors/{vendor_id}/contracts")
+async def create_vendor_contract(vendor_id: str, contract_data: dict):
+    """Create a new vendor contract"""
+    return {
+        "id": 3,
+        "contract_id": "VCT-I9J0K1L2",
+        "vendor_id": vendor_id,
+        "contract_name": contract_data.get("contract_name"),
+        "contract_type": contract_data.get("contract_type"),
+        "status": "draft",
+        "effective_date": contract_data.get("effective_date"),
+        "expiration_date": contract_data.get("expiration_date"),
+        "created_at": "2024-08-15T12:00:00Z",
+        "message": "Contract created successfully"
+    }
+
+@app.get("/api/v1/contracts/{contract_id}")
+async def get_contract_details(contract_id: str):
+    """Get detailed contract information"""
+    return {
+        "id": 1,
+        "contract_id": contract_id,
+        "vendor_id": 1,
+        "vendor_name": "CloudTech Solutions",
+        "contract_name": "Master Service Agreement",
+        "contract_type": "MSA",
+        "contract_number": "MSA-2023-001",
+        "status": "active",
+        "effective_date": "2023-02-01T00:00:00Z",
+        "expiration_date": "2025-12-31T23:59:59Z",
+        "auto_renewal": true,
+        "renewal_notice_days": 90,
+        "termination_notice_days": 30,
+        "contract_value": 1500000.0,
+        "currency": "USD",
+        "payment_terms": "Net 30",
+        "payment_schedule": "monthly",
+        "service_levels": [
+            {"metric": "Uptime", "target": 99.9, "unit": "%"},
+            {"metric": "Response Time", "target": 200, "unit": "ms"},
+            {"metric": "Support Response", "target": 4, "unit": "hours"}
+        ],
+        "performance_metrics": [
+            {"name": "Availability", "current": 99.95, "target": 99.9, "status": "meeting"},
+            {"name": "Performance", "current": 180, "target": 200, "status": "exceeding"}
+        ],
+        "security_requirements": [
+            "ISO 27001 certification maintenance",
+            "Annual penetration testing",
+            "Quarterly security reviews"
+        ],
+        "compliance_requirements": [
+            "GDPR compliance",
+            "SOC 2 Type II certification",
+            "Data residency requirements"
+        ],
+        "liability_cap": 5000000.0,
+        "insurance_requirements": [
+            {"type": "Professional Liability", "minimum": 2000000.0},
+            {"type": "Cyber Liability", "minimum": 1000000.0}
+        ],
+        "contract_owner": "Legal Team",
+        "business_owner": "IT Director",
+        "legal_reviewer": "Sarah Martinez",
+        "renewal_date": "2025-10-01T00:00:00Z",
+        "renewal_status": "pending_review",
+        "renewal_alerts_sent": 1,
+        "last_alert_date": "2024-07-01T09:00:00Z",
+        "created_at": "2023-01-20T10:00:00Z",
+        "updated_at": "2024-07-01T09:15:00Z"
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/monitoring")
+async def get_vendor_monitoring(vendor_id: str):
+    """Get vendor monitoring status and metrics"""
+    return {
+        "vendor_id": vendor_id,
+        "monitoring": {
+            "id": 1,
+            "monitoring_id": "VMN-A1B2C3D4",
+            "monitoring_type": "comprehensive",
+            "monitoring_frequency": "continuous",
+            "status": "active",
+            "automated_monitoring": true,
+            "last_check_date": "2024-08-15T12:00:00Z",
+            "next_check_date": "2024-08-15T13:00:00Z",
+            "security_posture_score": 85.2,
+            "service_availability": 99.95,
+            "response_time_ms": 180,
+            "compliance_status": "compliant",
+            "financial_health_score": 82.5,
+            "credit_rating": "A-",
+            "news_sentiment": 0.3,
+            "created_at": "2024-01-15T10:00:00Z",
+            "updated_at": "2024-08-15T12:00:00Z"
+        },
+        "recent_checks": [
+            {
+                "timestamp": "2024-08-15T12:00:00Z",
+                "check_type": "security_scan",
+                "status": "passed",
+                "score": 85.2
+            },
+            {
+                "timestamp": "2024-08-15T11:00:00Z",
+                "check_type": "availability",
+                "status": "excellent",
+                "uptime": 99.95
+            },
+            {
+                "timestamp": "2024-08-15T10:00:00Z",
+                "check_type": "news_sentiment",
+                "status": "positive",
+                "sentiment": 0.3
+            }
+        ],
+        "active_alerts": []
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/incidents")
+async def get_vendor_incidents(vendor_id: str):
+    """Get all incidents for a vendor"""
+    return {
+        "vendor_id": vendor_id,
+        "incidents": [
+            {
+                "id": 1,
+                "incident_id": "VIN-A1B2C3D4",
+                "title": "Service Outage - API Gateway",
+                "description": "Partial outage affecting API gateway services",
+                "incident_type": "operational",
+                "severity": "high",
+                "status": "resolved",
+                "business_impact": "medium",
+                "affected_services": ["API Gateway", "Authentication Service"],
+                "affected_users": 1250,
+                "financial_impact": 50000.0,
+                "discovered_date": "2024-07-20T14:30:00Z",
+                "reported_date": "2024-07-20T14:35:00Z",
+                "acknowledged_date": "2024-07-20T14:40:00Z",
+                "resolved_date": "2024-07-20T16:15:00Z",
+                "root_cause": "Database connection pool exhaustion",
+                "resolution_summary": "Increased connection pool size and implemented connection monitoring",
+                "incident_manager": "Mike Johnson",
+                "priority": "high",
+                "vendor_incident_id": "INC-2024-0720-001",
+                "created_at": "2024-07-20T14:35:00Z"
+            }
+        ],
+        "total": 1,
+        "summary": {
+            "open_incidents": 0,
+            "resolved_incidents": 1,
+            "average_resolution_time_hours": 1.75,
+            "incidents_this_month": 1,
+            "incidents_this_quarter": 3
+        }
+    }
+
+@app.post("/api/v1/vendors/{vendor_id}/incidents")
+async def create_vendor_incident(vendor_id: str, incident_data: dict):
+    """Create a new vendor incident"""
+    return {
+        "id": 2,
+        "incident_id": "VIN-E5F6G7H8",
+        "vendor_id": vendor_id,
+        "title": incident_data.get("title"),
+        "incident_type": incident_data.get("incident_type"),
+        "severity": incident_data.get("severity"),
+        "status": "open",
+        "discovered_date": incident_data.get("discovered_date"),
+        "created_at": "2024-08-15T12:00:00Z",
+        "message": "Incident created successfully"
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/action-items")
+async def get_vendor_action_items(vendor_id: str):
+    """Get all action items for a vendor"""
+    return {
+        "vendor_id": vendor_id,
+        "action_items": [
+            {
+                "id": 1,
+                "action_id": "VAC-A1B2C3D4",
+                "assessment_id": 1,
+                "title": "Implement Quarterly DR Testing",
+                "description": "Establish regular disaster recovery testing program",
+                "category": "business_continuity",
+                "priority": "high",
+                "status": "in_progress",
+                "progress_percentage": 65.0,
+                "assigned_to": "IT Operations Team",
+                "vendor_contact": "Alex Rodriguez",
+                "due_date": "2024-09-30T23:59:59Z",
+                "estimated_effort_hours": 40.0,
+                "implementation_plan": "1. Define DR test scenarios 2. Schedule quarterly tests 3. Document procedures",
+                "business_justification": "Ensure business continuity and compliance requirements",
+                "cost_estimate": 15000.0,
+                "created_at": "2024-07-17T15:00:00Z",
+                "updated_at": "2024-08-10T10:30:00Z"
+            },
+            {
+                "id": 2,
+                "action_id": "VAC-E5F6G7H8",
+                "assessment_id": 1,
+                "title": "Enhance Change Management Process",
+                "description": "Implement automated change management workflows",
+                "category": "operational",
+                "priority": "medium",
+                "status": "open",
+                "progress_percentage": 0.0,
+                "assigned_to": "DevOps Team",
+                "vendor_contact": "Lisa Chen",
+                "due_date": "2024-10-31T23:59:59Z",
+                "estimated_effort_hours": 60.0,
+                "created_at": "2024-07-17T15:00:00Z"
+            }
+        ],
+        "total": 2,
+        "summary": {
+            "open": 1,
+            "in_progress": 1,
+            "completed": 0,
+            "overdue": 0
+        }
+    }
+
+@app.get("/api/v1/vendors/{vendor_id}/sla-monitoring")
+async def get_vendor_sla_monitoring(vendor_id: str):
+    """Get SLA monitoring data for a vendor"""
+    return {
+        "vendor_id": vendor_id,
+        "sla_metrics": [
+            {
+                "id": 1,
+                "sla_id": "SLA-A1B2C3D4",
+                "contract_id": 1,
+                "sla_name": "Service Availability",
+                "metric_name": "uptime_percentage",
+                "metric_unit": "%",
+                "target_value": 99.9,
+                "current_value": 99.95,
+                "warning_threshold": 99.5,
+                "critical_threshold": 99.0,
+                "measurement_period": "monthly",
+                "status": "meeting",
+                "breach_count": 0,
+                "consecutive_breaches": 0,
+                "service_credits_earned": 0.0,
+                "penalties_applied": 0.0,
+                "trend_direction": "stable",
+                "last_breach_date": null,
+                "reporting_frequency": "monthly",
+                "created_at": "2023-02-01T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "sla_id": "SLA-E5F6G7H8",
+                "contract_id": 1,
+                "sla_name": "Response Time",
+                "metric_name": "avg_response_time_ms",
+                "metric_unit": "ms",
+                "target_value": 200.0,
+                "current_value": 180.0,
+                "warning_threshold": 250.0,
+                "critical_threshold": 300.0,
+                "measurement_period": "monthly",
+                "status": "exceeding",
+                "breach_count": 0,
+                "consecutive_breaches": 0,
+                "trend_direction": "improving",
+                "created_at": "2023-02-01T10:00:00Z"
+            }
+        ],
+        "overall_sla_performance": {
+            "meeting_slas": 2,
+            "breached_slas": 0,
+            "at_risk_slas": 0,
+            "overall_score": 98.5
+        }
+    }
+
+@app.get("/api/v1/supply-chain")
+async def get_supply_chain_overview():
+    """Get supply chain overview and risk analysis"""
+    return {
+        "supply_chain_nodes": [
+            {
+                "id": 1,
+                "node_id": "SCN-A1B2C3D4",
+                "name": "CloudTech Solutions",
+                "node_type": "vendor",
+                "tier_level": 1,
+                "criticality_level": "high",
+                "services_provided": ["Cloud Infrastructure", "Data Storage"],
+                "dependency_level": "critical",
+                "single_point_of_failure": true,
+                "replacement_time_days": 90,
+                "switching_cost": 250000.0,
+                "visibility_level": "full",
+                "operational_status": "active",
+                "inherent_risk_score": 75.2,
+                "residual_risk_score": 65.8,
+                "concentration_risk": 35.0,
+                "backup_options": ["Alternative Cloud Provider A", "Hybrid Setup"],
+                "created_at": "2023-01-15T10:00:00Z"
+            },
+            {
+                "id": 2,
+                "node_id": "SCN-E5F6G7H8",
+                "name": "SecureAuth Systems",
+                "node_type": "vendor",
+                "tier_level": 1,
+                "criticality_level": "medium",
+                "services_provided": ["Identity Management"],
+                "dependency_level": "important",
+                "single_point_of_failure": false,
+                "replacement_time_days": 30,
+                "switching_cost": 75000.0,
+                "visibility_level": "partial",
+                "operational_status": "active",
+                "inherent_risk_score": 45.6,
+                "residual_risk_score": 38.2,
+                "concentration_risk": 15.0,
+                "backup_options": ["Internal IAM System", "Alternative Provider"],
+                "created_at": "2023-03-10T11:00:00Z"
+            }
+        ],
+        "risk_analysis": {
+            "total_nodes": 2,
+            "critical_dependencies": 1,
+            "single_points_of_failure": 1,
+            "average_concentration_risk": 25.0,
+            "high_risk_nodes": 1,
+            "backup_coverage": 100.0,
+            "visibility_gaps": 0
+        },
+        "key_metrics": {
+            "supplier_diversity_score": 75.0,
+            "geographic_risk_score": 60.0,
+            "regulatory_compliance_score": 85.0,
+            "business_continuity_score": 80.0
+        }
+    }
+
+@app.get("/api/v1/due-diligence")
+async def get_due_diligence_overview():
+    """Get due diligence overview for all vendors"""
+    return {
+        "due_diligence_summary": {
+            "total_vendors": 25,
+            "completed_assessments": 22,
+            "pending_assessments": 3,
+            "overdue_reviews": 1,
+            "approval_rate": 88.0,
+            "average_completion_time_days": 14.5
+        },
+        "recent_assessments": [
+            {
+                "id": 1,
+                "due_diligence_id": "VDD-A1B2C3D4",
+                "vendor_id": 1,
+                "vendor_name": "CloudTech Solutions",
+                "due_diligence_type": "annual",
+                "overall_rating": "approved",
+                "financial_stability_rating": "A-",
+                "security_assessment_completed": true,
+                "privacy_assessment_completed": true,
+                "reference_checks_completed": true,
+                "reviewed_by": "Procurement Team",
+                "review_date": "2024-07-15T10:00:00Z",
+                "approved_by": "Chief Procurement Officer",
+                "approval_date": "2024-07-17T14:00:00Z",
+                "valid_until": "2025-07-17T23:59:59Z",
+                "next_review_due": "2025-01-17T10:00:00Z"
+            }
+        ],
+        "pending_reviews": [
+            {
+                "vendor_name": "New Vendor Corp",
+                "due_diligence_type": "initial",
+                "days_pending": 5,
+                "assigned_to": "Risk Assessment Team"
+            }
+        ]
+    }
+
+@app.get("/api/v1/third-party-dashboard")
+async def get_third_party_dashboard():
+    """Get comprehensive third-party risk management dashboard"""
+    return {
+        "portfolio_summary": {
+            "total_vendors": 25,
+            "active_vendors": 23,
+            "critical_vendors": 5,
+            "high_risk_vendors": 8,
+            "total_contract_value": 5750000.0,
+            "average_risk_score": 72.5,
+            "concentration_risk_percentage": 45.2
+        },
+        "risk_distribution": {
+            "critical": 3,
+            "high": 8,
+            "medium": 10,
+            "low": 4
+        },
+        "tier_distribution": {
+            "critical": 5,
+            "high": 8,
+            "medium": 10,
+            "low": 2
+        },
+        "key_metrics": {
+            "overdue_assessments": 4,
+            "contract_renewals_due_30_days": 3,
+            "active_incidents": 2,
+            "sla_breaches_this_month": 1,
+            "open_action_items": 15,
+            "compliance_exceptions": 2
+        },
+        "risk_trends": {
+            "overall_trend": "improving",
+            "risk_score_change_30_days": -2.3,
+            "new_high_risk_vendors": 1,
+            "resolved_high_risk_vendors": 2
+        },
+        "upcoming_activities": [
+            {
+                "type": "assessment",
+                "vendor_name": "DataProcess Corp",
+                "due_date": "2024-08-30T23:59:59Z",
+                "priority": "high"
+            },
+            {
+                "type": "contract_renewal",
+                "vendor_name": "SecureAuth Systems",
+                "due_date": "2024-09-15T23:59:59Z",
+                "priority": "medium"
+            }
+        ],
+        "top_risk_vendors": [
+            {
+                "vendor_name": "Legacy Systems Inc",
+                "risk_score": 92.5,
+                "tier": "critical",
+                "contract_value": 750000.0,
+                "issues": ["Outdated security practices", "No backup provider"]
+            },
+            {
+                "vendor_name": "Global Data Services",
+                "risk_score": 88.3,
+                "tier": "high",
+                "contract_value": 320000.0,
+                "issues": ["Regulatory compliance gaps", "Geographic concentration"]
+            }
+        ],
+        "recent_alerts": [
+            {
+                "vendor_name": "CloudTech Solutions",
+                "alert_type": "availability_threshold",
+                "severity": "medium",
+                "triggered_at": "2024-08-15T10:30:00Z"
+            }
+        ]
+    }
+
+
 if __name__ == "__main__":
     import random
     

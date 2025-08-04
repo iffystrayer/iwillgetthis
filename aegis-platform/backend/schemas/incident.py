@@ -1058,3 +1058,613 @@ class IncidentPlaybookExecutionResponse(BaseModel):
     next_action: Optional[str] = None
     estimated_completion_time: Optional[datetime] = None
     errors: List[str] = []
+
+
+# Post-Incident Analysis Schemas
+
+# Lessons Learned Schemas
+class LessonLearnedBase(BaseModel):
+    """Base schema for lessons learned"""
+    lesson_title: str = Field(..., min_length=1, max_length=500)
+    lesson_summary: str = Field(..., min_length=1)
+    lesson_category: Optional[str] = Field(None, max_length=100)
+    
+    # Lesson details
+    what_happened: Optional[str] = None
+    why_it_happened: Optional[str] = None
+    what_we_learned: Optional[str] = None
+    
+    # Recommendations and actions
+    recommendations: Optional[List[str]] = []
+    preventive_measures: Optional[List[str]] = []
+    process_improvements: Optional[List[str]] = []
+    
+    # Impact and relevance
+    severity_prevented: Optional[IncidentSeverityEnum] = None
+    cost_savings_estimated: Optional[float] = Field(None, ge=0)
+    applicability_scope: Optional[str] = Field(None, max_length=100)
+    affected_systems: Optional[List[str]] = []
+    
+    # Implementation tracking
+    implementation_status: str = Field("identified", regex="^(identified|planned|in_progress|implemented|verified)$")
+    implementation_date: Optional[datetime] = None
+    implementation_cost: Optional[float] = Field(None, ge=0)
+    implementation_effort_hours: Optional[float] = Field(None, ge=0)
+    
+    # Knowledge management
+    keywords: Optional[List[str]] = []
+    related_lessons: Optional[List[int]] = []
+    knowledge_base_category: Optional[str] = Field(None, max_length=100)
+    training_material_created: bool = False
+    
+    # Verification and effectiveness
+    effectiveness_verified: bool = False
+    verification_date: Optional[datetime] = None
+    verification_method: Optional[str] = None
+    recurrence_prevented: Optional[bool] = None
+    
+    # Approval and sharing
+    shared_externally: bool = False
+    sharing_restrictions: Optional[str] = None
+    
+    # Metadata
+    confidence_level: str = Field("medium", regex="^(high|medium|low)$")
+    evidence_quality: str = Field("medium", regex="^(high|medium|low)$")
+    tags: Optional[List[str]] = []
+
+
+class LessonLearnedCreate(LessonLearnedBase):
+    """Create schema for lessons learned"""
+    incident_id: Optional[int] = None
+    post_incident_review_id: Optional[int] = None
+    implementation_owner: Optional[int] = None
+
+
+class LessonLearnedUpdate(BaseModel):
+    """Update schema for lessons learned"""
+    lesson_title: Optional[str] = Field(None, min_length=1, max_length=500)
+    lesson_summary: Optional[str] = Field(None, min_length=1)
+    lesson_category: Optional[str] = None
+    
+    what_happened: Optional[str] = None
+    why_it_happened: Optional[str] = None
+    what_we_learned: Optional[str] = None
+    
+    recommendations: Optional[List[str]] = None
+    preventive_measures: Optional[List[str]] = None
+    process_improvements: Optional[List[str]] = None
+    
+    severity_prevented: Optional[IncidentSeverityEnum] = None
+    cost_savings_estimated: Optional[float] = Field(None, ge=0)
+    applicability_scope: Optional[str] = None
+    affected_systems: Optional[List[str]] = None
+    
+    implementation_status: Optional[str] = Field(None, regex="^(identified|planned|in_progress|implemented|verified)$")
+    implementation_date: Optional[datetime] = None
+    implementation_owner: Optional[int] = None
+    implementation_cost: Optional[float] = Field(None, ge=0)
+    implementation_effort_hours: Optional[float] = Field(None, ge=0)
+    
+    keywords: Optional[List[str]] = None
+    related_lessons: Optional[List[int]] = None
+    knowledge_base_category: Optional[str] = None
+    training_material_created: Optional[bool] = None
+    
+    effectiveness_verified: Optional[bool] = None
+    verification_date: Optional[datetime] = None
+    verification_method: Optional[str] = None
+    recurrence_prevented: Optional[bool] = None
+    
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    shared_externally: Optional[bool] = None
+    sharing_restrictions: Optional[str] = None
+    
+    confidence_level: Optional[str] = Field(None, regex="^(high|medium|low)$")
+    evidence_quality: Optional[str] = Field(None, regex="^(high|medium|low)$")
+    tags: Optional[List[str]] = None
+
+
+class LessonLearnedResponse(LessonLearnedBase):
+    """Response schema for lessons learned"""
+    id: int
+    
+    # Source relationships
+    incident_id: Optional[int] = None
+    post_incident_review_id: Optional[int] = None
+    implementation_owner: Optional[int] = None
+    
+    # Approval tracking
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    
+    # Timestamps
+    identified_at: datetime
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # Relationships
+    incident: Optional[Dict[str, Any]] = None
+    post_incident_review: Optional[Dict[str, Any]] = None
+    implementation_owner_user: Optional[UserSummary] = None
+    approver: Optional[UserSummary] = None
+    
+    class Config:
+        from_attributes = True
+
+
+# Action Item Schemas
+class ActionItemBase(BaseModel):
+    """Base schema for action items"""
+    title: str = Field(..., min_length=1, max_length=500)
+    description: str = Field(..., min_length=1)
+    action_type: Optional[str] = Field(None, max_length=100)
+    
+    # Assignment and ownership
+    responsible_team: Optional[str] = Field(None, max_length=200)
+    
+    # Priority and timing
+    priority: str = Field("medium", regex="^(low|medium|high|critical)$")
+    due_date: datetime
+    estimated_effort_hours: Optional[float] = Field(None, ge=0)
+    estimated_cost: Optional[float] = Field(None, ge=0)
+    
+    # Implementation details
+    success_criteria: Optional[str] = None
+    deliverables: Optional[List[str]] = []
+    dependencies: Optional[List[str]] = []
+    risks: Optional[str] = None
+    
+    # Follow-up
+    follow_up_required: bool = False
+    follow_up_date: Optional[datetime] = None
+    follow_up_notes: Optional[str] = None
+    
+    # Metadata
+    tags: Optional[List[str]] = []
+    related_action_items: Optional[List[int]] = []
+
+
+class ActionItemCreate(ActionItemBase):
+    """Create schema for action items"""
+    assigned_to: int
+    assigned_by: int
+    post_incident_review_id: Optional[int] = None
+    lesson_learned_id: Optional[int] = None
+    incident_id: Optional[int] = None
+
+
+class ActionItemUpdate(BaseModel):
+    """Update schema for action items"""
+    title: Optional[str] = Field(None, min_length=1, max_length=500)
+    description: Optional[str] = Field(None, min_length=1)
+    action_type: Optional[str] = None
+    
+    responsible_team: Optional[str] = None
+    
+    priority: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    due_date: Optional[datetime] = None
+    estimated_effort_hours: Optional[float] = Field(None, ge=0)
+    estimated_cost: Optional[float] = Field(None, ge=0)
+    
+    status: Optional[str] = Field(None, regex="^(open|in_progress|completed|cancelled|on_hold)$")
+    progress_percentage: Optional[int] = Field(None, ge=0, le=100)
+    status_notes: Optional[str] = None
+    
+    success_criteria: Optional[str] = None
+    deliverables: Optional[List[str]] = None
+    dependencies: Optional[List[str]] = None
+    risks: Optional[str] = None
+    
+    completion_notes: Optional[str] = None
+    actual_effort_hours: Optional[float] = Field(None, ge=0)
+    actual_cost: Optional[float] = Field(None, ge=0)
+    effectiveness_rating: Optional[int] = Field(None, ge=1, le=5)
+    lessons_from_implementation: Optional[str] = None
+    
+    verification_required: Optional[bool] = None
+    verified_by: Optional[int] = None
+    verified_at: Optional[datetime] = None
+    verification_notes: Optional[str] = None
+    
+    follow_up_required: Optional[bool] = None
+    follow_up_date: Optional[datetime] = None
+    follow_up_notes: Optional[str] = None
+    
+    tags: Optional[List[str]] = None
+    related_action_items: Optional[List[int]] = None
+    
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+
+
+class ActionItemResponse(ActionItemBase):
+    """Response schema for action items"""
+    id: int
+    
+    # Source relationships
+    post_incident_review_id: Optional[int] = None
+    lesson_learned_id: Optional[int] = None
+    incident_id: Optional[int] = None
+    
+    # Assignment
+    assigned_to: int
+    assigned_by: int
+    
+    # Status and progress
+    status: str = "open"
+    progress_percentage: int = 0
+    status_notes: Optional[str] = None
+    
+    # Results and outcomes
+    completion_notes: Optional[str] = None
+    actual_effort_hours: Optional[float] = None
+    actual_cost: Optional[float] = None
+    effectiveness_rating: Optional[int] = None
+    lessons_from_implementation: Optional[str] = None
+    
+    # Verification and closure
+    verification_required: bool = True
+    verified_by: Optional[int] = None
+    verified_at: Optional[datetime] = None
+    verification_notes: Optional[str] = None
+    
+    # Timestamps
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    
+    # Relationships
+    post_incident_review: Optional[Dict[str, Any]] = None
+    lesson_learned: Optional[Dict[str, Any]] = None
+    incident: Optional[Dict[str, Any]] = None
+    assignee: Optional[UserSummary] = None
+    assigner: Optional[UserSummary] = None
+    verifier: Optional[UserSummary] = None
+    
+    class Config:
+        from_attributes = True
+
+
+# Knowledge Article Schemas
+class KnowledgeArticleBase(BaseModel):
+    """Base schema for knowledge articles"""
+    title: str = Field(..., min_length=1, max_length=500)
+    article_type: Optional[str] = Field(None, max_length=100)
+    category: Optional[str] = Field(None, max_length=100)
+    subcategory: Optional[str] = Field(None, max_length=100)
+    
+    # Content
+    summary: Optional[str] = None
+    content: str = Field(..., min_length=1)
+    content_format: str = Field("markdown", regex="^(markdown|html|plain_text)$")
+    
+    # Source and derivation
+    source_documents: Optional[List[str]] = []
+    
+    # Applicability and audience
+    target_audience: Optional[List[str]] = []
+    skill_level_required: str = Field("intermediate", regex="^(beginner|intermediate|advanced|expert)$")
+    applicable_scenarios: Optional[List[str]] = []
+    
+    # Knowledge management
+    keywords: Optional[List[str]] = []
+    related_articles: Optional[List[int]] = []
+    prerequisites: Optional[List[str]] = []
+    follow_up_reading: Optional[List[str]] = []
+    
+    # Quality and maintenance
+    review_frequency_days: int = Field(365, gt=0)
+    
+    # Access control
+    access_level: str = Field("internal", regex="^(public|internal|restricted|confidential)$")
+    allowed_roles: Optional[List[str]] = []
+    allowed_teams: Optional[List[str]] = []
+    
+    # Versioning
+    version: str = Field("1.0", max_length=20)
+    change_log: Optional[List[Dict[str, Any]]] = []
+    
+    # Metadata
+    tags: Optional[List[str]] = []
+    attachments: Optional[List[str]] = []
+    external_links: Optional[List[str]] = []
+
+
+class KnowledgeArticleCreate(KnowledgeArticleBase):
+    """Create schema for knowledge articles"""
+    author_id: int
+    derived_from_incident: Optional[int] = None
+    derived_from_lesson: Optional[int] = None
+
+
+class KnowledgeArticleUpdate(BaseModel):
+    """Update schema for knowledge articles"""
+    title: Optional[str] = Field(None, min_length=1, max_length=500)
+    article_type: Optional[str] = None
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
+    
+    summary: Optional[str] = None
+    content: Optional[str] = Field(None, min_length=1)
+    content_format: Optional[str] = Field(None, regex="^(markdown|html|plain_text)$")
+    
+    source_documents: Optional[List[str]] = None
+    
+    target_audience: Optional[List[str]] = None
+    skill_level_required: Optional[str] = Field(None, regex="^(beginner|intermediate|advanced|expert)$")
+    applicable_scenarios: Optional[List[str]] = None
+    
+    keywords: Optional[List[str]] = None
+    related_articles: Optional[List[int]] = None
+    prerequisites: Optional[List[str]] = None
+    follow_up_reading: Optional[List[str]] = None
+    
+    accuracy_verified: Optional[bool] = None
+    verification_date: Optional[datetime] = None
+    verified_by: Optional[int] = None
+    last_reviewed: Optional[datetime] = None
+    review_frequency_days: Optional[int] = Field(None, gt=0)
+    
+    usefulness_rating: Optional[float] = Field(None, ge=0.0, le=5.0)
+    usage_feedback: Optional[List[Dict[str, Any]]] = None
+    search_ranking: Optional[int] = Field(None, ge=1, le=100)
+    
+    published: Optional[bool] = None
+    publication_date: Optional[datetime] = None
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    
+    access_level: Optional[str] = Field(None, regex="^(public|internal|restricted|confidential)$")
+    allowed_roles: Optional[List[str]] = None
+    allowed_teams: Optional[List[str]] = None
+    
+    version: Optional[str] = None
+    change_log: Optional[List[Dict[str, Any]]] = None
+    
+    tags: Optional[List[str]] = None
+    attachments: Optional[List[str]] = None
+    external_links: Optional[List[str]] = None
+
+
+class KnowledgeArticleResponse(KnowledgeArticleBase):
+    """Response schema for knowledge articles"""
+    id: int
+    
+    # Source relationships
+    derived_from_incident: Optional[int] = None
+    derived_from_lesson: Optional[int] = None
+    author_id: int
+    
+    # Quality and maintenance
+    accuracy_verified: bool = False
+    verification_date: Optional[datetime] = None
+    verified_by: Optional[int] = None
+    last_reviewed: Optional[datetime] = None
+    
+    # Usage and effectiveness
+    view_count: int = 0
+    usefulness_rating: Optional[float] = None
+    usage_feedback: Optional[List[Dict[str, Any]]] = []
+    search_ranking: int = 50
+    
+    # Publishing and access
+    published: bool = False
+    publication_date: Optional[datetime] = None
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    
+    # Versioning
+    previous_version_id: Optional[int] = None
+    
+    # Timestamps
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # Relationships
+    incident: Optional[Dict[str, Any]] = None
+    lesson_learned: Optional[Dict[str, Any]] = None
+    author: Optional[UserSummary] = None
+    approver: Optional[UserSummary] = None
+    verifier: Optional[UserSummary] = None
+    previous_version: Optional[Dict[str, Any]] = None
+    
+    class Config:
+        from_attributes = True
+
+
+# Trend Analysis Schemas
+class TrendAnalysisBase(BaseModel):
+    """Base schema for trend analysis"""
+    analysis_name: str = Field(..., min_length=1, max_length=300)
+    analysis_type: Optional[str] = Field(None, max_length=100)
+    time_period_start: datetime
+    time_period_end: datetime
+    
+    # Analysis scope
+    incident_categories: Optional[List[str]] = []
+    severity_levels: Optional[List[str]] = []
+    teams_included: Optional[List[str]] = []
+    
+    # Trend findings
+    key_trends: Optional[List[str]] = []
+    emerging_patterns: Optional[List[str]] = []
+    trend_directions: Optional[Dict[str, str]] = {}
+    
+    # Statistical analysis
+    incident_volume_trend: Optional[Dict[str, Any]] = {}
+    severity_distribution_trend: Optional[Dict[str, Any]] = {}
+    response_time_trends: Optional[Dict[str, Any]] = {}
+    cost_trends: Optional[Dict[str, Any]] = {}
+    
+    # Predictive insights
+    risk_predictions: Optional[List[str]] = []
+    resource_needs_forecast: Optional[Dict[str, Any]] = {}
+    seasonal_patterns: Optional[Dict[str, Any]] = {}
+    
+    # Recommendations
+    strategic_recommendations: Optional[List[str]] = []
+    tactical_recommendations: Optional[List[str]] = []
+    investment_priorities: Optional[List[str]] = []
+    
+    # Data quality and methodology
+    data_sources: Optional[List[str]] = []
+    methodology: Optional[str] = None
+    confidence_level: str = Field("medium", regex="^(high|medium|low)$")
+    limitations: Optional[str] = None
+    
+    # Results and impact
+    findings_summary: Optional[str] = None
+    business_impact: Optional[str] = None
+    action_items_generated: Optional[List[Dict[str, Any]]] = []
+    
+    # Approval and distribution
+    distribution_list: Optional[List[str]] = []
+    
+    # Metadata
+    tags: Optional[List[str]] = []
+    supporting_charts: Optional[List[str]] = []
+    detailed_report_path: Optional[str] = Field(None, max_length=500)
+
+
+class TrendAnalysisCreate(TrendAnalysisBase):
+    """Create schema for trend analysis"""
+    analyst_id: int
+
+
+class TrendAnalysisUpdate(BaseModel):
+    """Update schema for trend analysis"""
+    analysis_name: Optional[str] = Field(None, min_length=1, max_length=300)
+    analysis_type: Optional[str] = None
+    time_period_start: Optional[datetime] = None
+    time_period_end: Optional[datetime] = None
+    
+    incident_categories: Optional[List[str]] = None
+    severity_levels: Optional[List[str]] = None
+    teams_included: Optional[List[str]] = None
+    
+    key_trends: Optional[List[str]] = None
+    emerging_patterns: Optional[List[str]] = None
+    trend_directions: Optional[Dict[str, str]] = None
+    
+    incident_volume_trend: Optional[Dict[str, Any]] = None
+    severity_distribution_trend: Optional[Dict[str, Any]] = None
+    response_time_trends: Optional[Dict[str, Any]] = None
+    cost_trends: Optional[Dict[str, Any]] = None
+    
+    risk_predictions: Optional[List[str]] = None
+    resource_needs_forecast: Optional[Dict[str, Any]] = None
+    seasonal_patterns: Optional[Dict[str, Any]] = None
+    
+    strategic_recommendations: Optional[List[str]] = None
+    tactical_recommendations: Optional[List[str]] = None
+    investment_priorities: Optional[List[str]] = None
+    
+    data_sources: Optional[List[str]] = None
+    methodology: Optional[str] = None
+    confidence_level: Optional[str] = Field(None, regex="^(high|medium|low)$")
+    limitations: Optional[str] = None
+    
+    findings_summary: Optional[str] = None
+    business_impact: Optional[str] = None
+    action_items_generated: Optional[List[Dict[str, Any]]] = None
+    
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    distribution_list: Optional[List[str]] = None
+    
+    tags: Optional[List[str]] = None
+    supporting_charts: Optional[List[str]] = None
+    detailed_report_path: Optional[str] = None
+
+
+class TrendAnalysisResponse(TrendAnalysisBase):
+    """Response schema for trend analysis"""
+    id: int
+    analyst_id: int
+    
+    # Approval tracking
+    approved_by: Optional[int] = None
+    approved_at: Optional[datetime] = None
+    
+    # Timestamps
+    analysis_date: datetime
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # Relationships
+    analyst: Optional[UserSummary] = None
+    approver: Optional[UserSummary] = None
+    
+    class Config:
+        from_attributes = True
+
+
+# Knowledge Base Dashboard Schemas
+class LessonsLearnedDashboardData(BaseModel):
+    """Dashboard data for lessons learned"""
+    total_lessons: int
+    lessons_this_quarter: int
+    implemented_lessons: int
+    verified_effectiveness: int
+    
+    lessons_by_category: Dict[str, int]
+    lessons_by_implementation_status: Dict[str, int]
+    cost_savings_total: float
+    recurrence_prevention_rate: float
+    
+    recent_lessons: List[Dict[str, Any]]
+    high_impact_lessons: List[Dict[str, Any]]
+    implementation_backlog: List[Dict[str, Any]]
+
+
+class KnowledgeBaseDashboardData(BaseModel):
+    """Dashboard data for knowledge base"""
+    total_articles: int
+    published_articles: int
+    articles_this_month: int
+    pending_review_articles: int
+    
+    articles_by_category: Dict[str, int]
+    articles_by_type: Dict[str, int]
+    most_viewed_articles: List[Dict[str, Any]]
+    highest_rated_articles: List[Dict[str, Any]]
+    
+    search_activity: Dict[str, Any]
+    user_feedback_summary: Dict[str, Any]
+
+
+class PostIncidentAnalyticsDashboard(BaseModel):
+    """Comprehensive post-incident analytics dashboard"""
+    lessons_learned_data: LessonsLearnedDashboardData
+    knowledge_base_data: KnowledgeBaseDashboardData
+    
+    action_items_summary: Dict[str, Any]
+    trend_analysis_summary: Dict[str, Any]
+    improvement_metrics: Dict[str, Any]
+    
+    recent_reviews: List[Dict[str, Any]]
+    pending_action_items: List[Dict[str, Any]]
+    effectiveness_trends: Dict[str, Any]
+
+
+class KnowledgeSearchRequest(BaseModel):
+    """Knowledge base search request"""
+    query: str = Field(..., min_length=1)
+    categories: Optional[List[str]] = None
+    article_types: Optional[List[str]] = None
+    skill_levels: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    access_level: Optional[str] = None
+    limit: int = Field(20, ge=1, le=100)
+    offset: int = Field(0, ge=0)
+
+
+class KnowledgeSearchResponse(BaseModel):
+    """Knowledge base search response"""
+    total_results: int
+    results: List[Dict[str, Any]]
+    search_suggestions: List[str]
+    related_searches: List[str]
+    facets: Dict[str, List[Dict[str, Any]]]
