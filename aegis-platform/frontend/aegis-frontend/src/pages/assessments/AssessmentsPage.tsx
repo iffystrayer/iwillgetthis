@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Plus, Filter, Calendar, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,29 +7,32 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { assessmentsApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { NewAssessmentDialog } from '@/components/dialogs/NewAssessmentDialog';
 
 export default function AssessmentsPage() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [assessments, setAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNewAssessmentDialog, setShowNewAssessmentDialog] = useState(false);
+
+  const fetchAssessments = async () => {
+    try {
+      setLoading(true);
+      const response = await assessmentsApi.getAll();
+      setAssessments(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch assessments');
+      console.error('Error fetching assessments:', err);
+      setAssessments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAssessments = async () => {
-      try {
-        setLoading(true);
-        const response = await assessmentsApi.getAll();
-        setAssessments(response.items || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch assessments');
-        console.error('Error fetching assessments:', err);
-        setAssessments([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAssessments();
   }, []);
 
@@ -57,8 +61,12 @@ export default function AssessmentsPage() {
 
   const handleNewAssessment = () => {
     console.log('New Assessment clicked - Opening assessment creation dialog');
-    alert('New Assessment functionality would open a dialog to create new assessments');
-    // TODO: Implement new assessment dialog
+    setShowNewAssessmentDialog(true);
+  };
+
+  const handleAssessmentCreated = () => {
+    console.log('Assessment created successfully - refreshing assessments list');
+    fetchAssessments();
   };
 
   const handleSchedule = () => {
@@ -75,8 +83,7 @@ export default function AssessmentsPage() {
 
   const handleViewDetails = (assessmentId: string) => {
     console.log('View Details clicked for assessment:', assessmentId);
-    alert(`View Details functionality would navigate to detailed view for assessment ${assessmentId}`);
-    // TODO: Navigate to assessment details page
+    navigate(`/assessments/${assessmentId}`);
   };
 
   return (
@@ -245,6 +252,13 @@ export default function AssessmentsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* New Assessment Dialog */}
+      <NewAssessmentDialog
+        open={showNewAssessmentDialog}
+        onOpenChange={setShowNewAssessmentDialog}
+        onAssessmentCreated={handleAssessmentCreated}
+      />
     </div>
   );
 }
