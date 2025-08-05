@@ -99,9 +99,10 @@ docker-compose -f docker/docker-compose.yml down
 1. **Virtual Environment**: Always activate Python virtual environment before any Python operations
 2. **Random Ports**: Use random 5-digit TCP ports (10000-65535) to avoid conflicts
 3. **Never launch app with ports 3000 and 8000. Use unique random 5-digit numbered ports instead**
-4. **Regression Testing**: Run regression tests after every feature implementation
-5. **Commit Always**: Commit all changes immediately after completing features
-6. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
+4. **Regression Testing**: Run both backend and frontend regression tests after every feature implementation
+5. **Playwright Testing**: Run Playwright E2E tests to verify UI functionality and prevent regressions
+6. **Commit Always**: Commit all changes immediately after completing features
+7. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
 
 ### Git Workflow
 ```bash
@@ -110,8 +111,10 @@ git add .
 git commit -m "feat: description of feature"
 
 # Run regression tests before pushing
-python -m pytest tests/ -v  # Backend
-npm test                    # Frontend
+python -m pytest tests/ -v                    # Backend tests
+npm test                                       # Frontend unit tests  
+npx playwright test                            # E2E UI functionality tests
+npx playwright test button-functionality.spec.ts  # Button regression tests
 
 git push origin main
 ```
@@ -210,8 +213,17 @@ Key configuration is managed through environment variables in `backend/config.py
 ### Testing Strategy
 - **Regression Tests**: Must run after every feature completion
 - **Backend**: `python -m pytest tests/ -v` in virtual environment
-- **Frontend**: `npm test` for component and integration tests
+- **Frontend Unit**: `npm test` for component and integration tests
+- **E2E Testing**: `npx playwright test` for full user workflow verification
+- **Button Regression**: `npx playwright test button-functionality.spec.ts` for UI interaction verification
 - **Integration**: End-to-end testing with real AI providers (when API keys available)
+
+### Playwright Testing Guidelines
+- Run after every UI feature implementation
+- Verify button functionality doesn't regress
+- Test complete user workflows (login → navigation → actions)
+- Capture screenshots for visual verification
+- Automated testing prevents manual testing issues from recurring
 
 ## Common Issues
 
