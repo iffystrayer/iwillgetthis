@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { AddUserDialog } from '@/components/dialogs/AddUserDialog';
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,21 +18,6 @@ export default function UsersPage() {
   const [showFiltersDialog, setShowFiltersDialog] = useState(false);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const response = await usersApi.getAll();
-        setUsers(response.items || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch users');
-        console.error('Error fetching users:', err);
-        setUsers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -70,8 +56,7 @@ export default function UsersPage() {
 
   const handleAddUser = () => {
     console.log('Add User clicked - Opening dialog');
-    alert('Add User functionality would open a dialog here');
-    // TODO: Implement add user dialog
+    setShowAddDialog(true);
   };
 
   const handleInviteUsers = () => {
@@ -90,6 +75,27 @@ export default function UsersPage() {
     console.log('Edit User clicked for user:', userId);
     alert(`Edit User functionality would open edit dialog for user ${userId}`);
     // TODO: Navigate to edit user page or open edit dialog
+  };
+
+  const handleUserAdded = () => {
+    console.log('User added successfully - refreshing user list');
+    // Refresh the user list
+    fetchUsers();
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await usersApi.getAll();
+      setUsers(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch users');
+      console.error('Error fetching users:', err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -260,6 +266,13 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add User Dialog */}
+      <AddUserDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onUserAdded={handleUserAdded}
+      />
     </div>
   );
 }

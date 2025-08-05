@@ -6,29 +6,31 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { evidenceApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { UploadEvidenceDialog } from '@/components/dialogs/UploadEvidenceDialog';
 
 export default function EvidencePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [evidence, setEvidence] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+
+  const fetchEvidence = async () => {
+    try {
+      setLoading(true);
+      const response = await evidenceApi.getAll();
+      setEvidence(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch evidence');
+      console.error('Error fetching evidence:', err);
+      setEvidence([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEvidence = async () => {
-      try {
-        setLoading(true);
-        const response = await evidenceApi.getAll();
-        setEvidence(response.items || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch evidence');
-        console.error('Error fetching evidence:', err);
-        setEvidence([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvidence();
   }, []);
 
@@ -68,8 +70,12 @@ export default function EvidencePage() {
 
   const handleUploadEvidence = () => {
     console.log('Upload Evidence clicked - Opening file upload dialog');
-    alert('Upload Evidence functionality would open a file upload dialog');
-    // TODO: Implement file upload dialog
+    setShowUploadDialog(true);
+  };
+
+  const handleEvidenceUploaded = () => {
+    console.log('Evidence uploaded successfully - refreshing evidence list');
+    fetchEvidence();
   };
 
   const handleExportAll = () => {
@@ -84,10 +90,42 @@ export default function EvidencePage() {
     // TODO: Implement filters dialog
   };
 
-  const handleDownload = (evidenceId: string) => {
+  const handleDownload = async (evidenceId: string) => {
     console.log('Download clicked for evidence:', evidenceId);
-    alert(`Download functionality would download evidence file ${evidenceId}`);
-    // TODO: Implement evidence file download
+    try {
+      const response = await evidenceApi.download(evidenceId);
+      
+      // Create a blob from the response data
+      const blob = new Blob([response.data], { 
+        type: response.headers['content-type'] || 'application/octet-stream' 
+      });
+      
+      // Get filename from response headers or use a default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `evidence-${evidenceId}`;
+      if (contentDisposition && contentDisposition.includes('filename=')) {
+        filename = contentDisposition
+          .split('filename=')[1]
+          .replace(/['"]/g, '');
+      }
+      
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log(`Evidence ${evidenceId} downloaded successfully`);
+    } catch (error: any) {
+      console.error('Error downloading evidence:', error);
+      alert(`Failed to download evidence: ${error.message || 'Unknown error'}`);
+    }
   };
 
   const handleViewDetails = (evidenceId: string) => {
@@ -270,6 +308,13 @@ export default function EvidencePage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Upload Evidence Dialog */}
+      <UploadEvidenceDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        onEvidenceUploaded={handleEvidenceUploaded}
+      />
     </div>
   );
 }

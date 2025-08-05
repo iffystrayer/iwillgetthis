@@ -161,6 +161,29 @@ export const evidenceApi = {
   create: (data: any) => apiCall('POST', '/evidence', data),
   update: (id: string, data: any) => apiCall('PUT', `/evidence/${id}`, data),
   delete: (id: string) => apiCall('DELETE', `/evidence/${id}`),
+  upload: async (formData: FormData) => {
+    try {
+      const response = await api({
+        method: 'POST',
+        url: '/evidence/upload',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Evidence upload failed:', error);
+      throw error;
+    }
+  },
+  download: (id: string) => {
+    return api({
+      method: 'GET',
+      url: `/evidence/${id}/download`,
+      responseType: 'blob',
+    });
+  },
 };
 
 // Reports API
