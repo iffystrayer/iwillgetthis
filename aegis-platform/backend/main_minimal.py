@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from config import settings
-from database import engine, Base
+# Skip all model imports - pure auth service
 
 # Pydantic models for login
 class UserLogin(BaseModel):
@@ -30,14 +30,8 @@ async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting Aegis Risk Management Platform...")
     
-    # Create database tables
-    try:
-        print("📊 Creating database tables...")
-        Base.metadata.create_all(bind=engine)
-        print("✅ Database tables created successfully")
-    except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
-        print("⚠️  Continuing in development mode...")
+    # Skip database initialization for now
+    print("⚠️  Skipping database initialization - using mock auth only")
     
     yield
     

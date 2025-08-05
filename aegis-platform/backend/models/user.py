@@ -16,8 +16,8 @@ class Role(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Relationships
-    user_roles = relationship("UserRole", back_populates="role")
+    # Clean relationships
+    user_roles = relationship("UserRole")
 
 
 class User(Base):
@@ -40,12 +40,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Relationships
-    user_roles = relationship("UserRole", back_populates="user")
-    created_assessments = relationship("Assessment", back_populates="created_by_user")
-    assigned_tasks = relationship("Task", foreign_keys="Task.assigned_to_id", back_populates="assigned_to")
-    created_tasks = relationship("Task", foreign_keys="Task.created_by_id", back_populates="created_by")
-    audit_logs = relationship("AuditLog", back_populates="user")
+    # Temporarily disable all relationships to isolate the issue
+    # user_roles = relationship("UserRole")
 
 
 class UserRole(Base):
@@ -55,8 +51,7 @@ class UserRole(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     assigned_at = Column(DateTime(timezone=True), server_default=func.now())
-    assigned_by = Column(Integer, ForeignKey("users.id"))
     
-    # Relationships
-    user = relationship("User", back_populates="user_roles")
-    role = relationship("Role", back_populates="user_roles")
+    # Clean relationships - no back_populates for now
+    user = relationship("User")
+    role = relationship("Role")

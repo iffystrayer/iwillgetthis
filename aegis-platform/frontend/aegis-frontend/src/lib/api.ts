@@ -177,6 +177,7 @@ export const dashboardApi = {
   getRecentActivity: () => apiCall('GET', '/dashboards/recent-activity'),
   getCisoCockpit: () => apiCall('GET', '/dashboards/ciso-cockpit'),
   getAnalystWorkbench: () => apiCall('GET', '/dashboards/analyst-workbench'),
+  getSystemOwner: () => apiCall('GET', '/dashboards/system-owner'),
 };
 
 // Users API
@@ -186,6 +187,17 @@ export const usersApi = {
   create: (data: any) => apiCall('POST', '/users', data),
   update: (id: string, data: any) => apiCall('PUT', `/users/${id}`, data),
   delete: (id: string) => apiCall('DELETE', `/users/${id}`),
+};
+
+// Integrations API
+export const integrationsApi = {
+  getAll: (params?: QueryParams) => apiCall('GET', '/integrations', undefined, params),
+  getById: (id: string) => apiCall('GET', `/integrations/${id}`),
+  create: (data: any) => apiCall('POST', '/integrations', data),
+  update: (id: string, data: any) => apiCall('PUT', `/integrations/${id}`, data),
+  delete: (id: string) => apiCall('DELETE', `/integrations/${id}`),
+  sync: (id: string) => apiCall('POST', `/integrations/${id}/sync`),
+  test: (id: string) => apiCall('POST', `/integrations/${id}/test`),
 };
 
 // AI API

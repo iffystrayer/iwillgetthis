@@ -191,7 +191,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
+        <a href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <Shield className="w-5 h-5 text-white" />
           </div>
@@ -199,7 +199,7 @@ export function AppSidebar() {
             <h1 className="font-bold text-lg">Aegis</h1>
             <p className="text-xs text-muted-foreground">Risk Management</p>
           </div>
-        </div>
+        </a>
       </SidebarHeader>
 
       <SidebarContent>
