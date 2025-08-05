@@ -75,11 +75,8 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
     try {
       console.log('Creating user with data:', data);
       
-      // For now, simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Replace with actual API call when backend is ready
-      // await usersApi.create(data);
+      // Create user through API
+      await usersApi.create(data);
       
       console.log('✅ User created successfully:', data);
       

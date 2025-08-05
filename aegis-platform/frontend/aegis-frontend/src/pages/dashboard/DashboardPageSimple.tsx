@@ -1,34 +1,57 @@
+import { useState, useEffect } from 'react';
 import { BarChart3, Shield, AlertTriangle, CheckSquare, Database, TrendingUp, Users, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-
-// Mock data to bypass API calls
-const mockDashboardMetrics = {
-  assets: {
-    total: 45,
-    critical: 8
-  },
-  risks: {
-    total: 23,
-    high_priority: 8,
-    open: 19
-  },
-  tasks: {
-    total: 18,
-    open: 13,
-    overdue: 4
-  },
-  assessments: {
-    total: 7,
-    active: 3,
-    completed: 4
-  }
-};
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { dashboardApi } from '@/lib/api';
 
 export default function DashboardPageSimple() {
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await dashboardApi.getMetrics();
+        setMetrics(response);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch dashboard data');
+        console.error('Error fetching dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 p-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading dashboard: {error}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -60,9 +83,9 @@ export default function DashboardPageSimple() {
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockDashboardMetrics.assets.total}</div>
+            <div className="text-2xl font-bold">{metrics?.assets?.total || 0}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-red-600">{mockDashboardMetrics.assets.critical}</span> critical assets
+              <span className="text-red-600">{metrics?.assets?.critical || 0}</span> critical assets
             </p>
           </CardContent>
         </Card>
@@ -73,9 +96,9 @@ export default function DashboardPageSimple() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockDashboardMetrics.risks.total}</div>
+            <div className="text-2xl font-bold">{metrics?.risks?.total || 0}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-red-600">{mockDashboardMetrics.risks.high_priority}</span> high priority
+              <span className="text-red-600">{metrics?.risks?.high_priority || 0}</span> high priority
             </p>
           </CardContent>
         </Card>
@@ -86,9 +109,9 @@ export default function DashboardPageSimple() {
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockDashboardMetrics.tasks.open}</div>
+            <div className="text-2xl font-bold">{metrics?.tasks?.open || 0}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-orange-600">{mockDashboardMetrics.tasks.overdue}</span> overdue
+              <span className="text-orange-600">{metrics?.tasks?.overdue || 0}</span> overdue
             </p>
           </CardContent>
         </Card>
@@ -99,9 +122,9 @@ export default function DashboardPageSimple() {
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockDashboardMetrics.assessments.completed}</div>
+            <div className="text-2xl font-bold">{metrics?.assessments?.completed || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {mockDashboardMetrics.assessments.active} in progress
+              {metrics?.assessments?.active || 0} in progress
             </p>
           </CardContent>
         </Card>
@@ -199,13 +222,6 @@ export default function DashboardPageSimple() {
         </CardContent>
       </Card>
       
-      {/* Success Alert */}
-      <Alert>
-        <CheckSquare className="h-4 w-4" />
-        <AlertDescription>
-          ✅ Dashboard JavaScript Error Fixed! The dashboard is now loading successfully with mock data.
-        </AlertDescription>
-      </Alert>
     </div>
   );
 }
