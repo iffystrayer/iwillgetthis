@@ -48,8 +48,13 @@ pnpm run lint
 # Preview production build (uses random port)
 pnpm run preview --port $(shuf -i 10000-65535 -n 1)
 
-# Run regression tests
-npm test
+# Run regression tests (includes unit tests, E2E tests, and linting)
+npm run test:regression
+
+# Run individual test suites
+npm run test:unit         # Unit tests
+npm run test:e2e          # Playwright E2E tests
+npm test                  # Combined unit + E2E tests
 ```
 
 ### Backend (FastAPI + Python)
