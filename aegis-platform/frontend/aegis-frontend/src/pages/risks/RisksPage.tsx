@@ -73,6 +73,30 @@ export default function RisksPage() {
     }
   };
 
+  const handleAddRisk = () => {
+    console.log('Add Risk clicked - Opening risk creation dialog');
+    alert('Add Risk functionality would open a dialog to create new risks');
+    // TODO: Implement add risk dialog
+  };
+
+  const handleRiskMatrix = () => {
+    console.log('Risk Matrix clicked - Opening risk matrix view');
+    alert('Risk Matrix functionality would show risks plotted on probability vs impact matrix');
+    // TODO: Implement risk matrix visualization
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filters dialog');
+    alert('Filters functionality would open a filters panel for risks');
+    // TODO: Implement filters dialog
+  };
+
+  const handleViewDetails = (riskId: number) => {
+    console.log('View Details clicked for risk:', riskId);
+    alert(`View Details functionality would navigate to detailed view for risk ${riskId}`);
+    // TODO: Navigate to risk details page
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -88,11 +112,11 @@ export default function RisksPage() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleRiskMatrix}>
             <TrendingUp className="w-4 h-4 mr-2" />
             Risk Matrix
           </Button>
-          <Button>
+          <Button onClick={handleAddRisk}>
             <Plus className="w-4 h-4 mr-2" />
             Add Risk
           </Button>
@@ -153,7 +177,7 @@ export default function RisksPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleFilters}>
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
@@ -193,7 +217,7 @@ export default function RisksPage() {
                   <span className={`text-sm font-medium ${getStatusColor(risk.status)}`}>
                     {risk.status.charAt(0).toUpperCase() + risk.status.slice(1)}
                   </span>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(risk.id)}>
                     View Details
                   </Button>
                 </div>

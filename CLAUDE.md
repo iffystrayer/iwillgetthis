@@ -98,9 +98,10 @@ docker-compose -f docker/docker-compose.yml down
 ### Required Workflow Steps
 1. **Virtual Environment**: Always activate Python virtual environment before any Python operations
 2. **Random Ports**: Use random 5-digit TCP ports (10000-65535) to avoid conflicts
-3. **Regression Testing**: Run regression tests after every feature implementation
-4. **Commit Always**: Commit all changes immediately after completing features
-5. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
+3. **Never launch app with ports 3000 and 8000. Use unique random 5-digit numbered ports instead**
+4. **Regression Testing**: Run regression tests after every feature implementation
+5. **Commit Always**: Commit all changes immediately after completing features
+6. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
 
 ### Git Workflow
 ```bash
@@ -233,4 +234,4 @@ Key configuration is managed through environment variables in `backend/config.py
 - JWT tokens are httpOnly cookies for security
 - File uploads are validated and sanitized
 - Database queries use SQLAlchemy ORM to prevent injection attacks
-- Virtual environment isolation prevents system-wide package conflicts
+- Virtual environment isolation prevents system-wide package conflictsdescribe this promo

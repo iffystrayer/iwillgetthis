@@ -66,6 +66,36 @@ export default function EvidencePage() {
     }
   };
 
+  const handleUploadEvidence = () => {
+    console.log('Upload Evidence clicked - Opening file upload dialog');
+    alert('Upload Evidence functionality would open a file upload dialog');
+    // TODO: Implement file upload dialog
+  };
+
+  const handleExportAll = () => {
+    console.log('Export All clicked - Exporting all evidence files');
+    alert('Export All functionality would download all evidence files as a ZIP archive');
+    // TODO: Implement bulk export functionality
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filters dialog');
+    alert('Filters functionality would open a filters panel for evidence');
+    // TODO: Implement filters dialog
+  };
+
+  const handleDownload = (evidenceId: string) => {
+    console.log('Download clicked for evidence:', evidenceId);
+    alert(`Download functionality would download evidence file ${evidenceId}`);
+    // TODO: Implement evidence file download
+  };
+
+  const handleViewDetails = (evidenceId: string) => {
+    console.log('View Details clicked for evidence:', evidenceId);
+    alert(`View Details functionality would show detailed view for evidence ${evidenceId}`);
+    // TODO: Navigate to evidence details page or open details modal
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -80,11 +110,11 @@ export default function EvidencePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportAll}>
             <Download className="h-4 w-4 mr-2" />
             Export All
           </Button>
-          <Button>
+          <Button onClick={handleUploadEvidence}>
             <Upload className="h-4 w-4 mr-2" />
             Upload Evidence
           </Button>
@@ -101,7 +131,7 @@ export default function EvidencePage() {
             className="max-w-sm"
           />
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleFilters}>
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
@@ -193,7 +223,7 @@ export default function EvidencePage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by uploading your first evidence file'}
               </p>
-              <Button>
+              <Button onClick={handleUploadEvidence}>
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Evidence
               </Button>
@@ -226,11 +256,11 @@ export default function EvidencePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(item.id)}>
                       <Download className="h-4 w-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(item.id)}>
                       View Details
                     </Button>
                   </div>

@@ -64,6 +64,30 @@ export default function IntegrationsPage() {
     }
   };
 
+  const handleAddIntegration = () => {
+    console.log('Add Integration clicked - Opening integration creation dialog');
+    alert('Add Integration functionality would open a dialog to create new integrations');
+    // TODO: Implement add integration dialog
+  };
+
+  const handleSyncAll = () => {
+    console.log('Sync All clicked - Synchronizing all integrations');
+    alert('Sync All functionality would trigger synchronization for all active integrations');
+    // TODO: Implement sync all functionality
+  };
+
+  const handleConfigure = (integrationId: string) => {
+    console.log('Configure clicked for integration:', integrationId);
+    alert(`Configure functionality would open configuration dialog for integration ${integrationId}`);
+    // TODO: Navigate to configuration page or open config dialog
+  };
+
+  const handleSync = (integrationId: string) => {
+    console.log('Sync clicked for integration:', integrationId);
+    alert(`Sync functionality would trigger synchronization for integration ${integrationId}`);
+    // TODO: Implement individual integration sync
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -78,11 +102,11 @@ export default function IntegrationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleSyncAll}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Sync All
           </Button>
-          <Button>
+          <Button onClick={handleAddIntegration}>
             <Plus className="h-4 w-4 mr-2" />
             Add Integration
           </Button>
@@ -187,7 +211,7 @@ export default function IntegrationsPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by adding your first integration'}
               </p>
-              <Button>
+              <Button onClick={handleAddIntegration}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Integration
               </Button>
@@ -217,11 +241,11 @@ export default function IntegrationsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleConfigure(integration.id)}>
                       <Settings className="h-4 w-4 mr-2" />
                       Configure
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleSync(integration.id)}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Sync
                     </Button>

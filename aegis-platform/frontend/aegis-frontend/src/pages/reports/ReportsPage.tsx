@@ -59,11 +59,41 @@ export default function ReportsPage() {
   const getTypeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'risk management': return 'destructive';
-      case 'compliance': return 'secondary';
+      case 'compliance': return 'secondary';  
       case 'security': return 'default';
       case 'asset management': return 'outline';
       default: return 'outline';
     }
+  };
+
+  const handleNewReport = () => {
+    console.log('New Report clicked - Opening report creation dialog');
+    alert('New Report functionality would open a dialog to create new reports');
+    // TODO: Implement new report dialog
+  };
+
+  const handleScheduleReport = () => {
+    console.log('Schedule Report clicked - Opening report scheduling dialog');
+    alert('Schedule Report functionality would open a scheduling dialog for automated reports');
+    // TODO: Implement report scheduling dialog
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filters dialog');
+    alert('Filters functionality would open a filters panel for reports');
+    // TODO: Implement filters dialog
+  };
+
+  const handleDownload = (reportId: string) => {
+    console.log('Download clicked for report:', reportId);
+    alert(`Download functionality would download report ${reportId} as PDF or Excel`);
+    // TODO: Implement report download
+  };
+
+  const handleViewDetails = (reportId: string) => {
+    console.log('View Details clicked for report:', reportId);
+    alert(`View Details functionality would navigate to detailed view for report ${reportId}`);
+    // TODO: Navigate to report details page
   };
 
   return (
@@ -80,11 +110,11 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleScheduleReport}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Report
           </Button>
-          <Button>
+          <Button onClick={handleNewReport}>
             <Plus className="h-4 w-4 mr-2" />
             New Report
           </Button>
@@ -101,7 +131,7 @@ export default function ReportsPage() {
             className="max-w-sm"
           />
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleFilters}>
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
@@ -193,7 +223,7 @@ export default function ReportsPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by creating your first report'}
               </p>
-              <Button>
+              <Button onClick={handleNewReport}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Report
               </Button>
@@ -226,11 +256,11 @@ export default function ReportsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(report.id)}>
                       <Download className="h-4 w-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(report.id)}>
                       View Details
                     </Button>
                   </div>

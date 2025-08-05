@@ -55,6 +55,30 @@ export default function AssessmentsPage() {
     }
   };
 
+  const handleNewAssessment = () => {
+    console.log('New Assessment clicked - Opening assessment creation dialog');
+    alert('New Assessment functionality would open a dialog to create new assessments');
+    // TODO: Implement new assessment dialog
+  };
+
+  const handleSchedule = () => {
+    console.log('Schedule clicked - Opening assessment scheduling dialog');
+    alert('Schedule functionality would open a scheduling dialog for assessments');
+    // TODO: Implement assessment scheduling dialog
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filters dialog');
+    alert('Filters functionality would open a filters panel for assessments');
+    // TODO: Implement filters dialog
+  };
+
+  const handleViewDetails = (assessmentId: string) => {
+    console.log('View Details clicked for assessment:', assessmentId);
+    alert(`View Details functionality would navigate to detailed view for assessment ${assessmentId}`);
+    // TODO: Navigate to assessment details page
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -69,11 +93,11 @@ export default function AssessmentsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleSchedule}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule
           </Button>
-          <Button>
+          <Button onClick={handleNewAssessment}>
             <Plus className="h-4 w-4 mr-2" />
             New Assessment
           </Button>
@@ -90,7 +114,7 @@ export default function AssessmentsPage() {
             className="max-w-sm"
           />
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleFilters}>
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
@@ -182,7 +206,7 @@ export default function AssessmentsPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by creating your first assessment'}
               </p>
-              <Button>
+              <Button onClick={handleNewAssessment}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Assessment
               </Button>
@@ -211,7 +235,7 @@ export default function AssessmentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment.id)}>
                       View Details
                     </Button>
                   </div>

@@ -64,6 +64,30 @@ export default function TasksPage() {
     }
   };
 
+  const handleNewTask = () => {
+    console.log('New Task clicked - Opening task creation dialog');
+    alert('New Task functionality would open a dialog to create new tasks');
+    // TODO: Implement new task dialog
+  };
+
+  const handleViewCalendar = () => {
+    console.log('View Calendar clicked - Opening calendar view');
+    alert('View Calendar functionality would show tasks in calendar format');
+    // TODO: Implement calendar view
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filters dialog');
+    alert('Filters functionality would open a filters panel for tasks');
+    // TODO: Implement filters dialog
+  };
+
+  const handleViewDetails = (taskId: string) => {
+    console.log('View Details clicked for task:', taskId);
+    alert(`View Details functionality would navigate to detailed view for task ${taskId}`);
+    // TODO: Navigate to task details page
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -78,11 +102,11 @@ export default function TasksPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleViewCalendar}>
             <Calendar className="h-4 w-4 mr-2" />
             View Calendar
           </Button>
-          <Button>
+          <Button onClick={handleNewTask}>
             <Plus className="h-4 w-4 mr-2" />
             New Task
           </Button>
@@ -99,7 +123,7 @@ export default function TasksPage() {
             className="max-w-sm"
           />
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleFilters}>
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
@@ -191,7 +215,7 @@ export default function TasksPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by creating your first task'}
               </p>
-              <Button>
+              <Button onClick={handleNewTask}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Task
               </Button>
@@ -231,7 +255,7 @@ export default function TasksPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(task.id)}>
                       View Details
                     </Button>
                   </div>
