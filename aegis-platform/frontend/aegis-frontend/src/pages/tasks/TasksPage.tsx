@@ -6,29 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { tasksApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { NewTaskDialog } from '@/components/dialogs/NewTaskDialog';
 
 export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        setLoading(true);
-        const response = await tasksApi.getAll();
-        setTasks(response.items || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch tasks');
-        console.error('Error fetching tasks:', err);
-        setTasks([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTasks();
   }, []);
 
@@ -66,26 +53,42 @@ export default function TasksPage() {
 
   const handleNewTask = () => {
     console.log('New Task clicked - Opening task creation dialog');
-    alert('New Task functionality would open a dialog to create new tasks');
-    // TODO: Implement new task dialog
+    setShowNewTaskDialog(true);
+  };
+
+  const handleTaskCreated = () => {
+    console.log('Task created successfully - refreshing tasks list');
+    fetchTasks();
+  };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await tasksApi.getAll();
+      setTasks(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch tasks');
+      console.error('Error fetching tasks:', err);
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewCalendar = () => {
     console.log('View Calendar clicked - Opening calendar view');
-    alert('View Calendar functionality would show tasks in calendar format');
-    // TODO: Implement calendar view
+    alert('Calendar view functionality coming soon - would show tasks in calendar format');
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Filters functionality would open a filters panel for tasks');
-    // TODO: Implement filters dialog
+    alert('Task filters functionality coming soon - would open a filters panel');
   };
 
   const handleViewDetails = (taskId: string) => {
     console.log('View Details clicked for task:', taskId);
-    alert(`View Details functionality would navigate to detailed view for task ${taskId}`);
-    // TODO: Navigate to task details page
+    alert(`Task details view coming soon - would show detailed view for task ${taskId}`);
   };
 
   return (
@@ -265,6 +268,13 @@ export default function TasksPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* New Task Dialog */}
+      <NewTaskDialog
+        open={showNewTaskDialog}
+        onOpenChange={setShowNewTaskDialog}
+        onTaskCreated={handleTaskCreated}
+      />
     </div>
   );
 }
