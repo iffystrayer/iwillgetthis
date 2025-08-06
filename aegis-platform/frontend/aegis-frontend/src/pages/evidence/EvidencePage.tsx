@@ -80,13 +80,13 @@ export default function EvidencePage() {
 
   const handleExportAll = () => {
     console.log('Export All clicked - Exporting all evidence files');
-    alert('Export All functionality would download all evidence files as a ZIP archive');
+    console.log('Export All functionality would download all evidence files as a ZIP archive');
     // TODO: Implement bulk export functionality
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Filters functionality would open a filters panel for evidence');
+    console.log('Filters functionality would open a filters panel for evidence');
     // TODO: Implement filters dialog
   };
 
@@ -124,13 +124,13 @@ export default function EvidencePage() {
       console.log(`Evidence ${evidenceId} downloaded successfully`);
     } catch (error: any) {
       console.error('Error downloading evidence:', error);
-      alert(`Failed to download evidence: ${error.message || 'Unknown error'}`);
+      console.log(`Failed to download evidence: ${error.message || 'Unknown error'}`);
     }
   };
 
   const handleViewDetails = (evidenceId: string) => {
     console.log('View Details clicked for evidence:', evidenceId);
-    alert(`View Details functionality would show detailed view for evidence ${evidenceId}`);
+    console.log(`View Details functionality would show detailed view for evidence ${evidenceId}`);
     // TODO: Navigate to evidence details page or open details modal
   };
 

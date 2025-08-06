@@ -66,25 +66,25 @@ export default function IntegrationsPage() {
 
   const handleAddIntegration = () => {
     console.log('Add Integration clicked - Opening integration creation dialog');
-    alert('Add Integration functionality would open a dialog to create new integrations');
+    console.log('Add Integration functionality would open a dialog to create new integrations');
     // TODO: Implement add integration dialog
   };
 
   const handleSyncAll = () => {
     console.log('Sync All clicked - Synchronizing all integrations');
-    alert('Sync All functionality would trigger synchronization for all active integrations');
+    console.log('Sync All functionality would trigger synchronization for all active integrations');
     // TODO: Implement sync all functionality
   };
 
   const handleConfigure = (integrationId: string) => {
     console.log('Configure clicked for integration:', integrationId);
-    alert(`Configure functionality would open configuration dialog for integration ${integrationId}`);
+    console.log(`Configure functionality would open configuration dialog for integration ${integrationId}`);
     // TODO: Navigate to configuration page or open config dialog
   };
 
   const handleSync = (integrationId: string) => {
     console.log('Sync clicked for integration:', integrationId);
-    alert(`Sync functionality would trigger synchronization for integration ${integrationId}`);
+    console.log(`Sync functionality would trigger synchronization for integration ${integrationId}`);
     // TODO: Implement individual integration sync
   };
 

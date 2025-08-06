@@ -62,14 +62,14 @@ test.describe('Aegis Platform E2E Tests', () => {
     await loginAndNavigateToDashboard(page);
     
     // Check for sidebar navigation elements
-    const sidebar = page.locator('[data-sidebar="sidebar"], .sidebar, nav');
+    const sidebar = page.locator('[data-sidebar="sidebar"]');
     await expect(sidebar).toBeVisible({ timeout: 5000 });
     
-    // Check for key navigation links
+    // Check for key navigation links in sidebar (more specific selector)
     const expectedNavItems = ['Assets', 'Risks', 'Tasks', 'Evidence', 'Reports'];
     
     for (const item of expectedNavItems) {
-      const navLink = page.locator(`a:has-text("${item}"), button:has-text("${item}")`);
+      const navLink = page.locator(`[data-sidebar="sidebar"] a:has-text("${item}")`).first();
       await expect(navLink).toBeVisible();
     }
     

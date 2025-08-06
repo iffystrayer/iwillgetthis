@@ -68,31 +68,31 @@ export default function ReportsPage() {
 
   const handleNewReport = () => {
     console.log('New Report clicked - Opening report creation dialog');
-    alert('New Report functionality would open a dialog to create new reports');
+    console.log('New Report functionality would open a dialog to create new reports');
     // TODO: Implement new report dialog
   };
 
   const handleScheduleReport = () => {
     console.log('Schedule Report clicked - Opening report scheduling dialog');
-    alert('Schedule Report functionality would open a scheduling dialog for automated reports');
+    console.log('Schedule Report functionality would open a scheduling dialog for automated reports');
     // TODO: Implement report scheduling dialog
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Filters functionality would open a filters panel for reports');
+    console.log('Filters functionality would open a filters panel for reports');
     // TODO: Implement filters dialog
   };
 
   const handleDownload = (reportId: string) => {
     console.log('Download clicked for report:', reportId);
-    alert(`Download functionality would download report ${reportId} as PDF or Excel`);
+    console.log(`Download functionality would download report ${reportId} as PDF or Excel`);
     // TODO: Implement report download
   };
 
   const handleViewDetails = (reportId: string) => {
     console.log('View Details clicked for report:', reportId);
-    alert(`View Details functionality would navigate to detailed view for report ${reportId}`);
+    console.log(`View Details functionality would navigate to detailed view for report ${reportId}`);
     // TODO: Navigate to report details page
   };
 

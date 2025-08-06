@@ -18,6 +18,21 @@ export default function UsersPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showFiltersDialog, setShowFiltersDialog] = useState(false);
 
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await usersApi.getAll();
+      setUsers(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch users');
+      console.error('Error fetching users:', err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -72,33 +87,18 @@ export default function UsersPage() {
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('User filters functionality coming soon - would open a filters panel');
+    console.log('User filters functionality coming soon - would open a filters panel');
   };
 
   const handleEditUser = (userId: string) => {
     console.log('Edit User clicked for user:', userId);
-    alert(`User editing functionality coming soon - would open edit dialog for user ${userId}`);
+    console.log(`User editing functionality coming soon - would open edit dialog for user ${userId}`);
   };
 
   const handleUserAdded = () => {
     console.log('User added successfully - refreshing user list');
     // Refresh the user list
     fetchUsers();
-  };
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await usersApi.getAll();
-      setUsers(response.items || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch users');
-      console.error('Error fetching users:', err);
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

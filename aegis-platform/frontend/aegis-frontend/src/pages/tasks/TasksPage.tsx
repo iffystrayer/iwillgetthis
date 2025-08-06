@@ -15,6 +15,21 @@ export default function TasksPage() {
   const [error, setError] = useState<string | null>(null);
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
 
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const response = await tasksApi.getAll();
+      setTasks(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch tasks');
+      console.error('Error fetching tasks:', err);
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -24,14 +39,6 @@ export default function TasksPage() {
     task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.assigned_to?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -61,34 +68,27 @@ export default function TasksPage() {
     fetchTasks();
   };
 
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      const response = await tasksApi.getAll();
-      setTasks(response.items || []);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch tasks');
-      console.error('Error fetching tasks:', err);
-      setTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   const handleViewCalendar = () => {
     console.log('View Calendar clicked - Opening calendar view');
-    alert('Calendar view functionality coming soon - would show tasks in calendar format');
+    // TODO: Implement calendar view functionality
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Task filters functionality coming soon - would open a filters panel');
+    // TODO: Implement task filters functionality
   };
 
   const handleViewDetails = (taskId: string) => {
     console.log('View Details clicked for task:', taskId);
-    alert(`Task details view coming soon - would show detailed view for task ${taskId}`);
+    // TODO: Navigate to task details page
   };
 
   return (

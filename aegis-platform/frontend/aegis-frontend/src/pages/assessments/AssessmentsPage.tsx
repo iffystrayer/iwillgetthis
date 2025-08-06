@@ -71,13 +71,13 @@ export default function AssessmentsPage() {
 
   const handleSchedule = () => {
     console.log('Schedule clicked - Opening assessment scheduling dialog');
-    alert('Schedule functionality would open a scheduling dialog for assessments');
+    console.log('Schedule functionality would open a scheduling dialog for assessments');
     // TODO: Implement assessment scheduling dialog
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Filters functionality would open a filters panel for assessments');
+    console.log('Filters functionality would open a filters panel for assessments');
     // TODO: Implement filters dialog
   };
 
