@@ -2,40 +2,49 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
+import { Suspense, lazy } from 'react';
 
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { MainLayout } from './components/layout/MainLayout';
 import { AuthLayout } from './components/layout/AuthLayout';
+import { LoadingSpinner } from './components/ui/loading-spinner';
 
-// Auth pages
+// Auth pages (keep these eager loaded for better UX)
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 
-// Dashboard pages
-import DashboardPage from './pages/dashboard/DashboardPage';
-import CisoCockpitPage from './pages/dashboard/CisoCockpitPage';
-import AnalystWorkbenchPage from './pages/dashboard/AnalystWorkbenchPage';
-import SystemOwnerInboxPage from './pages/dashboard/SystemOwnerInboxPage';
+// Lazy load dashboard pages
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const CisoCockpitPage = lazy(() => import('./pages/dashboard/CisoCockpitPage'));
+const AnalystWorkbenchPage = lazy(() => import('./pages/dashboard/AnalystWorkbenchPage'));
+const SystemOwnerInboxPage = lazy(() => import('./pages/dashboard/SystemOwnerInboxPage'));
 
-// Core module pages
-import AssetsPage from './pages/assets/AssetsPage';
-import AssetDetailsPage from './pages/assets/AssetDetailsPage';
-import RisksPage from './pages/risks/RisksPage';
-import RiskDetailsPage from './pages/risks/RiskDetailsPage';
-import TasksPage from './pages/tasks/TasksPage';
-import TaskDetailsPage from './pages/tasks/TaskDetailsPage';
-import AssessmentsPage from './pages/assessments/AssessmentsPage';
-import AssessmentDetailsPage from './pages/assessments/AssessmentDetailsPage';
-import EvidencePage from './pages/evidence/EvidencePage';
-import ReportsPage from './pages/reports/ReportsPage';
-import IntegrationsPage from './pages/integrations/IntegrationsPage';
-import UsersPage from './pages/users/UsersPage';
-import SettingsPage from './pages/settings/SettingsPage';
+// Lazy load core module pages
+const AssetsPage = lazy(() => import('./pages/assets/AssetsPage'));
+const AssetDetailsPage = lazy(() => import('./pages/assets/AssetDetailsPage'));
+const RisksPage = lazy(() => import('./pages/risks/RisksPage'));
+const RiskDetailsPage = lazy(() => import('./pages/risks/RiskDetailsPage'));
+const TasksPage = lazy(() => import('./pages/tasks/TasksPage'));
+const TaskDetailsPage = lazy(() => import('./pages/tasks/TaskDetailsPage'));
+const AssessmentsPage = lazy(() => import('./pages/assessments/AssessmentsPage'));
+const AssessmentDetailsPage = lazy(() => import('./pages/assessments/AssessmentDetailsPage'));
+const EvidencePage = lazy(() => import('./pages/evidence/EvidencePage'));
+const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
+const IntegrationsPage = lazy(() => import('./pages/integrations/IntegrationsPage'));
+const UsersPage = lazy(() => import('./pages/users/UsersPage'));
+const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 
-// AI Management pages
-import ProvidersPage from './pages/ai/ProvidersPage';
-import AIAnalyticsPage from './pages/ai/AIAnalyticsPage';
+// Lazy load AI Management pages
+const ProvidersPage = lazy(() => import('./pages/ai/ProvidersPage'));
+const AIAnalyticsPage = lazy(() => import('./pages/ai/AIAnalyticsPage'));
+
+// Loading fallback component
+const PageLoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-96">
+    <LoadingSpinner size="lg" />
+  </div>
+);
 
 // Create a client
 const queryClient = new QueryClient({
@@ -81,45 +90,121 @@ function App() {
                 }>
                   {/* Dashboard routes */}
                   <Route index element={<Navigate to="/dashboard" replace />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="dashboard/ciso" element={<CisoCockpitPage />} />
-                  <Route path="dashboard/analyst" element={<AnalystWorkbenchPage />} />
-                  <Route path="dashboard/system-owner" element={<SystemOwnerInboxPage />} />
+                  <Route path="dashboard" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <DashboardPage />
+                    </Suspense>
+                  } />
+                  <Route path="dashboard/ciso" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <CisoCockpitPage />
+                    </Suspense>
+                  } />
+                  <Route path="dashboard/analyst" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AnalystWorkbenchPage />
+                    </Suspense>
+                  } />
+                  <Route path="dashboard/system-owner" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <SystemOwnerInboxPage />
+                    </Suspense>
+                  } />
                   
                   {/* Assets */}
-                  <Route path="assets" element={<AssetsPage />} />
-                  <Route path="assets/:id" element={<AssetDetailsPage />} />
+                  <Route path="assets" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AssetsPage />
+                    </Suspense>
+                  } />
+                  <Route path="assets/:id" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AssetDetailsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Risks */}
-                  <Route path="risks" element={<RisksPage />} />
-                  <Route path="risks/:id" element={<RiskDetailsPage />} />
+                  <Route path="risks" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <RisksPage />
+                    </Suspense>
+                  } />
+                  <Route path="risks/:id" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <RiskDetailsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Tasks */}
-                  <Route path="tasks" element={<TasksPage />} />
-                  <Route path="tasks/:id" element={<TaskDetailsPage />} />
+                  <Route path="tasks" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <TasksPage />
+                    </Suspense>
+                  } />
+                  <Route path="tasks/:id" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <TaskDetailsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Assessments */}
-                  <Route path="assessments" element={<AssessmentsPage />} />
-                  <Route path="assessments/:id" element={<AssessmentDetailsPage />} />
+                  <Route path="assessments" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AssessmentsPage />
+                    </Suspense>
+                  } />
+                  <Route path="assessments/:id" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AssessmentDetailsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Evidence */}
-                  <Route path="evidence" element={<EvidencePage />} />
+                  <Route path="evidence" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <EvidencePage />
+                    </Suspense>
+                  } />
                   
                   {/* Reports */}
-                  <Route path="reports" element={<ReportsPage />} />
+                  <Route path="reports" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ReportsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Integrations */}
-                  <Route path="integrations" element={<IntegrationsPage />} />
+                  <Route path="integrations" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <IntegrationsPage />
+                    </Suspense>
+                  } />
                   
                   {/* AI Management */}
-                  <Route path="ai/providers" element={<ProvidersPage />} />
-                  <Route path="ai/analytics" element={<AIAnalyticsPage />} />
+                  <Route path="ai/providers" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <ProvidersPage />
+                    </Suspense>
+                  } />
+                  <Route path="ai/analytics" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AIAnalyticsPage />
+                    </Suspense>
+                  } />
                   
                   {/* Users */}
-                  <Route path="users" element={<UsersPage />} />
+                  <Route path="users" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <UsersPage />
+                    </Suspense>
+                  } />
                   
                   {/* Settings */}
-                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="settings" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <SettingsPage />
+                    </Suspense>
+                  } />
                 </Route>
                 
                 {/* Catch all route */}

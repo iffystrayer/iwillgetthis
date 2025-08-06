@@ -1,0 +1,164 @@
+# Page snapshot
+
+```yaml
+- link "Aegis Risk Management":
+  - /url: /dashboard
+  - img
+  - heading "Aegis" [level=1]
+  - paragraph: Risk Management
+- text: Dashboards
+- list:
+  - listitem:
+    - link "Overview":
+      - /url: /dashboard
+      - img
+      - text: Overview
+  - listitem:
+    - link "CISO Cockpit":
+      - /url: /dashboard/ciso
+      - img
+      - text: CISO Cockpit
+  - listitem:
+    - link "Analyst Workbench":
+      - /url: /dashboard/analyst
+      - img
+      - text: Analyst Workbench
+  - listitem:
+    - link "System Owner Inbox":
+      - /url: /dashboard/system-owner
+      - img
+      - text: System Owner Inbox
+- text: Risk Management
+- list:
+  - listitem:
+    - link "Assets":
+      - /url: /assets
+      - img
+      - text: Assets
+  - listitem:
+    - link "Risks 5":
+      - /url: /risks
+      - img
+      - text: Risks 5
+  - listitem:
+    - link "Assessments":
+      - /url: /assessments
+      - img
+      - text: Assessments
+  - listitem:
+    - link "Tasks 12":
+      - /url: /tasks
+      - img
+      - text: Tasks 12
+- text: Documentation
+- list:
+  - listitem:
+    - link "Evidence":
+      - /url: /evidence
+      - img
+      - text: Evidence
+  - listitem:
+    - link "Reports":
+      - /url: /reports
+      - img
+      - text: Reports
+- text: Configuration
+- list:
+  - listitem:
+    - link "Integrations":
+      - /url: /integrations
+      - img
+      - text: Integrations
+  - listitem:
+    - link "Users":
+      - /url: /users
+      - img
+      - text: Users
+  - listitem:
+    - link "Settings":
+      - /url: /settings
+      - img
+      - text: Settings
+- paragraph: Aegis Risk Platform
+- paragraph: v1.0.0
+- main:
+  - button "Toggle Sidebar":
+    - img
+    - text: Toggle Sidebar
+  - img
+  - searchbox "Search assets, risks, tasks..."
+  - button "3":
+    - img
+    - text: "3"
+  - button "Toggle theme":
+    - img
+    - img
+    - text: Toggle theme
+  - button "SA"
+  - main:
+    - heading "Task Management" [level=1]:
+      - img
+      - text: Task Management
+    - paragraph: Track and manage security and compliance tasks
+    - button "View Calendar":
+      - img
+      - text: View Calendar
+    - button "New Task":
+      - img
+      - text: New Task
+    - textbox "Search tasks..."
+    - button "Filters":
+      - img
+      - text: Filters
+    - heading "Total Tasks" [level=3]
+    - img
+    - text: "4"
+    - paragraph: Active tasks in system
+    - heading "Open Tasks" [level=3]
+    - img
+    - text: "2"
+    - paragraph: Require attention
+    - heading "In Progress" [level=3]
+    - img
+    - text: "1"
+    - paragraph: Currently being worked on
+    - heading "Completed" [level=3]
+    - img
+    - text: "1"
+    - paragraph: Successfully finished
+    - heading "Tasks (4)" [level=3]
+    - paragraph: Manage your security and compliance tasks
+    - heading "Patch Critical Systems" [level=3]
+    - text: Open High Priority
+    - paragraph: No description available
+    - img
+    - text: IT Team
+    - img
+    - text: "Due: 2025-08-08 Created: 7/31/2025"
+    - button "View Details"
+    - heading "Review Access Permissions" [level=3]
+    - text: In Progress Medium Priority
+    - paragraph: No description available
+    - img
+    - text: Security Team
+    - img
+    - text: "Due: 2025-08-12 Created: 8/1/2025"
+    - button "View Details"
+    - heading "Update Security Policies" [level=3]
+    - text: Completed Low Priority
+    - paragraph: No description available
+    - img
+    - text: Compliance
+    - img
+    - text: "Due: 2025-08-05 Created: 7/27/2025"
+    - button "View Details"
+    - heading "Conduct Security Training" [level=3]
+    - text: Open Medium Priority
+    - paragraph: No description available
+    - img
+    - text: HR Security
+    - img
+    - text: "Due: 2025-08-20 Created: 8/2/2025"
+    - button "View Details"
+- region "Notifications alt+T"
+```

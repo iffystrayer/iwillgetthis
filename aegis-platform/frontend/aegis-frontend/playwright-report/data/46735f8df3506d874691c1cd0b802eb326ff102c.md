@@ -1,0 +1,189 @@
+# Page snapshot
+
+```yaml
+- link "Aegis Risk Management":
+  - /url: /dashboard
+  - img
+  - heading "Aegis" [level=1]
+  - paragraph: Risk Management
+- text: Dashboards
+- list:
+  - listitem:
+    - link "Overview":
+      - /url: /dashboard
+      - img
+      - text: Overview
+  - listitem:
+    - link "CISO Cockpit":
+      - /url: /dashboard/ciso
+      - img
+      - text: CISO Cockpit
+  - listitem:
+    - link "Analyst Workbench":
+      - /url: /dashboard/analyst
+      - img
+      - text: Analyst Workbench
+  - listitem:
+    - link "System Owner Inbox":
+      - /url: /dashboard/system-owner
+      - img
+      - text: System Owner Inbox
+- text: Risk Management
+- list:
+  - listitem:
+    - link "Assets":
+      - /url: /assets
+      - img
+      - text: Assets
+  - listitem:
+    - link "Risks 5":
+      - /url: /risks
+      - img
+      - text: Risks 5
+  - listitem:
+    - link "Assessments":
+      - /url: /assessments
+      - img
+      - text: Assessments
+  - listitem:
+    - link "Tasks 12":
+      - /url: /tasks
+      - img
+      - text: Tasks 12
+- text: Documentation
+- list:
+  - listitem:
+    - link "Evidence":
+      - /url: /evidence
+      - img
+      - text: Evidence
+  - listitem:
+    - link "Reports":
+      - /url: /reports
+      - img
+      - text: Reports
+- text: Configuration
+- list:
+  - listitem:
+    - link "Integrations":
+      - /url: /integrations
+      - img
+      - text: Integrations
+  - listitem:
+    - link "Users":
+      - /url: /users
+      - img
+      - text: Users
+  - listitem:
+    - link "Settings":
+      - /url: /settings
+      - img
+      - text: Settings
+- paragraph: Aegis Risk Platform
+- paragraph: v1.0.0
+- main:
+  - button "Toggle Sidebar":
+    - img
+    - text: Toggle Sidebar
+  - img
+  - searchbox "Search assets, risks, tasks..."
+  - button "3":
+    - img
+    - text: "3"
+  - button "Toggle theme":
+    - img
+    - img
+    - text: Toggle theme
+  - button "SA"
+  - main:
+    - heading "Integrations" [level=1]:
+      - img
+      - text: Integrations
+    - paragraph: Manage third-party integrations and data sources
+    - button "Sync All":
+      - img
+      - text: Sync All
+    - button "Add Integration":
+      - img
+      - text: Add Integration
+    - textbox "Search integrations..."
+    - heading "Total Integrations" [level=3]
+    - img
+    - text: "6"
+    - paragraph: Configured integrations
+    - heading "Connected" [level=3]
+    - img
+    - text: "5"
+    - paragraph: Active connections
+    - heading "Issues" [level=3]
+    - img
+    - text: "1"
+    - paragraph: Need attention
+    - heading "Types" [level=3]
+    - img
+    - text: "6"
+    - paragraph: Integration types
+    - heading "Integrations (6)" [level=3]
+    - paragraph: Third-party systems and data sources connected to the platform
+    - heading "Microsoft Azure AD" [level=3]
+    - text: Connected Healthy
+    - paragraph: Identity Provider
+    - text: "Last Sync: 8/4/2025, 2:00:00 PM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+    - heading "Splunk SIEM" [level=3]
+    - text: Connected Healthy
+    - paragraph: Security Information
+    - text: "Last Sync: 8/4/2025, 1:30:00 PM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+    - heading "Jira Service Desk" [level=3]
+    - text: Connected Warning
+    - paragraph: Ticketing System
+    - text: "Last Sync: 8/4/2025, 12:45:00 PM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+    - heading "Slack Notifications" [level=3]
+    - text: Disconnected Error
+    - paragraph: Communication
+    - text: "Last Sync: 8/1/2025, 6:20:00 AM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+    - heading "AWS CloudTrail" [level=3]
+    - text: Connected Healthy
+    - paragraph: Cloud Logging
+    - text: "Last Sync: 8/4/2025, 2:15:00 PM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+    - heading "Tenable Nessus" [level=3]
+    - text: Connected Healthy
+    - paragraph: Vulnerability Scanner
+    - text: "Last Sync: 8/4/2025, 8:00:00 AM"
+    - button "Configure":
+      - img
+      - text: Configure
+    - button "Sync":
+      - img
+      - text: Sync
+- region "Notifications alt+T"
+```
