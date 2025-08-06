@@ -660,5 +660,87 @@ async def generate_report():
     """Mock report generation"""
     return {"id": "new-report-123", "message": "Report generation started", "status": "processing"}
 
+# Missing POST endpoints for database writes
+@app.post("/api/v1/tasks")
+async def create_task():
+    """Mock task creation"""
+    return {"id": "new-task-123", "message": "Task created successfully", "status": "success"}
+
+@app.put("/api/v1/tasks/{task_id}")
+async def update_task(task_id: str):
+    """Mock task update"""
+    return {"id": task_id, "message": "Task updated successfully", "status": "success"}
+
+@app.delete("/api/v1/tasks/{task_id}")
+async def delete_task(task_id: str):
+    """Mock task deletion"""
+    return {"message": "Task deleted successfully", "status": "success"}
+
+@app.post("/api/v1/evidence/upload")
+async def upload_evidence():
+    """Mock evidence upload"""
+    return {"id": "new-evidence-123", "message": "Evidence uploaded successfully", "status": "success", "file_name": "uploaded-evidence.pdf"}
+
+@app.get("/api/v1/evidence/{evidence_id}/download")
+async def download_evidence(evidence_id: str):
+    """Mock evidence download"""
+    return {"id": evidence_id, "download_url": f"https://aegis-platform.com/downloads/evidence-{evidence_id}.pdf", "message": "Download link generated"}
+
+@app.post("/api/v1/users")
+async def create_user():
+    """Mock user creation"""
+    return {"id": "new-user-123", "message": "User created successfully", "status": "success"}
+
+@app.put("/api/v1/users/{user_id}")
+async def update_user(user_id: str):
+    """Mock user update"""
+    return {"id": user_id, "message": "User updated successfully", "status": "success"}
+
+@app.delete("/api/v1/users/{user_id}")
+async def delete_user(user_id: str):
+    """Mock user deletion"""
+    return {"message": "User deleted successfully", "status": "success"}
+
+@app.post("/api/v1/assessments")
+async def create_assessment():
+    """Mock assessment creation"""
+    return {"id": "new-assessment-123", "message": "Assessment created successfully", "status": "success"}
+
+@app.put("/api/v1/assessments/{assessment_id}")
+async def update_assessment(assessment_id: str):
+    """Mock assessment update"""
+    return {"id": assessment_id, "message": "Assessment updated successfully", "status": "success"}
+
+@app.delete("/api/v1/assessments/{assessment_id}")
+async def delete_assessment(assessment_id: str):
+    """Mock assessment deletion"""
+    return {"message": "Assessment deleted successfully", "status": "success"}
+
+@app.post("/api/v1/integrations")
+async def create_integration():
+    """Mock integration creation"""
+    return {"id": "new-integration-123", "message": "Integration created successfully", "status": "success"}
+
+@app.put("/api/v1/integrations/{integration_id}")
+async def update_integration(integration_id: str):
+    """Mock integration update"""
+    return {"id": integration_id, "message": "Integration updated successfully", "status": "success"}
+
+@app.delete("/api/v1/integrations/{integration_id}")
+async def delete_integration(integration_id: str):
+    """Mock integration deletion"""
+    return {"message": "Integration deleted successfully", "status": "success"}
+
+# Additional specific endpoints that were missing
+@app.get("/api/v1/reports/{report_id}/download")
+async def download_report(report_id: str):
+    """Mock report download"""
+    return {"id": report_id, "download_url": f"https://aegis-platform.com/downloads/report-{report_id}.pdf", "message": "Download link generated"}
+
+@app.post("/api/v1/ai/chat")
+async def ai_chat():
+    """Mock AI chat functionality"""
+    return {"response": "I'm here to help with your cybersecurity risk management questions. What would you like to know?", "provider_used": "anthropic"}
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

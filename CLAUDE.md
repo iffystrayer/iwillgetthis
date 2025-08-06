@@ -251,4 +251,9 @@ Key configuration is managed through environment variables in `backend/config.py
 - JWT tokens are httpOnly cookies for security
 - File uploads are validated and sanitized
 - Database queries use SQLAlchemy ORM to prevent injection attacks
-- Virtual environment isolation prevents system-wide package conflictsdescribe this promo
+- Virtual environment isolation prevents system-wide package conflicts
+
+## Memories
+
+### Workflow Management
+- remember to fix the assessment workflow
