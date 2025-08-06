@@ -18,7 +18,7 @@ from auth import get_current_active_user
 router = APIRouter()
 
 
-@router.get("/", response_model=List[TaskResponse])
+@router.get("/")
 async def get_tasks(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -55,8 +55,18 @@ async def get_tasks(
     if risk_id:
         query = query.filter(Task.risk_id == risk_id)
     
+    # Get total count for pagination
+    total = query.filter(Task.is_active == True).count()
     tasks = query.filter(Task.is_active == True).offset(skip).limit(limit).all()
-    return tasks
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [TaskResponse.model_validate(task) for task in tasks],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/my-tasks", response_model=List[TaskResponse])

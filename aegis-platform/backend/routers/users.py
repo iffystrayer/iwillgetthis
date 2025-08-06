@@ -15,7 +15,7 @@ from auth import get_current_active_user, get_password_hash
 router = APIRouter()
 
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("/")
 async def get_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -37,8 +37,18 @@ async def get_users(
     if is_active is not None:
         query = query.filter(User.is_active == is_active)
     
+    # Get total count for pagination
+    total = query.count()
     users = query.offset(skip).limit(limit).all()
-    return users
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [UserResponse.model_validate(user) for user in users],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/count")

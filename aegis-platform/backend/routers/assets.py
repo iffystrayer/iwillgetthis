@@ -45,7 +45,7 @@ async def create_asset_category(
 
 
 # Assets
-@router.get("/", response_model=List[AssetResponse])
+@router.get("/")
 async def get_assets(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -79,8 +79,18 @@ async def get_assets(
     if is_active is not None:
         query = query.filter(Asset.is_active == is_active)
     
+    # Get total count for pagination
+    total = query.count()
     assets = query.offset(skip).limit(limit).all()
-    return assets
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [AssetResponse.model_validate(asset) for asset in assets],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/count")

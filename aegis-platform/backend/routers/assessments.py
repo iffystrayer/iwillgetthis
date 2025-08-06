@@ -19,7 +19,7 @@ from auth import get_current_active_user
 router = APIRouter()
 
 
-@router.get("/", response_model=List[AssessmentResponse])
+@router.get("/")
 async def get_assessments(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -44,8 +44,18 @@ async def get_assessments(
     if framework_id:
         query = query.filter(Assessment.framework_id == framework_id)
     
+    # Get total count for pagination
+    total = query.filter(Assessment.is_active == True).count()
     assessments = query.filter(Assessment.is_active == True).offset(skip).limit(limit).all()
-    return assessments
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [AssessmentResponse.model_validate(assessment) for assessment in assessments],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/{assessment_id}", response_model=AssessmentResponse)

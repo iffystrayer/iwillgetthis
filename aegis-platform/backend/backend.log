@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend/run_server.py", line 19, in <module>
+    from main import app
+  File "/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend/main.py", line 16, in <module>
+    from routers import (
+    ...<3 lines>...
+    )
+  File "/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend/routers/__init__.py", line 2, in <module>
+    from . import (
+    ...<3 lines>...
+    )
+  File "/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend/routers/evidence.py", line 7, in <module>
+    import aiofiles
+ModuleNotFoundError: No module named 'aiofiles'
+Starting Aegis Backend Server...
+Python path: ['/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend', '/Users/ifiokmoses/code/iwillgetthis/aegis-platform/backend', '/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python313.zip']...
+❌ Failed to start server: No module named 'aiofiles'

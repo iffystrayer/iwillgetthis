@@ -93,7 +93,7 @@ async def get_default_risk_matrix(
 
 
 # Risks
-@router.get("/", response_model=List[RiskResponse])
+@router.get("/")
 async def get_risks(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -126,8 +126,18 @@ async def get_risks(
     if asset_id:
         query = query.filter(Risk.asset_id == asset_id)
     
+    # Get total count for pagination
+    total = query.filter(Risk.is_active == True).count()
     risks = query.filter(Risk.is_active == True).offset(skip).limit(limit).all()
-    return risks
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [RiskResponse.model_validate(risk) for risk in risks],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/summary", response_model=RiskSummary)

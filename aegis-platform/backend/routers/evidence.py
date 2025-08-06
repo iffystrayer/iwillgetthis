@@ -21,7 +21,7 @@ from config import settings
 router = APIRouter()
 
 
-@router.get("/", response_model=List[EvidenceResponse])
+@router.get("/")
 async def get_evidence(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -51,8 +51,18 @@ async def get_evidence(
     if category:
         query = query.filter(Evidence.category == category)
     
+    # Get total count for pagination
+    total = query.filter(Evidence.is_active == True).count()
     evidence = query.filter(Evidence.is_active == True).offset(skip).limit(limit).all()
-    return evidence
+    
+    # Return paginated response structure expected by frontend
+    return {
+        "items": [EvidenceResponse.model_validate(item) for item in evidence],
+        "total": total,
+        "page": skip // limit + 1,
+        "size": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/{evidence_id}", response_model=EvidenceResponse)
