@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { AddUserDialog } from '@/components/dialogs/AddUserDialog';
+import { InviteUsersDialog } from '@/components/dialogs/InviteUsersDialog';
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,20 +62,22 @@ export default function UsersPage() {
 
   const handleInviteUsers = () => {
     console.log('Invite Users clicked - Opening invite dialog');
-    alert('Invite Users functionality would open an invitation dialog here');
-    // TODO: Implement invite users dialog
+    setShowInviteDialog(true);
+  };
+
+  const handleUsersInvited = () => {
+    console.log('Users invited successfully - refreshing user list');
+    fetchUsers();
   };
 
   const handleFilters = () => {
     console.log('Filters clicked - Opening filters dialog');
-    alert('Filters functionality would open a filters panel here');
-    // TODO: Implement filters dialog
+    alert('User filters functionality coming soon - would open a filters panel');
   };
 
   const handleEditUser = (userId: string) => {
     console.log('Edit User clicked for user:', userId);
-    alert(`Edit User functionality would open edit dialog for user ${userId}`);
-    // TODO: Navigate to edit user page or open edit dialog
+    alert(`User editing functionality coming soon - would open edit dialog for user ${userId}`);
   };
 
   const handleUserAdded = () => {
@@ -272,6 +275,13 @@ export default function UsersPage() {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onUserAdded={handleUserAdded}
+      />
+
+      {/* Invite Users Dialog */}
+      <InviteUsersDialog
+        open={showInviteDialog}
+        onOpenChange={setShowInviteDialog}
+        onUsersInvited={handleUsersInvited}
       />
     </div>
   );
