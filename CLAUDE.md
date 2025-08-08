@@ -30,140 +30,91 @@ aegis-platform/
 └── docs/               # Additional documentation
 ```
 
-## Development Commands
+## Development Environment Setup
 
-### Frontend (React + TypeScript + Vite)
-```bash
-cd aegis-platform/frontend/aegis-frontend
+The recommended way to develop for the Aegis Platform is using Docker. This ensures a consistent and reproducible environment that closely matches production.
 
-# Install dependencies and start development server (random port selected once at startup)
-FRONTEND_PORT=$(shuf -i 10000-65535 -n 1)
-echo "Starting frontend on port $FRONTEND_PORT"
-pnpm run dev --port $FRONTEND_PORT
+### Prerequisites
+- Docker and Docker Compose
+- Node.js with `pnpm` (for frontend type-checking, linting, etc., if desired)
 
-# Build for production
-pnpm run build
+### First-Time Setup
+1.  **Clone the repository.**
+2.  **Navigate to the platform directory:**
+    ```bash
+    cd aegis-platform
+    ```
+3.  **Create your environment file:**
+    - Copy the example environment file:
+      ```bash
+      cp .env.example .env
+      ```
+    - Open the new `.env` file and add any necessary secrets, such as `OPENAI_API_KEY`. The default values are already configured for the Docker setup.
+4.  **Build and start the services:**
+    ```bash
+    docker-compose -f docker/docker-compose.yml up --build -d
+    ```
+    - This command will build the Docker images for the frontend and backend, and start all services (database, cache, backend, frontend) in the background.
 
-# Lint code
-pnpm run lint
+The platform is now running!
+-   **Frontend:** Access it at `http://localhost:58533` (or the `FRONTEND_PORT_HOST` you set in `.env`).
+-   **Backend API:** Available at `http://localhost:30641` (or the `BACKEND_PORT_HOST` you set in `.env`).
+-   **API Docs:** View the interactive API documentation at `http://localhost:30641/docs`.
 
-# Preview production build (random port selected once at startup)
-PREVIEW_PORT=$(shuf -i 10000-65535 -n 1)
-echo "Starting preview on port $PREVIEW_PORT"
-pnpm run preview --port $PREVIEW_PORT
+### Daily Development Commands
 
-# Run regression tests (includes unit tests, E2E tests, and linting)
-npm run test:regression
+-   **Start all services:**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml up -d
+    ```
+-   **View logs for all services:**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml logs -f
+    ```
+-   **View logs for a specific service (e.g., backend):**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml logs -f backend
+    ```
+-   **Stop all services:**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml down
+    ```
 
-# Run individual test suites
-npm run test:unit         # Unit tests
-npm run test:e2e          # Playwright E2E tests
-npm test                  # Combined unit + E2E tests
-```
+### Running Tests
 
-### Backend (FastAPI + Python)
-```bash
-cd aegis-platform/backend
+Testing is crucial. Tests should be run inside the Docker containers to ensure they execute in the correct environment.
 
-# Always use virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+-   **Run backend regression tests:**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml exec backend pytest tests/ -v
+    ```
+-   **Run frontend tests (unit, integration, E2E):**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml exec frontend npm test
+    ```
+-   **Run frontend Playwright E2E tests specifically:**
+    ```bash
+    cd aegis-platform
+    docker-compose -f docker/docker-compose.yml exec frontend npx playwright test
+    ```
 
-# Install dependencies
-pip install -r requirements.txt
+## Configuration Management
 
-# Run development server (random port selected once at startup)
-BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
-echo "Starting backend on port $BACKEND_PORT"
-python run_server.py --port $BACKEND_PORT
+-   **Single Source of Truth:** The `aegis-platform/.env` file is the single source of truth for all environment configuration. It is created by copying `.env.example`.
+-   **DO NOT commit your `.env` file.** It is ignored by Git via `aegis-platform/.gitignore`.
+-   **How it works:** The `docker-compose.yml` file is configured to load the `.env` file and pass the variables to the correct services. This includes port mappings, database credentials, and API keys.
 
-# Alternative with uvicorn directly (random port selected once at startup)
-BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
-echo "Starting backend on port $BACKEND_PORT"
-uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload
+## Common Issues
 
-# Initialize database
-python init_db_complete.py
-
-# Run database migrations
-alembic upgrade head
-
-# Run regression tests
-python -m pytest tests/ -v
-```
-
-### Docker Deployment
-```bash
-cd aegis-platform
-
-# Start all services
-docker-compose -f docker/docker-compose.yml up -d
-
-# View logs
-docker-compose -f docker/docker-compose.yml logs -f
-
-# Stop services
-docker-compose -f docker/docker-compose.yml down
-```
-
-## Development Workflow
-
-### Required Workflow Steps
-1. **Virtual Environment**: Always activate Python virtual environment before any Python operations
-2. **Port Selection**: Select random ports once at startup and keep them fixed during development session
-   - **Development**: Random ports (10000-65535) selected once and kept stable
-   - **Production**: Fixed predetermined ports for reliability
-   - **Never use ports 3000 and 8000 in development** - these are reserved for production
-3. **Regression Testing**: Run both backend and frontend regression tests after every feature implementation
-5. **Playwright Testing**: Run Playwright E2E tests to verify UI functionality and prevent regressions
-6. **Commit Always**: Commit all changes immediately after completing features
-7. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
-
-### Git Workflow
-```bash
-# After every feature completion
-git add .
-git commit -m "feat: description of feature"
-
-# Run regression tests before pushing
-python -m pytest tests/ -v                    # Backend tests
-npm test                                       # Frontend unit tests  
-npx playwright test                            # E2E UI functionality tests
-npx playwright test button-functionality.spec.ts  # Button regression tests
-
-git push origin main
-```
-
-## Port Management Strategy
-
-### Development Environment
-- **Random Port Selection**: Ports are randomly selected **once at startup** and remain fixed during the development session
-- **Port Range**: 10000-65535 (avoids conflicts with system ports)
-- **Stability**: Selected ports stay constant during the development session to ensure:
-  - CORS configuration works properly
-  - Frontend-backend communication remains stable
-  - API calls don't break due to port changes
-  - Developer tools and debugging maintain consistent connections
-
-### Production Environment
-- **Fixed Ports**: Predetermined, static ports for reliability
-- **Frontend**: Standard port 3000 or custom production port
-- **Backend**: Standard port 8000 or custom production port
-- **Docker**: Fixed port mappings in docker-compose.yml
-
-### Port Selection Commands
-```bash
-# Development - Select once at startup
-FRONTEND_PORT=$(shuf -i 10000-65535 -n 1)
-BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
-
-# Ensure frontend knows backend port
-export VITE_API_URL="http://localhost:$BACKEND_PORT"
-
-# Start services with selected ports
-pnpm run dev --port $FRONTEND_PORT
-uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload
-```
+-   **Port Conflict:** If a service fails to start due to a port conflict (e.g., "port is already allocated"), stop the conflicting service on your machine or change the host port mapping (e.g., `FRONTEND_PORT_HOST`) in your `aegis-platform/.env` file and restart the Docker containers.
+-   **"failed to solve: process..." error during `docker-compose build`:** This can happen if there's a network issue or a problem in a `Dockerfile` step. Check the build logs carefully. Running `docker-compose build --no-cache` can sometimes resolve caching issues.
+-   **Backend can't connect to Database:** Ensure the `db` container is healthy (`docker-compose ps`). Check that the `DATABASE_URL` in your `.env` file and the `docker-compose.yml` are configured correctly for the container network (i.e., the hostname should be `db`, not `localhost`).
 
 ## Architecture & Key Components
 
