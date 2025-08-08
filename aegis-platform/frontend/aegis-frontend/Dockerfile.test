@@ -1,0 +1,54 @@
+# Test Dockerfile - Production build with Development nginx config
+FROM node:18-alpine as builder
+
+# Build arguments
+ARG VITE_API_URL=http://localhost:26113/api/v1
+ARG VITE_ENVIRONMENT=production  
+ARG VITE_USE_MOCK_API=false
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files - use npm like production but test with pnpm
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+
+# Install pnpm and dependencies like dev
+RUN npm install -g pnpm
+RUN pnpm install
+
+# Copy source code
+COPY . .
+
+# Build with production environment
+ENV NODE_ENV=production
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_ENVIRONMENT=${VITE_ENVIRONMENT}
+ENV VITE_USE_MOCK_API=${VITE_USE_MOCK_API}
+
+RUN pnpm run build
+
+# Production stage with nginx using DEV config
+FROM nginx:1.25-alpine as production
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Use development nginx configuration instead of production
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Remove any conflicting default configs
+RUN rm -f /etc/nginx/conf.d/default.conf.bak
+
+# Expose port 80 (nginx.conf listens on 3000 but we'll map it)
+EXPOSE 80
+
+# Health check on port 3000 (from nginx.conf)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

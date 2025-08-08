@@ -9,11 +9,13 @@ ARG VITE_USE_MOCK_API=false
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files  
 COPY package*.json ./
+COPY pnpm-lock.yaml ./
 
-# Install all dependencies (including dev dependencies needed for build)
-RUN npm ci --silent
+# Install pnpm and dependencies like development
+RUN npm install -g pnpm
+RUN pnpm install
 
 # Copy source code
 COPY . .
@@ -24,7 +26,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_ENVIRONMENT=${VITE_ENVIRONMENT}
 ENV VITE_USE_MOCK_API=${VITE_USE_MOCK_API}
 
-RUN npm run build
+RUN pnpm run build
 
 # Production stage with Nginx
 FROM nginx:1.25-alpine as production
@@ -105,6 +107,11 @@ http {
             access_log off;
             return 200 "healthy\n";
             add_header Content-Type text/plain;
+        }
+        
+        # Handle /assets/ directory specifically (critical for ES modules)
+        location /assets/ {
+            try_files $uri =404;
         }
         
         # Handle client-side routing

@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [['html'], ['line']],
   timeout: 30000,
   use: {
-    baseURL: 'http://localhost:58533',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:58533',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

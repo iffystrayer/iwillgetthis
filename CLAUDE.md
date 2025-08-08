@@ -36,8 +36,10 @@ aegis-platform/
 ```bash
 cd aegis-platform/frontend/aegis-frontend
 
-# Install dependencies and start development server (uses random port)
-pnpm run dev --port $(shuf -i 10000-65535 -n 1)
+# Install dependencies and start development server (random port selected once at startup)
+FRONTEND_PORT=$(shuf -i 10000-65535 -n 1)
+echo "Starting frontend on port $FRONTEND_PORT"
+pnpm run dev --port $FRONTEND_PORT
 
 # Build for production
 pnpm run build
@@ -45,8 +47,10 @@ pnpm run build
 # Lint code
 pnpm run lint
 
-# Preview production build (uses random port)
-pnpm run preview --port $(shuf -i 10000-65535 -n 1)
+# Preview production build (random port selected once at startup)
+PREVIEW_PORT=$(shuf -i 10000-65535 -n 1)
+echo "Starting preview on port $PREVIEW_PORT"
+pnpm run preview --port $PREVIEW_PORT
 
 # Run regression tests (includes unit tests, E2E tests, and linting)
 npm run test:regression
@@ -68,11 +72,15 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run development server (uses random port)
-python run_server.py --port $(shuf -i 10000-65535 -n 1)
+# Run development server (random port selected once at startup)
+BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
+echo "Starting backend on port $BACKEND_PORT"
+python run_server.py --port $BACKEND_PORT
 
-# Alternative with uvicorn directly (uses random port)
-uvicorn main:app --host 0.0.0.0 --port $(shuf -i 10000-65535 -n 1) --reload
+# Alternative with uvicorn directly (random port selected once at startup)
+BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
+echo "Starting backend on port $BACKEND_PORT"
+uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload
 
 # Initialize database
 python init_db_complete.py
@@ -102,9 +110,11 @@ docker-compose -f docker/docker-compose.yml down
 
 ### Required Workflow Steps
 1. **Virtual Environment**: Always activate Python virtual environment before any Python operations
-2. **Random Ports**: Use random 5-digit TCP ports (10000-65535) to avoid conflicts
-3. **Never launch app with ports 3000 and 8000. Use unique random 5-digit numbered ports instead**
-4. **Regression Testing**: Run both backend and frontend regression tests after every feature implementation
+2. **Port Selection**: Select random ports once at startup and keep them fixed during development session
+   - **Development**: Random ports (10000-65535) selected once and kept stable
+   - **Production**: Fixed predetermined ports for reliability
+   - **Never use ports 3000 and 8000 in development** - these are reserved for production
+3. **Regression Testing**: Run both backend and frontend regression tests after every feature implementation
 5. **Playwright Testing**: Run Playwright E2E tests to verify UI functionality and prevent regressions
 6. **Commit Always**: Commit all changes immediately after completing features
 7. **No Permission Prompts**: Do not prompt for permissions except for file system manipulations
@@ -122,6 +132,37 @@ npx playwright test                            # E2E UI functionality tests
 npx playwright test button-functionality.spec.ts  # Button regression tests
 
 git push origin main
+```
+
+## Port Management Strategy
+
+### Development Environment
+- **Random Port Selection**: Ports are randomly selected **once at startup** and remain fixed during the development session
+- **Port Range**: 10000-65535 (avoids conflicts with system ports)
+- **Stability**: Selected ports stay constant during the development session to ensure:
+  - CORS configuration works properly
+  - Frontend-backend communication remains stable
+  - API calls don't break due to port changes
+  - Developer tools and debugging maintain consistent connections
+
+### Production Environment
+- **Fixed Ports**: Predetermined, static ports for reliability
+- **Frontend**: Standard port 3000 or custom production port
+- **Backend**: Standard port 8000 or custom production port
+- **Docker**: Fixed port mappings in docker-compose.yml
+
+### Port Selection Commands
+```bash
+# Development - Select once at startup
+FRONTEND_PORT=$(shuf -i 10000-65535 -n 1)
+BACKEND_PORT=$(shuf -i 10000-65535 -n 1)
+
+# Ensure frontend knows backend port
+export VITE_API_URL="http://localhost:$BACKEND_PORT"
+
+# Start services with selected ports
+pnpm run dev --port $FRONTEND_PORT
+uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload
 ```
 
 ## Architecture & Key Components
