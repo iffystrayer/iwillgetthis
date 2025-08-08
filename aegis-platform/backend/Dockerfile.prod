@@ -1,0 +1,92 @@
+# Production Dockerfile for Aegis Backend
+FROM python:3.11-slim as builder
+
+# Build arguments
+ARG BUILD_ENV=production
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    default-libmysqlclient-dev \
+    pkg-config \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Create app directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt requirements.prod.txt* ./
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install production-specific requirements if they exist
+RUN if [ -f requirements.prod.txt ]; then pip install --no-cache-dir -r requirements.prod.txt; fi
+
+# Production stage
+FROM python:3.11-slim as production
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ENVIRONMENT=production
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libmariadb3 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Create app directory and required subdirectories
+WORKDIR /app
+RUN mkdir -p /app/uploads /app/reports /app/logs /app/static && \
+    chown -R appuser:appuser /app
+
+# Copy Python packages from builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY --chown=appuser:appuser . .
+
+# Create production configuration
+RUN python -c "import os; \
+config_content = '# Production Configuration\\nDATABASE_URL=mysql+pymysql://aegis_user:password@db:3306/aegis_production\\nREDIS_URL=redis://redis:6379/0\\nENVIRONMENT=production\\nDEBUG=False\\nLOG_LEVEL=INFO\\n'; \
+open('.env.prod', 'w').write(config_content)"
+
+# Set proper permissions
+RUN chown -R appuser:appuser /app && \
+    chmod +x /app/run_server.py
+
+# Create health check script
+RUN echo '#!/bin/bash\ncurl -f http://localhost:8000/health || exit 1' > /app/healthcheck.sh && \
+    chmod +x /app/healthcheck.sh
+
+# Switch to app user
+USER appuser
+
+# Expose port
+EXPOSE 8000 9090
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)"
+
+# Production startup command with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--max-requests", "1000", "--max-requests-jitter", "50", "--timeout", "120", "--keep-alive", "2", "--log-level", "info", "--access-logfile", "/app/logs/access.log", "--error-logfile", "/app/logs/error.log", "main:app"]

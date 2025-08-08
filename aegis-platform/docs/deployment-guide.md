@@ -1,13 +1,81 @@
-# Aegis Platform - Deployment Guide
+# Production Deployment Guide
 
-## 🚀 Production Deployment Guide
+This guide covers the complete production deployment process for the Aegis Risk Management Platform.
 
-This guide provides comprehensive instructions for deploying the Aegis Risk Management Platform in production environments, including Docker, Kubernetes, and traditional server deployments.
+## Overview
 
-## 📋 Table of Contents
+The Aegis Platform production deployment includes:
+- **Backend**: FastAPI application with Gunicorn
+- **Frontend**: React application with Nginx
+- **Database**: MySQL 8.0 with persistent storage
+- **Cache**: Redis for session and application caching
+- **Monitoring**: Prometheus + Grafana with custom dashboards
+- **Security**: SSL/TLS termination, security headers, rate limiting
+- **Backup**: Automated backup system with S3 integration
 
-- [Pre-Deployment Checklist](#pre-deployment-checklist)
-- [Infrastructure Requirements](#infrastructure-requirements)
+## Prerequisites
+
+### System Requirements
+
+- **OS**: Ubuntu 20.04 LTS or CentOS 8+ (recommended)
+- **CPU**: 4+ cores (8+ recommended)
+- **RAM**: 8GB minimum (16GB+ recommended)
+- **Storage**: 100GB minimum (SSD recommended)
+- **Network**: Static IP address, domain name configured
+
+### Required Software
+
+```bash
+# Docker & Docker Compose
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Docker Compose (latest version)
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Additional tools
+sudo apt update
+sudo apt install -y curl openssl cron
+```
+
+## Quick Deployment
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url>
+cd aegis-platform
+```
+
+### 2. Configure Environment
+
+```bash
+# Copy environment template
+cp .env.prod.template .env.prod
+
+# Edit with your production values
+nano .env.prod
+```
+
+### 3. Run Deployment Script
+
+```bash
+# Make script executable
+chmod +x scripts/deploy-production.sh
+
+# Run deployment
+./scripts/deploy-production.sh
+```
+
+The deployment script handles:
+- Prerequisites verification
+- SSL certificate generation
+- Service deployment
+- Health checks
+- Monitoring setup
+- Security configuration
 - [Docker Deployment](#docker-deployment)
 - [Kubernetes Deployment](#kubernetes-deployment)
 - [Traditional Server Deployment](#traditional-server-deployment)

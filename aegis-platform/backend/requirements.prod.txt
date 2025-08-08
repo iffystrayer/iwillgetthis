@@ -1,0 +1,37 @@
+# Production-specific dependencies for Aegis Backend
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# Production Database Drivers
+PyMySQL==1.1.0
+mysqlclient==2.2.0
+
+# Monitoring and Logging
+sentry-sdk[fastapi]==1.38.0
+prometheus-client==0.19.0
+structlog==23.2.0
+
+# Performance and Caching
+redis[hiredis]==5.0.1
+orjson==3.9.10
+ujson==5.8.0
+
+# Security
+python-jose[cryptography]==3.3.0
+bcrypt==4.1.2
+
+# Email
+sendgrid==6.10.0
+emails==0.6
+
+# File Processing
+Pillow==10.1.0
+python-magic==0.4.27
+
+# Background Tasks - Note: celery is already installed from requirements.txt
+# Just ensure Redis extras are available
+kombu==5.3.4
+
+# Health Checks
+psutil==5.9.6

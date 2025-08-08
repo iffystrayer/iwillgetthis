@@ -1,0 +1,96 @@
+2025/08/07 23:51:31 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:31 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:31 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:31 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:31 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:31 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:32 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:32 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:33 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:33 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:34 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:34 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:38 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:38 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:44 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:44 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:51:57 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:51:57 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/07 23:52:23 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/07 23:52:23 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:21 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:21 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:21 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:21 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:22 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:22 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:22 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:22 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:23 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:23 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:25 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:25 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:28 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:28 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:35 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:35 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:05:48 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:05:48 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:06:14 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:06:14 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:07:05 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:07:05 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:08:05 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:08:05 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:09:05 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:09:05 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:10:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:10:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:11:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:11:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:12:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:12:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:13:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:13:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:14:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:14:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:15:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:15:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:16:06 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:16:06 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:17:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:17:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:18:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:18:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:19:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:19:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:20:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:20:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:21:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:21:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:22:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:22:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:23:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:23:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:24:07 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:24:07 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:25:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:25:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:26:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:26:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:27:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:27:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:28:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:28:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:29:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:29:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:30:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:30:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:31:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:31:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:32:08 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:32:08 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:33:09 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:33:09 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85
+2025/08/08 00:34:09 [warn] 1#1: the "listen ... http2" directive is deprecated, use the "http2" directive instead in /etc/nginx/nginx.conf:78
+2025/08/08 00:34:09 [emerg] 1#1: unknown directive "ssl_private_key" in /etc/nginx/nginx.conf:85

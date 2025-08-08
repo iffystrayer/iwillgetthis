@@ -24,6 +24,8 @@ import json
 from config import settings
 from database import Base
 from models import *
+from models.asset import AssetType, AssetCriticality
+from models.risk import RiskCategory, RiskStatus
 from auth import get_password_hash
 
 
@@ -179,9 +181,7 @@ def create_frameworks(session):
         nist_framework = Framework(
             name="NIST CSF 2.0",
             version="2.0",
-            description="NIST Cybersecurity Framework 2.0",
-            organization="NIST",
-            framework_type="cybersecurity",
+            description="NIST Cybersecurity Framework 2.0 - NIST cybersecurity framework",
             is_active=True
         )
         session.add(nist_framework)
@@ -219,8 +219,10 @@ def create_frameworks(session):
         ]
         
         for control_data in nist_controls:
-            control_data["framework_id"] = nist_framework.id
-            control = Control(**control_data)
+            # Remove fields that don't exist in the Control model
+            filtered_data = {k: v for k, v in control_data.items() if k in ['control_id', 'title', 'description']}
+            filtered_data["framework_id"] = nist_framework.id
+            control = Control(**filtered_data)
             session.add(control)
     
     # CIS Controls
@@ -229,9 +231,7 @@ def create_frameworks(session):
         cis_framework = Framework(
             name="CIS Controls v8",
             version="8.0",
-            description="CIS Critical Security Controls Version 8",
-            organization="Center for Internet Security",
-            framework_type="cybersecurity",
+            description="CIS Critical Security Controls Version 8 - Center for Internet Security cybersecurity framework",
             is_active=True
         )
         session.add(cis_framework)
@@ -254,8 +254,10 @@ def create_frameworks(session):
         ]
         
         for control_data in cis_controls:
-            control_data["framework_id"] = cis_framework.id
-            control = Control(**control_data)
+            # Remove fields that don't exist in the Control model
+            filtered_data = {k: v for k, v in control_data.items() if k in ['control_id', 'title', 'description']}
+            filtered_data["framework_id"] = cis_framework.id
+            control = Control(**filtered_data)
             session.add(control)
     
     session.commit()
@@ -279,9 +281,9 @@ def create_sample_assets(session):
         {
             "name": "Web Server 01",
             "description": "Primary web application server hosting customer portal",
-            "asset_type": "Server",
+            "asset_type": AssetType.SERVER,
             "category_id": infra_cat.id if infra_cat else None,
-            "criticality": "critical",
+            "criticality": AssetCriticality.CRITICAL,
             "status": "active",
             "ip_address": "10.1.1.10",
             "hostname": "web01.company.com",
@@ -294,9 +296,9 @@ def create_sample_assets(session):
         {
             "name": "Database Server - Production",
             "description": "Primary PostgreSQL database server",
-            "asset_type": "Database",
+            "asset_type": AssetType.DATABASE,
             "category_id": data_cat.id if data_cat else None,
-            "criticality": "critical",
+            "criticality": AssetCriticality.CRITICAL,
             "status": "active",
             "ip_address": "10.1.1.20",
             "hostname": "db01.company.com",
@@ -309,9 +311,9 @@ def create_sample_assets(session):
         {
             "name": "Employee Workstation Fleet",
             "description": "Standard employee workstations (approximately 250 units)",
-            "asset_type": "Workstation",
+            "asset_type": AssetType.WORKSTATION,
             "category_id": infra_cat.id if infra_cat else None,
-            "criticality": "medium",
+            "criticality": AssetCriticality.MEDIUM,
             "status": "active",
             "location": "Corporate Offices",
             "environment": "production",
@@ -321,9 +323,9 @@ def create_sample_assets(session):
         {
             "name": "Network Firewall",
             "description": "Primary perimeter firewall protecting internal network",
-            "asset_type": "Network Device",
+            "asset_type": AssetType.NETWORK_DEVICE,
             "category_id": network_cat.id if network_cat else None,
-            "criticality": "high",
+            "criticality": AssetCriticality.HIGH,
             "status": "active",
             "ip_address": "10.1.1.1",
             "hostname": "fw01.company.com",
@@ -398,56 +400,56 @@ def create_sample_risks(session):
         {
             "title": "Unpatched Web Server Vulnerability",
             "description": "Critical security vulnerability in web server requires immediate patching",
-            "category": "Technical",
+            "category": RiskCategory.TECHNICAL,
             "asset_id": web_server.id if web_server else None,
-            "likelihood": 4,
-            "impact": 5,
+            "inherent_likelihood": 4,
+            "inherent_impact": 5,
             "inherent_risk_score": 20,
             "residual_risk_score": 8,
             "risk_level": "critical",
-            "status": "mitigating",
-            "identified_by_id": admin_user.id if admin_user else 1,
+            "status": RiskStatus.MITIGATING,
+            "created_by": admin_user.id if admin_user else 1,
             "identified_date": datetime.utcnow() - timedelta(days=5)
         },
         {
             "title": "Third-Party Vendor Data Access",
             "description": "External vendor has excessive access to sensitive customer data",
-            "category": "Operational",
-            "likelihood": 3,
-            "impact": 4,
+            "category": RiskCategory.OPERATIONAL,
+            "inherent_likelihood": 3,
+            "inherent_impact": 4,
             "inherent_risk_score": 12,
             "residual_risk_score": 6,
             "risk_level": "high",
-            "status": "assessed",
-            "identified_by_id": admin_user.id if admin_user else 1,
+            "status": RiskStatus.ASSESSED,
+            "created_by": admin_user.id if admin_user else 1,
             "identified_date": datetime.utcnow() - timedelta(days=12)
         },
         {
             "title": "Inadequate Backup Recovery Testing",
             "description": "Backup systems have not been tested for recovery in over 6 months",
-            "category": "Operational",
+            "category": RiskCategory.OPERATIONAL,
             "asset_id": db_server.id if db_server else None,
-            "likelihood": 2,
-            "impact": 4,
+            "inherent_likelihood": 2,
+            "inherent_impact": 4,
             "inherent_risk_score": 8,
             "residual_risk_score": 4,
             "risk_level": "medium",
-            "status": "identified",
-            "identified_by_id": admin_user.id if admin_user else 1,
+            "status": RiskStatus.IDENTIFIED,
+            "created_by": admin_user.id if admin_user else 1,
             "identified_date": datetime.utcnow() - timedelta(days=8)
         },
         {
             "title": "Employee Security Awareness Gap",
             "description": "Staff lack adequate training on phishing and social engineering attacks",
-            "category": "Human",
+            "category": RiskCategory.OPERATIONAL,
             "asset_id": workstations.id if workstations else None,
-            "likelihood": 3,
-            "impact": 3,
+            "inherent_likelihood": 3,
+            "inherent_impact": 3,
             "inherent_risk_score": 9,
             "residual_risk_score": 6,
             "risk_level": "medium",
-            "status": "mitigating",
-            "identified_by_id": admin_user.id if admin_user else 1,
+            "status": RiskStatus.MITIGATING,
+            "created_by": admin_user.id if admin_user else 1,
             "identified_date": datetime.utcnow() - timedelta(days=20)
         }
     ]

@@ -40,8 +40,12 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Temporarily disable all relationships to isolate the issue
-    # user_roles = relationship("UserRole")
+    # Relationships
+    user_roles = relationship("UserRole")
+    created_assessments = relationship("Assessment", foreign_keys="Assessment.created_by_id", back_populates="created_by_user")
+    assigned_tasks = relationship("Task", foreign_keys="Task.assigned_to_id", back_populates="assigned_to")
+    created_tasks = relationship("Task", foreign_keys="Task.created_by_id", back_populates="created_by")
+    audit_logs = relationship("AuditLog", back_populates="user")
 
 
 class UserRole(Base):
