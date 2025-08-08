@@ -8,7 +8,7 @@ The Aegis Risk Management Platform is an enterprise-grade cybersecurity risk man
 ### 1.2 Technical Architecture
 - **Backend**: FastAPI (Python 3.11+) with SQLAlchemy ORM
 - **Frontend**: React 18 + TypeScript + Vite + TailwindCSS + shadcn/ui
-- **Database**: SQLite (development) → MySQL 8.0+ (production)
+- **Database**: PostgreSQL 15 (Docker), SQLite (non-Docker fallback)
 - **AI Integration**: Multi-provider LLM system (OpenAI, Anthropic, Google, etc.)
 - **Deployment**: Docker containers with docker-compose orchestration
 
@@ -137,83 +137,72 @@ threat_intel_data: id, indicator, type, source, confidence, last_seen, tags, met
 
 ## 3. Development Environment Setup
 
-### 3.1 Initial Setup
+The primary development environment for the Aegis Platform is managed via Docker and Docker Compose. This approach ensures consistency between development, testing, and production environments.
+
+### 3.1 Prerequisites
+- **Docker**: 24.0+ with Docker Compose v2
+- **Node.js**: 18+ with pnpm (for running local scripts like linting/testing if needed)
+- **Git**: 2.30+
+
+### 3.2 First-Time Setup
 ```bash
-# Clone repository
+# 1. Clone the repository
 git clone <repository-url>
-cd iwillgetthis
+cd aegis-platform
 
-# Backend setup with virtual environment (MANDATORY)
-cd aegis-platform/backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+# 2. Create the environment configuration file
+cp .env.example .env
 
-# Frontend setup
-cd ../frontend/aegis-frontend
-pnpm install
+# 3. (Optional) Customize your .env file
+# Open .env and add any necessary API keys (e.g., OPENAI_API_KEY).
+# The default ports and service connections are already configured for Docker.
 
-# Database initialization
-cd ../../backend
-python init_db_complete.py
-alembic upgrade head
+# 4. Build and start all services
+docker-compose -f docker/docker-compose.yml up --build -d
 ```
 
-### 3.2 Development Workflow
+### 3.3 Accessing the Running Application
+- **Frontend Application**: `http://localhost:58533` (or `${FRONTEND_PORT_HOST}` from your `.env`)
+- **Backend API Docs**: `http://localhost:30641/docs` (or `${BACKEND_PORT_HOST}` from your `.env`)
 
-#### Port Management
-- **Backend**: Random port via `$(shuf -i 10000-65535 -n 1)`
-- **Frontend**: Random port via `$(shuf -i 10000-65535 -n 1)`
-- **Database**: Default ports (3306 MySQL, 6379 Redis)
-
-#### Daily Development Commands
+### 3.4 Daily Development Workflow
 ```bash
-# Backend (always in virtual environment)
-cd aegis-platform/backend
-source venv/bin/activate
-python run_server.py --port $(shuf -i 10000-65535 -n 1)
+# Navigate to the platform directory
+cd aegis-platform
 
-# Frontend (separate terminal)
-cd aegis-platform/frontend/aegis-frontend
-pnpm run dev --port $(shuf -i 10000-65535 -n 1)
+# Start all services in the background
+docker-compose -f docker/docker-compose.yml up -d
 
-# After feature completion
-python -m pytest tests/ -v  # Backend tests
-npm test                    # Frontend tests
-git add .
-git commit -m "feat: feature description"
+# Follow logs of all services
+docker-compose -f docker/docker-compose.yml logs -f
+
+# Follow logs of a specific service (e.g., backend)
+docker-compose -f docker/docker-compose.yml logs -f backend
+
+# Stop and remove containers
+docker-compose -f docker/docker-compose.yml down
 ```
 
-### 3.3 Environment Variables
+### 3.5 Running Tests in the Docker Environment
+All tests should be executed within the running Docker containers to ensure a consistent testing environment.
 
-#### Backend (.env)
 ```bash
-# Core Application
-ENVIRONMENT=development
-DEBUG=true
-DATABASE_URL=sqlite:///./aegis_development.db
-SECRET_KEY=dev-secret-key-change-in-production
-JWT_SECRET_KEY=dev-jwt-secret-change-in-production
+# Run backend tests
+docker-compose -f docker/docker-compose.yml exec backend pytest tests/ -v
 
-# AI Providers
-DEFAULT_LLM_PROVIDER=openai
-OPENAI_API_KEY=your-openai-api-key
-ANTHROPIC_API_KEY=your-anthropic-api-key
-AZURE_OPENAI_API_KEY=your-azure-openai-key
+# Run all frontend tests
+docker-compose -f docker/docker-compose.yml exec frontend npm test
 
-# External Integrations
-OPENVAS_HOST=localhost
-OPENCTI_URL=http://localhost:8080
-SMTP_SERVER=smtp.gmail.com
-SMTP_USERNAME=your-email@domain.com
+# Run frontend E2E tests specifically
+docker-compose -f docker/docker-compose.yml exec frontend npx playwright test
 ```
 
-#### Frontend (.env)
-```bash
-VITE_API_URL=http://localhost:8000/api/v1
-VITE_USE_MOCK_API=false
-VITE_ENVIRONMENT=development
-```
+### 3.6 Environment Configuration
+Environment variables are managed exclusively through the `.env` file in the `aegis-platform` directory.
+
+- **Source of Truth**: The `aegis-platform/.env` file, created from `.env.example`, controls the configuration for all services.
+- **Mechanism**: The `docker-compose.yml` file loads variables from `.env` and injects them into the appropriate containers. This includes secrets, feature flags, and port mappings.
+- **Security**: The `.env` file is included in `.gitignore` and should never be committed to version control.
 
 ## 4. API Specifications
 
@@ -577,32 +566,41 @@ async def generate_with_failover(prompt: str, providers: List[str]) -> str:
 ### 8.1 Docker Configuration
 ```yaml
 # docker-compose.yml structure
+# For the full file, see aegis-platform/docker/docker-compose.yml
+# The configuration is managed by an .env file in the aegis-platform/ directory.
+
 services:
+  db:
+    image: postgres:15-alpine
+    env_file: [../.env] # Loads DB credentials
+    ports:
+      - "${POSTGRES_PORT_HOST:-5432}:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT_HOST:-6379}:6379"
+
   backend:
     build: ./backend
+    env_file: [../.env] # Loads all backend config
     environment:
-      - DATABASE_URL=mysql://user:pass@db:3306/aegis
+      # Overwrites for container-to-container communication
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+      REDIS_URL: "redis://redis:6379/0"
+    ports:
+      - "${BACKEND_PORT_HOST:-30641}:8000"
     depends_on:
       - db
       - redis
-    
+
   frontend:
     build: ./frontend/aegis-frontend
-    environment:
-      - VITE_API_URL=http://backend:8000/api/v1
+    env_file: [../.env] # Loads VITE_API_URL, etc.
+    ports:
+      - "${FRONTEND_PORT_HOST:-58533}:3000"
     depends_on:
       - backend
-    
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_DATABASE=aegis
-      - MYSQL_USER=aegis_user
-      - MYSQL_PASSWORD=secure_password
-    
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes
 ```
 
 ### 8.2 Production Requirements
