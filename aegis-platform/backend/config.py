@@ -36,7 +36,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # CORS Settings
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "https://*.space.minimax.io"]
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:58533", "https://*.space.minimax.io"]
+    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:58533", "https://*.space.minimax.io"]
     
     # ==============================================
     # Production Security Configuration
