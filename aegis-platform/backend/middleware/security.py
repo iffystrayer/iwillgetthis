@@ -343,8 +343,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         
         # Check for suspicious user agents
         suspicious_agents = [
-            "sqlmap", "nikto", "nmap", "masscan", "zap", "burp",
-            "curl", "wget", "python-requests"  # May want to allow these in some cases
+            "sqlmap", "nikto", "nmap", "masscan", "zap", "burp"
+            # Removed curl, wget, python-requests as they can be legitimate
         ]
         
         if any(agent in user_agent.lower() for agent in suspicious_agents):
