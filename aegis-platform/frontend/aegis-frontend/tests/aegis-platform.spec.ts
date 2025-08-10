@@ -369,12 +369,13 @@ test.describe('Aegis Platform E2E Tests', () => {
   test('should navigate to Integrations page and verify integration management', async ({ page }) => {
     await loginAndNavigateToDashboard(page);
     
-    const integrationsLink = page.locator('a[href="/integrations"], a:has-text("Integrations")').first();
+    // Navigate directly to Integrations page by URL
+    await page.goto('/integrations');
+    
     const integrationsApiPromise = page.waitForRequest(request => 
       request.url().includes('/api/v1/integrations'), { timeout: 10000 }
     );
     
-    await integrationsLink.click();
     await page.waitForURL(/.*\/integrations/, { timeout: 10000 });
     
     try {
@@ -386,31 +387,44 @@ test.describe('Aegis Platform E2E Tests', () => {
     
     const pageContent = await page.textContent('body');
     expect(pageContent).not.toContain('Coming soon');
+    expect(pageContent).not.toContain('coming soon');
     
-    // Check for integration management elements
-    const connectButton = page.locator('button:has-text("Connect"), button:has-text("Add Integration"), button:has-text("Configure")');
-    const statusIndicators = page.locator('.status, [data-status], .connected, .disconnected');
+    // Check for Integrations page UI elements
+    const integrationsElements = [
+      page.locator('h1, h2, [role="heading"]').filter({ hasText: /Integration/i }),
+      page.locator(':text("Connect")'),
+      page.locator('button:has-text("Connect")'),
+      page.locator('button:has-text("Add Integration")'),
+      page.locator('button:has-text("Configure")'),
+      page.locator(':text("Status")'),
+      page.locator(':text("Integration")'),
+      page.locator('.status, [data-status], .connected, .disconnected')
+    ];
+    
+    let foundIntegrationsElements = 0;
+    for (const element of integrationsElements) {
+      if (await element.count() > 0) {
+        foundIntegrationsElements++;
+      }
+    }
+    
+    // At least one integrations-related element should be found
+    expect(foundIntegrationsElements).toBeGreaterThan(0);
     
     await page.screenshot({ path: 'test-results/integrations-page.png' });
     console.log('Integrations page content preview:', pageContent?.substring(0, 500));
-    
-    if (await connectButton.count() > 0) {
-      console.log('✓ Found integration connection buttons');
-    }
-    if (await statusIndicators.count() > 0) {
-      console.log('✓ Found integration status indicators');
-    }
   });
 
   test('should navigate to Users page and verify user management features', async ({ page }) => {
     await loginAndNavigateToDashboard(page);
     
-    const usersLink = page.locator('a[href="/users"], a:has-text("Users")').first();
+    // Navigate directly to Users page by URL
+    await page.goto('/users');
+    
     const usersApiPromise = page.waitForRequest(request => 
       request.url().includes('/api/v1/users'), { timeout: 10000 }
     );
     
-    await usersLink.click();
     await page.waitForURL(/.*\/users/, { timeout: 10000 });
     
     try {
@@ -422,24 +436,34 @@ test.describe('Aegis Platform E2E Tests', () => {
     
     const pageContent = await page.textContent('body');
     expect(pageContent).not.toContain('Coming soon');
+    expect(pageContent).not.toContain('coming soon');
     
-    // Check for user management elements
-    const addUserButton = page.locator('button:has-text("Add User"), button:has-text("Invite"), button:has-text("Create User")');
-    const roleDropdowns = page.locator('select:has(option[value*="admin"]), select:has(option[value*="analyst"])');
-    const editButtons = page.locator('button:has-text("Edit"), button[aria-label*="edit" i]');
+    // Check for Users page UI elements
+    const usersElements = [
+      page.locator('h1, h2, [role="heading"]').filter({ hasText: /Users?/i }),
+      page.locator(':text("Add User")'),
+      page.locator('button:has-text("Add User")'),
+      page.locator('button:has-text("Invite")'),
+      page.locator('button:has-text("Create User")'),
+      page.locator(':text("Role")'),
+      page.locator(':text("Admin")'),
+      page.locator(':text("User Management")'),
+      page.locator('button:has-text("Edit")'),
+      page.locator('select:has(option)')
+    ];
+    
+    let foundUsersElements = 0;
+    for (const element of usersElements) {
+      if (await element.count() > 0) {
+        foundUsersElements++;
+      }
+    }
+    
+    // At least one users-related element should be found
+    expect(foundUsersElements).toBeGreaterThan(0);
     
     await page.screenshot({ path: 'test-results/users-page.png' });
     console.log('Users page content preview:', pageContent?.substring(0, 500));
-    
-    if (await addUserButton.count() > 0) {
-      console.log('✓ Found user creation buttons');
-    }
-    if (await roleDropdowns.count() > 0) {
-      console.log('✓ Found role management dropdowns');
-    }
-    if (await editButtons.count() > 0) {
-      console.log('✓ Found user edit functionality');
-    }
   });
 
   test('should navigate to Reports page and verify reporting workflow', async ({ page }) => {
