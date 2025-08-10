@@ -35,5 +35,11 @@ RUN mkdir -p /app/uploads
 # Expose port
 EXPOSE 8000
 
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Create startup script that chooses between development and production mode
+RUN echo '#!/bin/bash\nif [ "$ENVIRONMENT" = "production" ]; then\n    exec gunicorn --config gunicorn.conf.py main:app\nelse\n    exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload\nfi' > /app/start.sh && chmod +x /app/start.sh
+
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["/app/start.sh"]
