@@ -1,15 +1,41 @@
-import { useState, useEffect } from 'react';
-import { Plus, Database, Filter, Download, Upload } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, Database, Download, Upload, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { assetsApi } from '@/lib/api';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { DataTable, CriticalityBadge, StatusBadge } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+// Asset interface for type safety
+interface Asset {
+  id: number;
+  name: string;
+  description?: string;
+  asset_type: string;
+  criticality: string;
+  status: string;
+  environment?: string;
+  owner_id?: number;
+  ip_address?: string;
+  hostname?: string;
+  operating_system?: string;
+  location?: string;
+  business_unit?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export default function AssetsPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [assets, setAssets] = useState<any[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,38 +59,128 @@ export default function AssetsPage() {
     fetchAssets();
   }, []);
 
-  const filteredAssets = assets.filter((asset: any) =>
-    asset.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.asset_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Define columns for the data table
+  const columns = useMemo<ColumnDef<Asset>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Asset Name',
+        cell: ({ row }) => {
+          const asset = row.original;
+          return (
+            <div className="flex flex-col">
+              <span className="font-medium">{asset.name}</span>
+              {asset.description && (
+                <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                  {asset.description}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'asset_type',
+        header: 'Type',
+        cell: ({ getValue }) => (
+          <Badge variant="outline" className="capitalize">
+            {(getValue() as string) || 'Unknown'}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'criticality',
+        header: 'Criticality',
+        cell: ({ getValue }) => (
+          <CriticalityBadge level={getValue() as string} />
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          const getVariant = () => {
+            switch (status?.toLowerCase()) {
+              case 'active': return 'default';
+              case 'inactive': return 'secondary';
+              case 'maintenance': return 'outline';
+              default: return 'secondary';
+            }
+          };
+          return <StatusBadge status={status} variant={getVariant()} />;
+        },
+      },
+      {
+        accessorKey: 'environment',
+        header: 'Environment',
+        cell: ({ getValue }) => {
+          const env = getValue() as string;
+          return (
+            <span className="capitalize text-sm">
+              {env || 'Unknown'}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: 'ip_address',
+        header: 'IP Address',
+        cell: ({ getValue }) => {
+          const ip = getValue() as string;
+          return (
+            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+              {ip || 'N/A'}
+            </code>
+          );
+        },
+      },
+      {
+        accessorKey: 'updated_at',
+        header: 'Last Updated',
+        cell: ({ getValue }) => {
+          const date = getValue() as string;
+          return date ? (
+            <span className="text-sm text-muted-foreground">
+              {new Date(date).toLocaleDateString()}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground">Never</span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const asset = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Asset
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    []
   );
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  const getCriticalityColor = (criticality: string) => {
-    switch (criticality?.toLowerCase()) {
-      case 'critical': return 'destructive';
-      case 'high': return 'secondary';
-      case 'medium': return 'outline';
-      case 'low': return 'secondary';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active': return 'default';
-      case 'inactive': return 'secondary';
-      case 'maintenance': return 'outline';
-      default: return 'secondary';
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -93,22 +209,6 @@ export default function AssetsPage() {
             Add Asset
           </Button>
         </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Search assets..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
-        <Button variant="outline" size="sm">
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
       </div>
 
       {/* Error Message */}
@@ -181,65 +281,37 @@ export default function AssetsPage() {
         </Card>
       </div>
 
-      {/* Assets List */}
+      {/* Enhanced Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Assets ({filteredAssets.length})</CardTitle>
+          <CardTitle>Assets ({assets.length})</CardTitle>
           <CardDescription>
-            A comprehensive list of all organizational assets
+            A comprehensive view of all organizational assets with advanced filtering and search
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredAssets.length === 0 ? (
-            <div className="text-center py-8">
-              <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No assets found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'Try adjusting your search criteria' : 'Get started by adding your first asset'}
-              </p>
+          <DataTable
+            columns={columns}
+            data={assets}
+            loading={loading}
+            searchPlaceholder="Search assets by name, type, or description..."
+            emptyStateTitle="No assets found"
+            emptyStateDescription="Get started by adding your first asset to track your organization's resources"
+            emptyStateAction={
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Asset
+                Add First Asset
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredAssets.map((asset: any) => (
-                <div
-                  key={asset.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{asset.name}</h3>
-                      <Badge variant={getCriticalityColor(asset.criticality)}>
-                        {asset.criticality || 'Unknown'}
-                      </Badge>
-                      <Badge variant={getStatusColor(asset.status)}>
-                        {asset.status || 'Unknown'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {asset.description || 'No description available'}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Type: {asset.asset_type || 'Unknown'}</span>
-                      <span>Environment: {asset.environment || 'Unknown'}</span>
-                      <span>Owner: {asset.owner_id || 'Unassigned'}</span>
-                      {asset.updated_at && (
-                        <span>Updated: {new Date(asset.updated_at).toLocaleDateString()}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      View Details
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            }
+            showSearch={true}
+            showColumnToggle={true}
+            showPagination={true}
+            pageSize={10}
+            onRowClick={(asset) => {
+              // Handle row click - navigate to asset details
+              console.log('View asset:', asset);
+            }}
+          />
         </CardContent>
       </Card>
     </div>

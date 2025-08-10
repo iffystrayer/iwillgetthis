@@ -1,22 +1,40 @@
-import { useState, useEffect } from 'react';
-import { Users, Plus, Filter, Edit, UserCheck, UserX } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, Plus, Edit, UserCheck, UserX, Eye, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { DataTable, StatusBadge } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { AddUserDialog } from '@/components/dialogs/AddUserDialog';
 import { InviteUsersDialog } from '@/components/dialogs/InviteUsersDialog';
 
+// User interface for type safety
+interface User {
+  id: number;
+  full_name: string;
+  email: string;
+  role: string;
+  status: string;
+  last_login?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export default function UsersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [showFiltersDialog, setShowFiltersDialog] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -37,38 +55,120 @@ export default function UsersPage() {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((user: any) =>
-    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Define columns for the data table
+  const columns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        accessorKey: 'full_name',
+        header: 'User',
+        cell: ({ row }) => {
+          const user = row.original;
+          return (
+            <div className="flex flex-col">
+              <span className="font-medium">{user.full_name}</span>
+              <span className="text-sm text-muted-foreground">
+                {user.email}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'role',
+        header: 'Role',
+        cell: ({ getValue }) => {
+          const role = getValue() as string;
+          const getVariant = () => {
+            switch (role?.toLowerCase()) {
+              case 'admin': return 'destructive';
+              case 'security analyst': return 'secondary';
+              case 'risk manager': return 'outline';
+              case 'compliance officer': return 'default';
+              default: return 'secondary';
+            }
+          };
+          return <Badge variant={getVariant()} className="capitalize">
+            {role || 'No Role'}
+          </Badge>;
+        },
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          const getVariant = () => {
+            switch (status?.toLowerCase()) {
+              case 'active': return 'default';
+              case 'inactive': return 'secondary';
+              case 'suspended': return 'destructive';
+              default: return 'secondary';
+            }
+          };
+          return <StatusBadge status={status} variant={getVariant()} />;
+        },
+      },
+      {
+        accessorKey: 'last_login',
+        header: 'Last Login',
+        cell: ({ getValue }) => {
+          const date = getValue() as string;
+          if (!date) return <span className="text-sm text-muted-foreground">Never</span>;
+          return (
+            <span className="text-sm text-muted-foreground">
+              {new Date(date).toLocaleString()}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: 'created_at',
+        header: 'Created',
+        cell: ({ getValue }) => {
+          const date = getValue() as string;
+          return date ? (
+            <span className="text-sm text-muted-foreground">
+              {new Date(date).toLocaleDateString()}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground">N/A</span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const user = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleViewDetails(user.id)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEditUser(user.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    []
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active': return 'default';
-      case 'inactive': return 'secondary';
-      case 'suspended': return 'destructive';
-      default: return 'secondary';
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role?.toLowerCase()) {
-      case 'admin': return 'destructive';
-      case 'security analyst': return 'secondary';
-      case 'risk manager': return 'outline';
-      case 'compliance officer': return 'default';
-      default: return 'secondary';
-    }
-  };
 
   const handleAddUser = () => {
     console.log('Add User clicked - Opening dialog');
@@ -85,12 +185,12 @@ export default function UsersPage() {
     fetchUsers();
   };
 
-  const handleFilters = () => {
-    console.log('Filters clicked - Opening filters dialog');
-    console.log('User filters functionality coming soon - would open a filters panel');
+  const handleViewDetails = (userId: number) => {
+    console.log('View Details clicked for user:', userId);
+    // TODO: Navigate to user details page
   };
 
-  const handleEditUser = (userId: string) => {
+  const handleEditUser = (userId: number) => {
     console.log('Edit User clicked for user:', userId);
     console.log(`User editing functionality coming soon - would open edit dialog for user ${userId}`);
   };
@@ -126,21 +226,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
-        <Button variant="outline" size="sm" onClick={handleFilters}>
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
-      </div>
 
       {/* Error Message */}
       {error && (
@@ -175,7 +260,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter(u => u.status === 'Active').length}
+              {users.filter(u => u.status?.toLowerCase() === 'active').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Currently active
@@ -189,7 +274,7 @@ export default function UsersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter(u => u.status !== 'Active').length}
+              {users.filter(u => u.status?.toLowerCase() !== 'active').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Need attention
@@ -212,61 +297,44 @@ export default function UsersPage() {
         </Card>
       </div>
 
-      {/* Users List */}
+      {/* Enhanced Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>Users ({users.length})</CardTitle>
           <CardDescription>
-            Manage user accounts and access permissions
+            Comprehensive view of all user accounts with advanced filtering and search
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredUsers.length === 0 ? (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No users found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'Try adjusting your search criteria' : 'Get started by adding your first user'}
-              </p>
-              <Button>
+          <DataTable
+            columns={columns}
+            data={users}
+            loading={loading}
+            searchPlaceholder="Search users by name, email, or role..."
+            emptyStateTitle="No users found"
+            emptyStateDescription="Get started by adding your first user to the system"
+            emptyStateAction={
+              <Button onClick={handleAddUser}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add User
+                Add First User
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredUsers.map((user: any) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{user.full_name}</h3>
-                      <Badge variant={getStatusColor(user.status)}>
-                        {user.status || 'Unknown'}
-                      </Badge>
-                      <Badge variant={getRoleColor(user.role)}>
-                        {user.role || 'No Role'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {user.email || 'No email'}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Last Login: {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEditUser(user.id)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            }
+            showSearch={true}
+            showColumnToggle={true}
+            showPagination={true}
+            pageSize={10}
+            onRowClick={(user) => {
+              handleViewDetails(user.id);
+            }}
+            rowClassName={(user) => {
+              // Highlight inactive or suspended users
+              const isInactive = user.status?.toLowerCase() === 'inactive';
+              const isSuspended = user.status?.toLowerCase() === 'suspended';
+              if (isSuspended) return 'bg-red-50 hover:bg-red-100';
+              if (isInactive) return 'bg-gray-50 hover:bg-gray-100';
+              return '';
+            }}
+          />
         </CardContent>
       </Card>
 

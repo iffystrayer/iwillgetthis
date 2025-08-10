@@ -1,16 +1,36 @@
-import { useState } from 'react';
-import { Plus, AlertTriangle, Filter, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, AlertTriangle, TrendingUp, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { DataTable, CriticalityBadge, StatusBadge } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+// Risk interface for type safety
+interface Risk {
+  id: number;
+  title: string;
+  category: string;
+  level: string;
+  score: number;
+  status: string;
+  owner: string;
+  dueDate: string;
+}
 
 export default function RisksPage() {
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data
-  const risks = [
+  // Mock data with more comprehensive examples
+  const risks: Risk[] = [
     {
       id: 1,
       title: 'Unpatched Web Server Vulnerability',
@@ -53,6 +73,122 @@ export default function RisksPage() {
     }
   ];
 
+  // Define columns for the data table
+  const columns = useMemo<ColumnDef<Risk>[]>(
+    () => [
+      {
+        accessorKey: 'title',
+        header: 'Risk Title',
+        cell: ({ row }) => {
+          const risk = row.original;
+          return (
+            <div className="flex flex-col max-w-[300px]">
+              <span className="font-medium">{risk.title}</span>
+              <span className="text-sm text-muted-foreground">
+                ID: {risk.id} • {risk.category}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'level',
+        header: 'Risk Level',
+        cell: ({ getValue }) => (
+          <CriticalityBadge level={getValue() as string} />
+        ),
+      },
+      {
+        accessorKey: 'score',
+        header: 'Risk Score',
+        cell: ({ getValue }) => {
+          const score = getValue() as number;
+          const getScoreColor = () => {
+            if (score >= 8) return 'text-red-600';
+            if (score >= 6) return 'text-orange-600';
+            if (score >= 4) return 'text-yellow-600';
+            return 'text-green-600';
+          };
+          return (
+            <div className="flex items-center gap-2">
+              <span className={`font-mono text-sm font-semibold ${getScoreColor()}`}>
+                {score.toFixed(1)}
+              </span>
+              <Progress value={score * 10} className="w-16 h-2" />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          const getVariant = () => {
+            switch (status?.toLowerCase()) {
+              case 'mitigating': return 'default';
+              case 'assessed': return 'secondary';
+              case 'identified': return 'destructive';
+              case 'monitoring': return 'outline';
+              default: return 'secondary';
+            }
+          };
+          return <StatusBadge status={status} variant={getVariant()} />;
+        },
+      },
+      {
+        accessorKey: 'owner',
+        header: 'Owner',
+        cell: ({ getValue }) => (
+          <span className="text-sm">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: 'dueDate',
+        header: 'Due Date',
+        cell: ({ getValue }) => {
+          const date = new Date(getValue() as string);
+          const isOverdue = date < new Date();
+          return (
+            <span className={`text-sm ${isOverdue ? 'text-red-600 font-semibold' : 'text-muted-foreground'}`}>
+              {date.toLocaleDateString()}
+            </span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const risk = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Risk
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    []
+  );
+
   const getRiskLevelColor = (level: string) => {
     switch (level) {
       case 'critical': return 'destructive';
@@ -85,11 +221,6 @@ export default function RisksPage() {
     // TODO: Implement risk matrix visualization
   };
 
-  const handleFilters = () => {
-    console.log('Filters clicked - Opening filters dialog');
-    console.log('Filters functionality would open a filters panel for risks');
-    // TODO: Implement filters dialog
-  };
 
   const handleViewDetails = (riskId: number) => {
     console.log('View Details clicked for risk:', riskId);
@@ -166,64 +297,46 @@ export default function RisksPage() {
         </Card>
       </div>
 
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search risks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Button variant="outline" onClick={handleFilters}>
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Risks List */}
+      {/* Enhanced Risk Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Risk Register</CardTitle>
+          <CardTitle>Risk Register ({risks.length})</CardTitle>
           <CardDescription>
-            Current organizational risk portfolio
+            Comprehensive view of organizational risk portfolio with advanced filtering and analytics
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {risks.map((risk) => (
-              <div key={risk.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold">{risk.title}</h3>
-                    <Badge variant={getRiskLevelColor(risk.level)}>
-                      {risk.level}
-                    </Badge>
-                    <div className="text-sm font-medium">
-                      Score: {risk.score}/10
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span>Category: {risk.category}</span>
-                    <span>Owner: {risk.owner}</span>
-                    <span>Due: {risk.dueDate}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${getStatusColor(risk.status)}`}>
-                    {risk.status.charAt(0).toUpperCase() + risk.status.slice(1)}
-                  </span>
-                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(risk.id)}>
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <DataTable
+            columns={columns}
+            data={risks}
+            loading={false}
+            searchPlaceholder="Search risks by title, category, or owner..."
+            emptyStateTitle="No risks found"
+            emptyStateDescription="Start building your risk register by adding your first organizational risk"
+            emptyStateAction={
+              <Button onClick={handleAddRisk}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Risk
+              </Button>
+            }
+            showSearch={true}
+            showColumnToggle={true}
+            showPagination={true}
+            pageSize={10}
+            onRowClick={(risk) => {
+              handleViewDetails(risk.id);
+            }}
+            rowClassName={(risk) => {
+              // Highlight overdue or critical risks
+              const isOverdue = new Date(risk.dueDate) < new Date();
+              const isCritical = risk.level === 'critical';
+              if (isOverdue && isCritical) return 'bg-red-50 hover:bg-red-100';
+              if (isOverdue) return 'bg-orange-50 hover:bg-orange-100';
+              if (isCritical) return 'bg-yellow-50 hover:bg-yellow-100';
+              return '';
+            }}
+          />
         </CardContent>
       </Card>
     </div>

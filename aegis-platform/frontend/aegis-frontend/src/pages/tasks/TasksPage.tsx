@@ -1,16 +1,36 @@
-import { useState, useEffect } from 'react';
-import { Plus, CheckSquare, Filter, Calendar, User } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, CheckSquare, Calendar, User, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { tasksApi } from '@/lib/api';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { DataTable, StatusBadge } from '@/components/ui/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { NewTaskDialog } from '@/components/dialogs/NewTaskDialog';
 
+// Task interface for type safety
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  assigned_to?: string;
+  due_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export default function TasksPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
@@ -34,29 +54,140 @@ export default function TasksPage() {
     fetchTasks();
   }, []);
 
-  const filteredTasks = tasks.filter((task: any) =>
-    task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.assigned_to?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Define columns for the data table
+  const columns = useMemo<ColumnDef<Task>[]>(
+    () => [
+      {
+        accessorKey: 'title',
+        header: 'Task Title',
+        cell: ({ row }) => {
+          const task = row.original;
+          return (
+            <div className="flex flex-col max-w-[300px]">
+              <span className="font-medium">{task.title}</span>
+              {task.description && (
+                <span className="text-sm text-muted-foreground truncate">
+                  {task.description}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          const getVariant = () => {
+            switch (status?.toLowerCase()) {
+              case 'open': return 'destructive';
+              case 'in progress': return 'secondary';
+              case 'completed': return 'default';
+              default: return 'outline';
+            }
+          };
+          return <StatusBadge status={status} variant={getVariant()} />;
+        },
+      },
+      {
+        accessorKey: 'priority',
+        header: 'Priority',
+        cell: ({ getValue }) => {
+          const priority = getValue() as string;
+          const getVariant = () => {
+            switch (priority?.toLowerCase()) {
+              case 'high': return 'destructive';
+              case 'medium': return 'secondary';
+              case 'low': return 'outline';
+              default: return 'secondary';
+            }
+          };
+          return <Badge variant={getVariant()} className="capitalize">
+            {priority || 'Unknown'}
+          </Badge>;
+        },
+      },
+      {
+        accessorKey: 'assigned_to',
+        header: 'Assigned To',
+        cell: ({ getValue }) => {
+          const assignee = getValue() as string;
+          return (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{assignee || 'Unassigned'}</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'due_date',
+        header: 'Due Date',
+        cell: ({ getValue }) => {
+          const date = getValue() as string;
+          if (!date) return <span className="text-sm text-muted-foreground">No due date</span>;
+          const dueDate = new Date(date);
+          const isOverdue = dueDate < new Date();
+          return (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className={`text-sm ${
+                isOverdue ? 'text-red-600 font-semibold' : 'text-muted-foreground'
+              }`}>
+                {dueDate.toLocaleDateString()}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'created_at',
+        header: 'Created',
+        cell: ({ getValue }) => {
+          const date = getValue() as string;
+          return date ? (
+            <span className="text-sm text-muted-foreground">
+              {new Date(date).toLocaleDateString()}
+            </span>
+          ) : (
+            <span className="text-sm text-muted-foreground">N/A</span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const task = row.original;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleViewDetails(task.id)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Task
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    []
   );
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'open': return 'destructive';
-      case 'in progress': return 'secondary';
-      case 'completed': return 'default';
-      default: return 'outline';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return 'destructive';
-      case 'medium': return 'secondary';
-      case 'low': return 'outline';
-      default: return 'outline';
-    }
-  };
 
   const handleNewTask = () => {
     console.log('New Task clicked - Opening task creation dialog');
@@ -68,25 +199,13 @@ export default function TasksPage() {
     fetchTasks();
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
 
   const handleViewCalendar = () => {
     console.log('View Calendar clicked - Opening calendar view');
     // TODO: Implement calendar view functionality
   };
 
-  const handleFilters = () => {
-    console.log('Filters clicked - Opening filters dialog');
-    // TODO: Implement task filters functionality
-  };
-
-  const handleViewDetails = (taskId: string) => {
+  const handleViewDetails = (taskId: number) => {
     console.log('View Details clicked for task:', taskId);
     // TODO: Navigate to task details page
   };
@@ -116,21 +235,6 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
-        <Button variant="outline" size="sm" onClick={handleFilters}>
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
-      </div>
 
       {/* Error Message */}
       {error && (
@@ -165,7 +269,7 @@ export default function TasksPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tasks.filter(t => t.status === 'Open').length}
+              {tasks.filter(t => t.status?.toLowerCase() === 'open').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Require attention
@@ -179,7 +283,7 @@ export default function TasksPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tasks.filter(t => t.status === 'In Progress').length}
+              {tasks.filter(t => t.status?.toLowerCase() === 'in progress').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Currently being worked on
@@ -193,7 +297,7 @@ export default function TasksPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {tasks.filter(t => t.status === 'Completed').length}
+              {tasks.filter(t => t.status?.toLowerCase() === 'completed').length}
             </div>
             <p className="text-xs text-muted-foreground">
               Successfully finished
@@ -202,70 +306,45 @@ export default function TasksPage() {
         </Card>
       </div>
 
-      {/* Tasks List */}
+      {/* Enhanced Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Tasks ({filteredTasks.length})</CardTitle>
+          <CardTitle>Tasks ({tasks.length})</CardTitle>
           <CardDescription>
-            Manage your security and compliance tasks
+            Comprehensive view of all security and compliance tasks with advanced filtering and search
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredTasks.length === 0 ? (
-            <div className="text-center py-8">
-              <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'Try adjusting your search criteria' : 'Get started by creating your first task'}
-              </p>
+          <DataTable
+            columns={columns}
+            data={tasks}
+            loading={loading}
+            searchPlaceholder="Search tasks by title, description, or assignee..."
+            emptyStateTitle="No tasks found"
+            emptyStateDescription="Get started by creating your first security or compliance task"
+            emptyStateAction={
               <Button onClick={handleNewTask}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Task
+                Create First Task
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredTasks.map((task: any) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{task.title}</h3>
-                      <Badge variant={getStatusColor(task.status)}>
-                        {task.status || 'Unknown'}
-                      </Badge>
-                      <Badge variant={getPriorityColor(task.priority)}>
-                        {task.priority || 'Unknown'} Priority
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      {task.description || 'No description available'}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {task.assigned_to || 'Unassigned'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        Due: {task.due_date || 'No due date'}
-                      </span>
-                      {task.created && (
-                        <span>Created: {new Date(task.created).toLocaleDateString()}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(task.id)}>
-                      View Details
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            }
+            showSearch={true}
+            showColumnToggle={true}
+            showPagination={true}
+            pageSize={10}
+            onRowClick={(task) => {
+              handleViewDetails(task.id);
+            }}
+            rowClassName={(task) => {
+              // Highlight overdue or high priority tasks
+              const isOverdue = task.due_date && new Date(task.due_date) < new Date();
+              const isHighPriority = task.priority?.toLowerCase() === 'high';
+              if (isOverdue && isHighPriority) return 'bg-red-50 hover:bg-red-100';
+              if (isOverdue) return 'bg-orange-50 hover:bg-orange-100';
+              if (isHighPriority) return 'bg-yellow-50 hover:bg-yellow-100';
+              return '';
+            }}
+          />
         </CardContent>
       </Card>
 
