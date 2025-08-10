@@ -1,0 +1,246 @@
+# ==============================================
+# Aegis Platform - Alertmanager Configuration
+# ==============================================
+# Comprehensive alerting with multiple channels and escalation
+# ==============================================
+
+global:
+  # Global SMTP configuration
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@yourdomain.com'
+  smtp_auth_username: 'alerts@yourdomain.com'
+  smtp_auth_password: 'your-smtp-app-password'
+  smtp_require_tls: true
+
+  # Default notification settings
+  resolve_timeout: 5m
+
+# Template files for custom notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routing configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'default'
+  
+  # Routing rules
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 5m
+      continue: true
+    
+    # Security alerts - immediate notification to security team
+    - match:
+        category: security
+      receiver: 'security-team'
+      group_wait: 10s
+      repeat_interval: 15m
+      continue: true
+    
+    # Database alerts
+    - match:
+        service: postgresql
+      receiver: 'database-team'
+      group_wait: 30s
+      repeat_interval: 30m
+    
+    # Frontend/UI alerts
+    - match_re:
+        service: aegis-frontend.*
+      receiver: 'frontend-team'
+      group_wait: 1m
+      repeat_interval: 1h
+    
+    # Infrastructure alerts
+    - match:
+        category: resource
+      receiver: 'infrastructure-team'
+      group_wait: 1m
+      repeat_interval: 2h
+    
+    # Business logic alerts
+    - match:
+        category: business
+      receiver: 'product-team'
+      group_wait: 2m
+      repeat_interval: 4h
+
+# Inhibition rules (prevent spam from related alerts)
+inhibit_rules:
+  # Inhibit any alert that has the same alertname and cluster
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+  
+  # If entire service is down, don't alert on individual components
+  - source_match:
+      alertname: 'AegisBackendDown'
+    target_match_re:
+      alertname: '.*Backend.*'
+    equal: ['service']
+
+# Notification receivers
+receivers:
+  # Default receiver
+  - name: 'default'
+    email_configs:
+      - to: 'ops-team@yourdomain.com'
+        subject: '[Aegis] {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          {{ if .Labels.runbook_url }}
+          Runbook: {{ .Labels.runbook_url }}
+          {{ end }}
+          {{ end }}
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'critical-alerts@yourdomain.com'
+        subject: '🚨 [CRITICAL] Aegis Platform Alert'
+        body: |
+          ⚠️ CRITICAL ALERT DETECTED ⚠️
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          
+          {{ if .Labels.runbook_url }}
+          🔧 Runbook: {{ .Labels.runbook_url }}
+          {{ end }}
+          {{ end }}
+        
+    slack_configs:
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL'
+        channel: '#critical-alerts'
+        title: '🚨 Critical Alert - Aegis Platform'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          Service: `{{ .Labels.service }}`
+          Severity: `{{ .Labels.severity }}`
+          {{ end }}
+        actions:
+          - type: button
+            text: 'View Alert'
+            url: '{{ .ExternalURL }}'
+          - type: button
+            text: 'Acknowledge'
+            url: '{{ .ExternalURL }}'
+
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        severity: '{{ .Labels.severity }}'
+
+  # Security team notifications
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@yourdomain.com'
+        subject: '🛡️ [SECURITY] Aegis Security Alert'
+        body: |
+          🛡️ SECURITY ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          
+          Immediate investigation required.
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL'
+        channel: '#security-alerts'
+        title: '🛡️ Security Alert - Aegis Platform'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ end }}
+
+  # Database team
+  - name: 'database-team'
+    email_configs:
+      - to: 'dba@yourdomain.com'
+        subject: '[DATABASE] Aegis Database Alert'
+        body: |
+          Database Alert Detected
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Database: {{ .Labels.instance }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          {{ end }}
+
+  # Frontend team
+  - name: 'frontend-team'
+    email_configs:
+      - to: 'frontend@yourdomain.com'
+        subject: '[FRONTEND] Aegis UI Alert'
+        body: |
+          Frontend/UI Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          {{ end }}
+
+  # Infrastructure team
+  - name: 'infrastructure-team'
+    email_configs:
+      - to: 'infrastructure@yourdomain.com'
+        subject: '[INFRA] Aegis Infrastructure Alert'
+        body: |
+          Infrastructure Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Resource: {{ .Labels.instance }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          {{ end }}
+
+  # Product team
+  - name: 'product-team'
+    email_configs:
+      - to: 'product@yourdomain.com'
+        subject: '[BUSINESS] Aegis Business Logic Alert'
+        body: |
+          Business Logic Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Impact: Business functionality may be affected
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          {{ end }}
+
+# Webhook for integration with external systems
+# - name: 'webhook'
+#   webhook_configs:
+#     - url: 'https://yourdomain.com/api/v1/alerts/webhook'
+#       http_config:
+#         bearer_token: 'your-webhook-auth-token'

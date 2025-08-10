@@ -16,6 +16,14 @@ RUN pnpm install
 # Copy source code
 COPY . .
 
+# Accept build arguments and set as environment variables
+ARG VITE_API_URL
+ARG VITE_USE_MOCK_API
+ARG VITE_ENVIRONMENT
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_USE_MOCK_API=${VITE_USE_MOCK_API}
+ENV VITE_ENVIRONMENT=${VITE_ENVIRONMENT}
+
 # Build the application
 RUN pnpm run build
 

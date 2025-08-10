@@ -1,0 +1,543 @@
+name: Security Scanning
+
+on:
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: 'Type of security scan to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - dependencies
+        - code
+        - containers
+        - infrastructure
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # ==============================================
+  # Dependency Vulnerability Scanning
+  # ==============================================
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'dependencies' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    
+    strategy:
+      matrix:
+        component: ['backend', 'frontend']
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python (for backend)
+      if: matrix.component == 'backend'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Set up Node.js (for frontend)
+      if: matrix.component == 'frontend'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/aegis-frontend/package-lock.json
+        
+    - name: Install backend dependencies
+      if: matrix.component == 'backend'
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install safety bandit semgrep
+        
+    - name: Install frontend dependencies
+      if: matrix.component == 'frontend'
+      run: |
+        cd frontend/aegis-frontend
+        npm ci
+        
+    - name: Backend - Safety vulnerability scan
+      if: matrix.component == 'backend'
+      run: |
+        cd backend
+        safety check --json --output safety-report.json || true
+        safety check --short-report
+        
+    - name: Backend - Bandit security scan
+      if: matrix.component == 'backend'
+      run: |
+        cd backend
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . --exit-zero-on-skipped
+        
+    - name: Backend - Semgrep security scan
+      if: matrix.component == 'backend'
+      run: |
+        cd backend
+        semgrep --config=auto --json --output=semgrep-report.json . || true
+        semgrep --config=auto --error .
+        
+    - name: Frontend - npm audit
+      if: matrix.component == 'frontend'
+      run: |
+        cd frontend/aegis-frontend
+        npm audit --json > npm-audit-report.json || true
+        npm audit --audit-level moderate
+        
+    - name: Frontend - Retire.js scan
+      if: matrix.component == 'frontend'
+      run: |
+        cd frontend/aegis-frontend
+        npx retire --outputformat json --outputpath retire-report.json || true
+        npx retire
+        
+    - name: Upload dependency scan reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-scan-${{ matrix.component }}
+        path: |
+          backend/safety-report.json
+          backend/bandit-report.json
+          backend/semgrep-report.json
+          frontend/aegis-frontend/npm-audit-report.json
+          frontend/aegis-frontend/retire-report.json
+
+  # ==============================================
+  # Static Code Analysis
+  # ==============================================
+  code-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'code' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python, javascript
+        queries: security-extended,security-and-quality
+        
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+      
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:python,javascript"
+        
+    - name: Run ESLint security scan
+      run: |
+        cd frontend/aegis-frontend
+        npm ci
+        npx eslint . --ext .ts,.tsx,.js,.jsx --format json --output-file eslint-security-report.json || true
+        npx eslint . --ext .ts,.tsx,.js,.jsx
+        
+    - name: Upload code analysis reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: code-analysis-reports
+        path: |
+          frontend/aegis-frontend/eslint-security-report.json
+
+  # ==============================================
+  # Container Security Scanning
+  # ==============================================
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'containers' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    
+    permissions:
+      contents: read
+      security-events: write
+      
+    strategy:
+      matrix:
+        image: ['backend', 'frontend']
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build container image
+      run: |
+        if [ "${{ matrix.image }}" == "backend" ]; then
+          docker build -t aegis-${{ matrix.image }}:security-scan ./backend
+        else
+          docker build -t aegis-${{ matrix.image }}:security-scan ./frontend/aegis-frontend
+        fi
+        
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: aegis-${{ matrix.image }}:security-scan
+        format: 'sarif'
+        output: 'trivy-results-${{ matrix.image }}.sarif'
+        
+    - name: Upload Trivy scan results to Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results-${{ matrix.image }}.sarif'
+        
+    - name: Run Trivy vulnerability scanner (table format)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: aegis-${{ matrix.image }}:security-scan
+        format: 'table'
+        output: 'trivy-table-${{ matrix.image }}.txt'
+        
+    - name: Run Grype vulnerability scanner
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+        grype aegis-${{ matrix.image }}:security-scan -o json > grype-results-${{ matrix.image }}.json || true
+        grype aegis-${{ matrix.image }}:security-scan
+        
+    - name: Upload container scan reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: container-scan-${{ matrix.image }}
+        path: |
+          trivy-table-${{ matrix.image }}.txt
+          grype-results-${{ matrix.image }}.json
+
+  # ==============================================
+  # Infrastructure Security Scanning
+  # ==============================================
+  infrastructure-scan:
+    name: Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'infrastructure' || github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install security scanning tools
+      run: |
+        pip install checkov terraform-compliance
+        
+    - name: Run Checkov on Docker files
+      run: |
+        checkov -f backend/Dockerfile --framework dockerfile --output json --output-file checkov-backend-dockerfile.json || true
+        checkov -f frontend/aegis-frontend/Dockerfile --framework dockerfile --output json --output-file checkov-frontend-dockerfile.json || true
+        checkov -f backend/Dockerfile --framework dockerfile
+        checkov -f frontend/aegis-frontend/Dockerfile --framework dockerfile
+        
+    - name: Run Checkov on Docker Compose
+      run: |
+        checkov -f docker/docker-compose.yml --framework docker_compose --output json --output-file checkov-compose.json || true
+        checkov -f docker/docker-compose.yml --framework docker_compose
+        
+    - name: Scan nginx configuration
+      run: |
+        # Install nginx configuration scanner
+        pip install nginxparser
+        
+        # Create a simple nginx config scanner
+        cat << 'EOF' > nginx_security_check.py
+        import sys
+        import re
+        
+        def check_nginx_security(config_file):
+            with open(config_file, 'r') as f:
+                content = f.read()
+            
+            security_issues = []
+            
+            # Check for security headers
+            required_headers = [
+                'X-Frame-Options',
+                'X-Content-Type-Options',
+                'X-XSS-Protection',
+                'Strict-Transport-Security'
+            ]
+            
+            for header in required_headers:
+                if header.lower() not in content.lower():
+                    security_issues.append(f"Missing security header: {header}")
+            
+            # Check for SSL configuration
+            if 'ssl_protocols' in content:
+                if 'TLSv1 ' in content or 'TLSv1.1' in content:
+                    security_issues.append("Insecure TLS versions enabled")
+            
+            # Check for rate limiting
+            if 'limit_req' not in content:
+                security_issues.append("No rate limiting configured")
+            
+            return security_issues
+        
+        if len(sys.argv) > 1:
+            issues = check_nginx_security(sys.argv[1])
+            for issue in issues:
+                print(f"WARNING: {issue}")
+        EOF
+        
+        python nginx_security_check.py nginx/nginx-production.conf || true
+        
+    - name: Scan shell scripts with ShellCheck
+      run: |
+        sudo apt-get update && sudo apt-get install -y shellcheck
+        find . -name "*.sh" -type f -exec shellcheck {} \; || true
+        
+    - name: Upload infrastructure scan reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: infrastructure-scan-reports
+        path: |
+          checkov-*.json
+          nginx_security_check.py
+
+  # ==============================================
+  # Secrets Scanning
+  # ==============================================
+  secrets-scan:
+    name: Secrets Scanning
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'full' || github.event.inputs.scan_type == ''
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Run TruffleHog secrets scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+        
+    - name: Run detect-secrets
+      run: |
+        pip install detect-secrets
+        detect-secrets scan --all-files --baseline .secrets.baseline || true
+        
+    - name: GitLeaks secrets scan
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ==============================================
+  # Security Report Generation
+  # ==============================================
+  generate-security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-analysis, container-scan, infrastructure-scan, secrets-scan]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all scan artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: security-scan-results/
+        
+    - name: Generate comprehensive security report
+      run: |
+        python << 'EOF'
+        import os
+        import json
+        import glob
+        from datetime import datetime
+        
+        def generate_html_report():
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Aegis Platform Security Scan Report</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                    .header {{ background-color: #2c3e50; color: white; padding: 20px; text-align: center; }}
+                    .section {{ margin: 20px 0; padding: 15px; border-left: 4px solid #3498db; }}
+                    .critical {{ border-left-color: #e74c3c; background-color: #fadbd8; }}
+                    .high {{ border-left-color: #f39c12; background-color: #fef5e7; }}
+                    .medium {{ border-left-color: #f1c40f; background-color: #fef9e7; }}
+                    .low {{ border-left-color: #27ae60; background-color: #d5f4e6; }}
+                    .info {{ border-left-color: #3498db; background-color: #ebf3fd; }}
+                    pre {{ background-color: #f8f9fa; padding: 10px; overflow-x: auto; }}
+                    table {{ width: 100%; border-collapse: collapse; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; }}
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Aegis Platform Security Scan Report</h1>
+                    <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+                    <p>Scan Type: {os.getenv('SCAN_TYPE', 'Full Security Scan')}</p>
+                </div>
+            """
+            
+            # Process each scan type
+            scan_types = ['dependency-scan', 'code-analysis', 'container-scan', 'infrastructure-scan']
+            
+            for scan_type in scan_types:
+                html_content += f"""
+                <div class="section">
+                    <h2>{scan_type.replace('-', ' ').title()} Results</h2>
+                """
+                
+                # Look for JSON reports
+                json_files = glob.glob(f"security-scan-results/{scan_type}-*/*.json")
+                for json_file in json_files:
+                    try:
+                        with open(json_file, 'r') as f:
+                            data = json.load(f)
+                            html_content += f"<h3>{os.path.basename(json_file)}</h3>"
+                            html_content += f"<pre>{json.dumps(data, indent=2)}</pre>"
+                    except:
+                        pass
+                
+                html_content += "</div>"
+            
+            html_content += """
+                <div class="section info">
+                    <h2>Recommendations</h2>
+                    <ul>
+                        <li>Review all CRITICAL and HIGH severity vulnerabilities immediately</li>
+                        <li>Update dependencies with known vulnerabilities</li>
+                        <li>Fix identified code security issues</li>
+                        <li>Review container base images for security updates</li>
+                        <li>Ensure infrastructure security best practices are followed</li>
+                        <li>Rotate any exposed secrets immediately</li>
+                    </ul>
+                </div>
+                
+                <div class="section info">
+                    <h2>Next Steps</h2>
+                    <ol>
+                        <li>Prioritize vulnerabilities by severity and exploitability</li>
+                        <li>Create tickets for each security issue</li>
+                        <li>Implement fixes according to priority</li>
+                        <li>Re-run security scans to verify fixes</li>
+                        <li>Schedule regular security scans</li>
+                    </ol>
+                </div>
+            </body>
+            </html>
+            """
+            
+            with open('security-report.html', 'w') as f:
+                f.write(html_content)
+            
+            print("Security report generated: security-report.html")
+        
+        generate_html_report()
+        EOF
+        
+    - name: Upload security report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: comprehensive-security-report
+        path: |
+          security-report.html
+          security-scan-results/
+          
+    - name: Comment security report on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Create a summary comment for the PR
+          const comment = `
+          ## 🔒 Security Scan Results
+          
+          A comprehensive security scan has been completed for this PR.
+          
+          **Scan Components:**
+          - ✅ Dependency vulnerability scanning
+          - ✅ Static code analysis (CodeQL)
+          - ✅ Container security scanning
+          - ✅ Infrastructure security scanning
+          - ✅ Secrets scanning
+          
+          📋 **Download the full security report from the workflow artifacts.**
+          
+          🚨 **Please review any security findings before merging this PR.**
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  # ==============================================
+  # Security Notification
+  # ==============================================
+  notify-security-team:
+    name: Notify Security Team
+    runs-on: ubuntu-latest
+    needs: [generate-security-report]
+    if: always() && (github.ref == 'refs/heads/main' || github.event.schedule)
+    
+    steps:
+    - name: Send Slack notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#security-alerts'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        message: |
+          🔒 Security Scan Completed
+          Repository: ${{ github.repository }}
+          Branch: ${{ github.ref_name }}
+          Scan Type: ${{ github.event.inputs.scan_type || 'Scheduled Full Scan' }}
+          
+          📋 Review the security report in the workflow artifacts.
+          
+    - name: Send email notification (if critical issues found)
+      if: contains(needs.*.result, 'failure')
+      run: |
+        echo "Critical security issues detected - sending email notification"
+        # Add email notification logic here

@@ -46,8 +46,6 @@ services:
       - ../.env
     environment:
       # These URLs are constructed for the container network.
-      # They use the variables loaded from the .env file.
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
       REDIS_URL: "redis://redis:6379/0"
     ports:
       - "${BACKEND_PORT_HOST:-30641}:8000"
@@ -75,6 +73,10 @@ services:
     build:
       context: ../frontend/aegis-frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_USE_MOCK_API: ${VITE_USE_MOCK_API}
+        VITE_ENVIRONMENT: ${VITE_ENVIRONMENT}
     container_name: aegis-frontend
     env_file:
       - ../.env

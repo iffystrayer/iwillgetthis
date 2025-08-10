@@ -17,6 +17,13 @@ class Settings(BaseSettings):
     # Database Configuration
     DATABASE_URL: str = "sqlite:///./aegis_development.db"
     
+    # PostgreSQL Configuration (for Docker/Production)
+    POSTGRES_USER: str = ""
+    POSTGRES_PASSWORD: str = ""
+    POSTGRES_DB: str = ""
+    POSTGRES_HOST: str = "db"
+    POSTGRES_PORT: int = 5432
+    
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"
     
@@ -30,6 +37,53 @@ class Settings(BaseSettings):
     
     # CORS Settings
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "https://*.space.minimax.io"]
+    
+    # ==============================================
+    # Production Security Configuration
+    # ==============================================
+    
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = False
+    RATE_LIMIT_PER_MINUTE: int = 100
+    RATE_LIMIT_PER_HOUR: int = 1000
+    RATE_LIMIT_PER_DAY: int = 10000
+    
+    # Session Security
+    SESSION_TIMEOUT: int = 3600  # 1 hour
+    MAX_CONCURRENT_SESSIONS: int = 5
+    SESSION_ENCRYPTION_KEY: str = ""
+    
+    # Security Headers
+    X_FRAME_OPTIONS: str = "DENY"
+    X_CONTENT_TYPE_OPTIONS: str = "nosniff" 
+    X_XSS_PROTECTION: str = "1; mode=block"
+    REFERRER_POLICY: str = "strict-origin-when-cross-origin"
+    CONTENT_SECURITY_POLICY: str = "default-src 'self'"
+    
+    # SSL/TLS Configuration
+    SSL_REDIRECT: bool = False
+    HSTS_MAX_AGE: int = 31536000  # 1 year
+    SSL_CERT_PATH: str = ""
+    SSL_KEY_PATH: str = ""
+    
+    # Database Security
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 3600
+    DB_SSL_MODE: str = "prefer"
+    
+    # File Upload Security
+    MAX_UPLOAD_SIZE: int = 52428800  # 50MB
+    ALLOWED_EXTENSIONS: List[str] = ["pdf", "docx", "txt", "csv", "json", "png", "jpg", "jpeg"]
+    UPLOAD_SCAN_ENABLED: bool = False
+    VIRUS_SCAN_ENDPOINT: str = ""
+    
+    # Encryption
+    DATA_ENCRYPTION_AT_REST: bool = False
+    DATA_ENCRYPTION_IN_TRANSIT: bool = True
+    FILE_ENCRYPTION_KEY: str = ""
+    BACKUP_ENCRYPTION_KEY: str = ""
     
     # Application Settings
     APP_NAME: str = "Aegis Risk Management Platform"
@@ -291,6 +345,13 @@ class Settings(BaseSettings):
             return json.loads(self.PROVIDER_DAILY_COST_LIMITS)
         except:
             return {}
+    
+    @property
+    def get_database_url(self) -> str:
+        """Get the appropriate database URL - PostgreSQL if configured, otherwise SQLite"""
+        if self.POSTGRES_USER and self.POSTGRES_PASSWORD and self.POSTGRES_DB:
+            return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return self.DATABASE_URL
     
     @property
     def ALLOWED_ORIGINS(self) -> List[str]:

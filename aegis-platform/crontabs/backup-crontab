@@ -1,0 +1,117 @@
+# ==============================================
+# Aegis Platform - Backup Schedule
+# ==============================================
+# Automated backup scheduling for production systems
+# 
+# Installation:
+#   crontab -e
+#   (copy and paste this content)
+# 
+# Or:
+#   crontab /path/to/this/file
+# ==============================================
+
+# Set environment variables for cron jobs
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=ops@yourdomain.com
+
+# Backup environment variables
+BACKUP_BASE_DIR=/var/backups/aegis
+BACKUP_RETENTION_DAYS=30
+BACKUP_ENCRYPTION_KEY=your-backup-encryption-key-here
+AWS_S3_BUCKET=your-s3-bucket-name
+BACKUP_NOTIFICATION_EMAIL=backups@yourdomain.com
+
+# Database environment variables
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_DB=aegis_production
+POSTGRES_USER=aegis_user
+POSTGRES_PASSWORD=your-postgres-password
+
+# ==============================================
+# Daily Backups
+# ==============================================
+
+# Full system backup - Daily at 2:00 AM
+0 2 * * * /opt/aegis-platform/scripts/backup-system.sh >> /var/log/aegis-backup.log 2>&1
+
+# Database-only backup - Every 6 hours
+0 */6 * * * /opt/aegis-platform/scripts/backup-system.sh --database-only >> /var/log/aegis-backup.log 2>&1
+
+# ==============================================
+# Weekly Backups
+# ==============================================
+
+# Weekly full backup with extended retention - Sundays at 1:00 AM
+0 1 * * 0 BACKUP_RETENTION_DAYS=90 /opt/aegis-platform/scripts/backup-system.sh >> /var/log/aegis-backup-weekly.log 2>&1
+
+# ==============================================
+# Monthly Backups  
+# ==============================================
+
+# Monthly backup with long-term retention - 1st of each month at midnight
+0 0 1 * * BACKUP_RETENTION_DAYS=365 /opt/aegis-platform/scripts/backup-system.sh >> /var/log/aegis-backup-monthly.log 2>&1
+
+# ==============================================
+# Cleanup Tasks
+# ==============================================
+
+# Cleanup old backups - Daily at 3:00 AM (after backup completes)
+0 3 * * * /opt/aegis-platform/scripts/backup-system.sh --cleanup-only >> /var/log/aegis-backup.log 2>&1
+
+# Cleanup old log files - Weekly on Sundays at 4:00 AM
+0 4 * * 0 find /var/log -name "*aegis*" -mtime +30 -delete
+
+# ==============================================
+# Health Checks
+# ==============================================
+
+# Verify latest backup integrity - Daily at 4:00 AM
+0 4 * * * /opt/aegis-platform/scripts/verify-backups.sh >> /var/log/aegis-backup-verify.log 2>&1
+
+# ==============================================
+# Monitoring and Alerting
+# ==============================================
+
+# Check backup status and send alerts - Daily at 5:00 AM
+0 5 * * * /opt/aegis-platform/scripts/backup-health-check.sh >> /var/log/aegis-backup-health.log 2>&1
+
+# ==============================================
+# Examples for Different Schedules
+# ==============================================
+
+# Hourly database snapshots during business hours (9 AM - 6 PM, Mon-Fri)
+# 0 9-18 * * 1-5 /opt/aegis-platform/scripts/backup-system.sh --database-only
+
+# Emergency backup before maintenance windows
+# 0 22 * * 6 /opt/aegis-platform/scripts/backup-system.sh
+
+# Quarterly backup with permanent retention
+# 0 0 1 1,4,7,10 * BACKUP_RETENTION_DAYS=0 /opt/aegis-platform/scripts/backup-system.sh
+
+# ==============================================
+# Security Considerations
+# ==============================================
+#
+# 1. Ensure backup scripts have proper permissions (750)
+# 2. Backup directories should be owned by backup user
+# 3. Consider running backups as dedicated backup user
+# 4. Encrypt sensitive backups using BACKUP_ENCRYPTION_KEY
+# 5. Rotate backup encryption keys regularly
+# 6. Monitor backup logs for security events
+# 7. Use separate credentials for backup operations
+#
+# ==============================================
+# Monitoring and Alerting
+# ==============================================
+#
+# 1. Set MAILTO to receive cron job notifications
+# 2. Configure BACKUP_NOTIFICATION_EMAIL for detailed reports
+# 3. Monitor backup log files for errors
+# 4. Set up external monitoring for backup completion
+# 5. Alert on backup size anomalies
+# 6. Monitor S3 upload success/failure
+#
+# ==============================================

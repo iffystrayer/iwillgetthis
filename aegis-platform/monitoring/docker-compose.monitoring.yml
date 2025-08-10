@@ -1,0 +1,287 @@
+# ==============================================
+# Aegis Platform - Monitoring Stack
+# ==============================================
+# Complete monitoring infrastructure with:
+# - Prometheus metrics collection
+# - Grafana dashboards and visualization
+# - Alertmanager for notifications
+# - Exporters for comprehensive metrics
+# ==============================================
+
+version: '3.8'
+
+networks:
+  monitoring:
+    driver: bridge
+  aegis-network:
+    external: true
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+
+services:
+  # ==============================================
+  # Prometheus - Metrics Collection
+  # ==============================================
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: aegis-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+      - aegis-network
+    volumes:
+      - prometheus-data:/prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules:/etc/prometheus/alert_rules:ro
+      - ./monitoring/recording_rules:/etc/prometheus/recording_rules:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=50GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--web.external-url=https://prometheus.yourdomain.com'
+    environment:
+      - PROMETHEUS_RETENTION=30d
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ==============================================
+  # Alertmanager - Alert Management
+  # ==============================================
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: aegis-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+    volumes:
+      - alertmanager-data:/alertmanager
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./monitoring/templates:/etc/alertmanager/templates:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=https://alertmanager.yourdomain.com'
+      - '--web.route-prefix=/'
+      - '--cluster.listen-address=0.0.0.0:9094'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==============================================
+  # Grafana - Visualization and Dashboards
+  # ==============================================
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: aegis-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_change_this_password
+      - GF_SERVER_ROOT_URL=https://grafana.yourdomain.com
+      - GF_SERVER_DOMAIN=yourdomain.com
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com:587
+      - GF_SMTP_USER=alerts@yourdomain.com
+      - GF_SMTP_PASSWORD=your-smtp-password
+      - GF_SMTP_FROM_ADDRESS=alerts@yourdomain.com
+      - GF_SMTP_FROM_NAME=Aegis Monitoring
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_SECURITY_SECRET_KEY=your-grafana-secret-key-here
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==============================================
+  # Node Exporter - System Metrics
+  # ==============================================
+  node-exporter:
+    image: prom/node-exporter:v1.6.0
+    container_name: aegis-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /run/systemd/private:/run/systemd/private:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.systemd'
+      - '--collector.processes'
+    pid: host
+
+  # ==============================================
+  # cAdvisor - Container Metrics
+  # ==============================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: aegis-cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
+
+  # ==============================================
+  # PostgreSQL Exporter
+  # ==============================================
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.13.0
+    container_name: aegis-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring
+      - aegis-network
+    environment:
+      - DATA_SOURCE_NAME=postgresql://aegis_user:your-postgres-password@db:5432/aegis_production?sslmode=disable
+      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
+    volumes:
+      - ./monitoring/exporters/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    depends_on:
+      - prometheus
+
+  # ==============================================
+  # Redis Exporter
+  # ==============================================
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.51.0
+    container_name: aegis-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring
+      - aegis-network
+    environment:
+      - REDIS_ADDR=redis://cache:6379
+      - REDIS_PASSWORD=your-redis-password
+    depends_on:
+      - prometheus
+
+  # ==============================================
+  # Nginx Exporter
+  # ==============================================
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.11.0
+    container_name: aegis-nginx-exporter
+    restart: unless-stopped
+    ports:
+      - "9113:9113"
+    networks:
+      - monitoring
+      - aegis-network
+    command:
+      - '-nginx.scrape-uri=http://aegis-frontend/nginx_status'
+    depends_on:
+      - prometheus
+
+  # ==============================================
+  # Blackbox Exporter - External Monitoring
+  # ==============================================
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    container_name: aegis-blackbox-exporter
+    restart: unless-stopped
+    ports:
+      - "9115:9115"
+    networks:
+      - monitoring
+    volumes:
+      - ./monitoring/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    depends_on:
+      - prometheus
+
+  # ==============================================
+  # Log Aggregation - Loki
+  # ==============================================
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: aegis-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==============================================
+  # Log Shipping - Promtail
+  # ==============================================
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: aegis-promtail
+    restart: unless-stopped
+    networks:
+      - monitoring
+      - aegis-network
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
+    driver: local

@@ -10,6 +10,7 @@ import logging
 from config import settings
 from database import engine, Base
 from enhanced_ai_service import enhanced_ai_service
+from middleware.security import setup_security
 
 # Import models to ensure they are registered with Base metadata
 from models import analytics
@@ -81,22 +82,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Add middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Setup comprehensive security middleware
+security_manager = setup_security(app)
 
+# Add additional middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-if not settings.DEBUG:
-    app.add_middleware(
-        TrustedHostMiddleware, 
-        allowed_hosts=["localhost", "127.0.0.1", "frontend"]
-    )
 
 # Include health check router first (no auth required)
 app.include_router(health_router)

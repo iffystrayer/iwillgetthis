@@ -1,0 +1,630 @@
+name: Aegis Platform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*', 'hotfix/*', 'release/*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      run_security_tests:
+        description: 'Run comprehensive security tests'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}/aegis-backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/aegis-frontend
+
+jobs:
+  # ==============================================
+  # Code Quality and Security Checks
+  # ==============================================
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/aegis-frontend/package-lock.json
+        
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black isort flake8 mypy bandit safety
+        
+    - name: Install frontend dependencies
+      run: |
+        cd frontend/aegis-frontend
+        npm ci
+        
+    # Backend code quality
+    - name: Backend - Code formatting (Black)
+      run: |
+        cd backend
+        black --check --diff .
+        
+    - name: Backend - Import sorting (isort)
+      run: |
+        cd backend
+        isort --check-only --diff .
+        
+    - name: Backend - Linting (Flake8)
+      run: |
+        cd backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Backend - Type checking (MyPy)
+      run: |
+        cd backend
+        mypy . --ignore-missing-imports --no-strict-optional
+        
+    - name: Backend - Security scanning (Bandit)
+      run: |
+        cd backend
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . --exit-zero-on-skipped
+        
+    - name: Backend - Vulnerability scanning (Safety)
+      run: |
+        cd backend
+        safety check --json --output safety-report.json || true
+        safety check
+        
+    # Frontend code quality
+    - name: Frontend - Linting (ESLint)
+      run: |
+        cd frontend/aegis-frontend
+        npm run lint
+        
+    - name: Frontend - Type checking (TypeScript)
+      run: |
+        cd frontend/aegis-frontend
+        npm run type-check
+        
+    - name: Frontend - Security audit (npm audit)
+      run: |
+        cd frontend/aegis-frontend
+        npm audit --audit-level moderate
+        
+    # Upload security reports
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          backend/bandit-report.json
+          backend/safety-report.json
+
+  # ==============================================
+  # Automated Testing
+  # ==============================================
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: aegis_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+          
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio httpx
+        
+    - name: Run tests with coverage
+      env:
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/aegis_test
+        REDIS_URL: redis://localhost:6379/0
+        ENVIRONMENT: testing
+        SECRET_KEY: test-secret-key-for-ci
+        JWT_SECRET_KEY: test-jwt-secret-key-for-ci
+        ENABLE_AI_FEATURES: false
+      run: |
+        cd backend
+        pytest tests/ -v --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing
+        
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: backend-test-results
+        path: |
+          backend/htmlcov/
+          backend/coverage.xml
+
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/aegis-frontend/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd frontend/aegis-frontend
+        npm ci
+        
+    - name: Run unit tests
+      run: |
+        cd frontend/aegis-frontend
+        npm test -- --coverage --watchAll=false
+        
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./frontend/aegis-frontend/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: frontend-test-results
+        path: frontend/aegis-frontend/coverage/
+
+  # ==============================================
+  # End-to-End Testing
+  # ==============================================
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build application stack
+      run: |
+        docker-compose -f docker/docker-compose.yml build
+        
+    - name: Start application stack
+      run: |
+        cp .env.example .env
+        docker-compose -f docker/docker-compose.yml up -d
+        
+    - name: Wait for services to be ready
+      run: |
+        timeout 300 bash -c 'until curl -f http://localhost:30641/health; do sleep 5; done'
+        timeout 300 bash -c 'until curl -f http://localhost:58533; do sleep 5; done'
+        
+    - name: Set up Node.js for Playwright
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install Playwright
+      run: |
+        cd frontend/aegis-frontend
+        npm ci
+        npx playwright install --with-deps chromium
+        
+    - name: Run E2E tests
+      run: |
+        cd frontend/aegis-frontend
+        npx playwright test
+        
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-test-results
+        path: |
+          frontend/aegis-frontend/test-results/
+          frontend/aegis-frontend/playwright-report/
+          
+    - name: Collect container logs
+      if: failure()
+      run: |
+        docker-compose -f docker/docker-compose.yml logs > container-logs.txt
+        
+    - name: Upload container logs
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: container-logs
+        path: container-logs.txt
+
+  # ==============================================
+  # Security Testing
+  # ==============================================
+  security-tests:
+    name: Security Testing
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: github.event.inputs.run_security_tests == 'true' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build application stack
+      run: |
+        docker-compose -f docker/docker-compose.yml build
+        
+    - name: Start application stack
+      run: |
+        cp .env.example .env
+        docker-compose -f docker/docker-compose.yml up -d
+        
+    - name: Wait for services to be ready
+      run: |
+        timeout 300 bash -c 'until curl -f http://localhost:30641/health; do sleep 5; done'
+        
+    - name: Install security testing tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nmap
+        
+    - name: Run security tests
+      run: |
+        chmod +x scripts/security-test.sh
+        TARGET_HOST=localhost TARGET_PORT=30641 ./scripts/security-test.sh
+        
+    - name: Upload security test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-test-results
+        path: test-results/
+
+  # ==============================================
+  # Build and Push Container Images
+  # ==============================================
+  build-images:
+    name: Build Container Images
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    permissions:
+      contents: read
+      packages: write
+      
+    outputs:
+      backend-image: ${{ steps.backend-meta.outputs.tags }}
+      frontend-image: ${{ steps.frontend-meta.outputs.tags }}
+      backend-digest: ${{ steps.backend-build.outputs.digest }}
+      frontend-digest: ${{ steps.frontend-build.outputs.digest }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract backend metadata
+      id: backend-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: Extract frontend metadata
+      id: frontend-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: Build and push backend image
+      id: backend-build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.backend-meta.outputs.tags }}
+        labels: ${{ steps.backend-meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+        
+    - name: Build and push frontend image
+      id: frontend-build
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend/aegis-frontend
+        push: true
+        tags: ${{ steps.frontend-meta.outputs.tags }}
+        labels: ${{ steps.frontend-meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+        build-args: |
+          VITE_API_URL=${{ secrets.VITE_API_URL || 'http://localhost:30641' }}
+          VITE_USE_MOCK_API=false
+          VITE_ENVIRONMENT=production
+
+  # ==============================================
+  # Security Scanning
+  # ==============================================
+  container-security-scan:
+    name: Container Security Scanning
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+      
+    strategy:
+      matrix:
+        image: ['backend', 'frontend']
+        
+    steps:
+    - name: Set image reference
+      id: set-image
+      run: |
+        if [ "${{ matrix.image }}" == "backend" ]; then
+          echo "image=${{ needs.build-images.outputs.backend-image }}" >> $GITHUB_OUTPUT
+        else
+          echo "image=${{ needs.build-images.outputs.frontend-image }}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.set-image.outputs.image }}
+        format: 'sarif'
+        output: 'trivy-results-${{ matrix.image }}.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results-${{ matrix.image }}.sarif'
+        
+    - name: Run Trivy vulnerability scanner (table output)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.set-image.outputs.image }}
+        format: 'table'
+        output: 'trivy-results-${{ matrix.image }}.txt'
+        
+    - name: Upload vulnerability scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: vulnerability-scan-results
+        path: trivy-results-*.txt
+
+  # ==============================================
+  # Deployment to Staging
+  # ==============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, build-images]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    
+    environment:
+      name: staging
+      url: https://staging.aegis.example.com
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+        
+    - name: Deploy to ECS
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your deployment commands here
+        # This could be ECS, EKS, or other deployment targets
+        
+    - name: Run smoke tests
+      run: |
+        # Wait for deployment to be ready
+        sleep 60
+        # Run basic smoke tests
+        curl -f https://staging.aegis.example.com/health || exit 1
+        curl -f https://staging.aegis.example.com/api || exit 1
+        
+    - name: Notify deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        message: |
+          Staging deployment ${{ job.status }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Backend Image: ${{ needs.build-images.outputs.backend-image }}
+          Frontend Image: ${{ needs.build-images.outputs.frontend-image }}
+
+  # ==============================================
+  # Deployment to Production
+  # ==============================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, build-images, security-tests]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    
+    environment:
+      name: production
+      url: https://aegis.example.com
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+        
+    - name: Create backup before deployment
+      run: |
+        echo "Creating pre-deployment backup..."
+        # Add backup commands here
+        
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment commands here
+        
+    - name: Run comprehensive smoke tests
+      run: |
+        # Wait for deployment to be ready
+        sleep 120
+        # Run comprehensive smoke tests
+        curl -f https://aegis.example.com/health || exit 1
+        curl -f https://aegis.example.com/api || exit 1
+        
+    - name: Verify monitoring and alerting
+      run: |
+        # Verify monitoring systems are receiving data
+        echo "Verifying monitoring systems..."
+        
+    - name: Notify production deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#production-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        message: |
+          🚀 Production deployment ${{ job.status }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Backend Image: ${{ needs.build-images.outputs.backend-image }}
+          Frontend Image: ${{ needs.build-images.outputs.frontend-image }}
+
+  # ==============================================
+  # Cleanup and Reporting
+  # ==============================================
+  cleanup:
+    name: Cleanup and Reporting
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+    - name: Clean up old images
+      run: |
+        echo "Cleaning up old container images..."
+        # Add cleanup commands here
+        
+    - name: Generate deployment report
+      run: |
+        echo "Generating deployment report..."
+        # Generate comprehensive deployment report
+        
+    - name: Update deployment status
+      run: |
+        echo "Updating deployment status in monitoring systems..."
+        # Update external monitoring systems

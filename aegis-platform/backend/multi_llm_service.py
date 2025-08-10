@@ -212,11 +212,12 @@ class MultiLLMService:
         # Custom endpoints
         if settings.CUSTOM_LLM_ENDPOINTS:
             try:
-                custom_endpoints = json.loads(settings.CUSTOM_LLM_ENDPOINTS)
+                # Use the property method that handles the JSON parsing
+                custom_endpoints = settings.get_custom_endpoints
                 for name, config in custom_endpoints.items():
                     config["enabled"] = True
                     self.providers[f"custom_{name}"] = CustomProvider(f"custom_{name}", config)
-            except (json.JSONDecodeError, Exception) as e:
+            except Exception as e:
                 logger.error(f"Failed to parse custom LLM endpoints: {e}")
         
         # Initialize all providers
@@ -251,11 +252,12 @@ class MultiLLMService:
     async def _initialize_cost_tracking(self):
         """Initialize cost tracking and daily limits"""
         if settings.ENABLE_COST_TRACKING:
-            # Parse daily limits
+            # Parse daily limits  
             if settings.PROVIDER_DAILY_LIMITS:
                 try:
-                    self.daily_limits = json.loads(settings.PROVIDER_DAILY_LIMITS)
-                except json.JSONDecodeError:
+                    # PROVIDER_DAILY_LIMITS is already a dictionary
+                    self.daily_limits = settings.PROVIDER_DAILY_LIMITS
+                except Exception:
                     logger.warning("Failed to parse provider daily limits")
             
             # Initialize cost tracking for each provider
@@ -397,7 +399,7 @@ class MultiLLMService:
         """Background health check loop"""
         while True:
             try:
-                await asyncio.sleep(settings.LLM_HEALTH_CHECK_INTERVAL)
+                await asyncio.sleep(settings.PROVIDER_HEALTH_CHECK_INTERVAL)
                 
                 for name, provider in self.providers.items():
                     if provider.should_check_health():

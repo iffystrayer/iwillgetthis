@@ -1,0 +1,306 @@
+# ==============================================
+# Aegis Platform - Prometheus Alert Rules
+# ==============================================
+# Comprehensive alerting for production monitoring
+# ==============================================
+
+groups:
+  # ==============================================
+  # Application Health Alerts
+  # ==============================================
+  - name: aegis_application
+    rules:
+      - alert: AegisBackendDown
+        expr: up{job="aegis-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: aegis-backend
+          category: availability
+        annotations:
+          summary: "Aegis backend service is down"
+          description: "Aegis backend service has been down for more than 1 minute"
+          runbook_url: "https://docs.yourdomain.com/runbooks/backend-down"
+
+      - alert: AegisFrontendDown
+        expr: up{job="aegis-frontend-nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: aegis-frontend
+          category: availability
+        annotations:
+          summary: "Aegis frontend service is down"
+          description: "Aegis frontend nginx service has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(aegis_http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: aegis-backend
+          category: errors
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second for the last 5 minutes"
+
+      - alert: CriticalErrorRate
+        expr: rate(aegis_http_requests_total{status=~"5.."}[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+          service: aegis-backend
+          category: errors
+        annotations:
+          summary: "Critical error rate detected"
+          description: "Error rate is {{ $value }} errors per second"
+
+      - alert: SlowResponseTime
+        expr: aegis_http_request_duration_seconds{quantile="0.95"} > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: aegis-backend
+          category: performance
+        annotations:
+          summary: "Slow API response times"
+          description: "95th percentile response time is {{ $value }} seconds"
+
+  # ==============================================
+  # Infrastructure Alerts
+  # ==============================================
+  - name: infrastructure
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: resource
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 10 minutes"
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 5m
+        labels:
+          severity: critical
+          category: resource
+        annotations:
+          summary: "Critical CPU usage"
+          description: "CPU usage is above 95%"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: resource
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 80% for more than 10 minutes"
+
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is above 85% on {{ $labels.mountpoint }}"
+
+      - alert: CriticalDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+          category: storage
+        annotations:
+          summary: "Critical disk space"
+          description: "Disk usage is above 95% on {{ $labels.mountpoint }}"
+
+  # ==============================================
+  # Database Alerts
+  # ==============================================
+  - name: database
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgresql
+          category: availability
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL has been down for more than 1 minute"
+
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: postgresql
+          category: resource
+        annotations:
+          summary: "High database connections"
+          description: "Database connections are above 80% of max capacity"
+
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_database_blk_read_time[5m]) > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: postgresql
+          category: performance
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Database queries are running slowly"
+
+      - alert: DatabaseDeadlocks
+        expr: rate(pg_stat_database_deadlocks[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: postgresql
+          category: errors
+        annotations:
+          summary: "Database deadlocks detected"
+          description: "Database deadlocks are occurring"
+
+  # ==============================================
+  # Cache Alerts
+  # ==============================================
+  - name: cache
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: availability
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis has been down for more than 1 minute"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: resource
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage is above 90%"
+
+  # ==============================================
+  # Security Alerts
+  # ==============================================
+  - name: security
+    rules:
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(aegis_http_requests_total{status="401"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: aegis-backend
+          category: security
+        annotations:
+          summary: "High number of unauthorized access attempts"
+          description: "{{ $value }} unauthorized access attempts per second"
+
+      - alert: SuspiciousActivity
+        expr: rate(aegis_http_requests_total{status="403"}[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          service: aegis-backend
+          category: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "High number of forbidden requests detected"
+
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 7
+        for: 1m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} expires in less than 7 days"
+
+      - alert: SSLCertificateExpired
+        expr: probe_ssl_earliest_cert_expiry - time() <= 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "SSL certificate expired"
+          description: "SSL certificate for {{ $labels.instance }} has expired"
+
+  # ==============================================
+  # Business Logic Alerts
+  # ==============================================
+  - name: business_logic
+    rules:
+      - alert: HighFailedLogins
+        expr: rate(aegis_failed_login_attempts_total[5m]) > 20
+        for: 3m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High number of failed login attempts"
+          description: "{{ $value }} failed login attempts per second"
+
+      - alert: AIServiceFailures
+        expr: rate(aegis_ai_service_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: ai-service
+          category: business
+        annotations:
+          summary: "AI service failures detected"
+          description: "AI service is experiencing failures"
+
+      - alert: AssessmentProcessingDelayed
+        expr: aegis_assessment_processing_duration_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Assessment processing delayed"
+          description: "Assessment processing is taking longer than expected"
+
+  # ==============================================
+  # External Service Alerts
+  # ==============================================
+  - name: external_services
+    rules:
+      - alert: ExternalAPIDown
+        expr: probe_success{job="blackbox"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          category: external
+        annotations:
+          summary: "External service is down"
+          description: "{{ $labels.instance }} is not responding"
+
+      - alert: HighLatencyToExternalAPI
+        expr: probe_http_duration_seconds{job="blackbox"} > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: external
+        annotations:
+          summary: "High latency to external service"
+          description: "Latency to {{ $labels.instance }} is {{ $value }} seconds"
