@@ -4,8 +4,9 @@ export interface Toast {
   id: string;
   title: string;
   description?: string;
-  variant?: 'default' | 'destructive' | 'success' | 'warning';
+  variant?: 'default' | 'destructive';
   duration?: number;
+  action?: React.ReactNode;
 }
 
 type ToastActionFunction = (toast: Omit<Toast, 'id' | 'variant'>) => void;
@@ -70,7 +71,7 @@ export function useToast(): UseToastReturn {
   }, []);
 
   const success = useCallback((toast: Omit<Toast, 'id' | 'variant'>) => {
-    return addToast({ ...toast, variant: 'success' });
+    return addToast({ ...toast, variant: 'default' });
   }, []);
 
   const error = useCallback((toast: Omit<Toast, 'id' | 'variant'>) => {
@@ -78,7 +79,7 @@ export function useToast(): UseToastReturn {
   }, []);
 
   const warning = useCallback((toast: Omit<Toast, 'id' | 'variant'>) => {
-    return addToast({ ...toast, variant: 'warning' });
+    return addToast({ ...toast, variant: 'default' });
   }, []);
 
   const info = useCallback((toast: Omit<Toast, 'id' | 'variant'>) => {

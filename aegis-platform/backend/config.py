@@ -37,7 +37,6 @@ class Settings(BaseSettings):
     
     # CORS Settings
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:58533", "https://*.space.minimax.io"]
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:58533", "https://*.space.minimax.io"]
     
     # ==============================================
     # Production Security Configuration
@@ -355,7 +354,7 @@ class Settings(BaseSettings):
         return self.DATABASE_URL
     
     @property
-    def ALLOWED_ORIGINS(self) -> List[str]:
+    def allowed_origins(self) -> List[str]:
         """Get CORS allowed origins"""
         return self.CORS_ORIGINS
     

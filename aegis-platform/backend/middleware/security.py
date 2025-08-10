@@ -14,6 +14,7 @@ import logging
 import asyncio
 import hashlib
 import ipaddress
+import os
 from typing import Dict, List, Optional, Set
 from collections import defaultdict, deque
 from dataclasses import dataclass
@@ -460,9 +461,22 @@ class SecurityManager:
         self.app.add_middleware(SecurityMiddleware)
         
         # Add CORS middleware with security settings
+        # Get CORS origins from environment or use settings defaults
+        env_origins = os.getenv('CORS_ORIGINS')
+        if env_origins:
+            try:
+                import json
+                cors_origins = json.loads(env_origins)
+            except (json.JSONDecodeError, TypeError):
+                # If JSON parsing fails, split by comma
+                cors_origins = [origin.strip() for origin in env_origins.split(',')]
+        else:
+            cors_origins = settings.allowed_origins
+        
+        logger.info(f"CORS origins configured: {cors_origins}")
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=settings.ALLOWED_ORIGINS,
+            allow_origins=cors_origins,
             allow_credentials=True,
             allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
             allow_headers=["*"],
