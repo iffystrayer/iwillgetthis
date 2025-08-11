@@ -80,8 +80,7 @@ services:
     container_name: aegis-frontend
     env_file:
       - ../.env
-    ports:
-      - "${FRONTEND_PORT_HOST:-58533}:3000"
+    # Remove direct port exposure - access via nginx proxy
     depends_on:
       backend:
         condition: service_healthy
@@ -95,12 +94,39 @@ services:
       retries: 3
       start_period: 20s
 
+  # Nginx Reverse Proxy with SSL/TLS
+  nginx:
+    build:
+      context: ../nginx
+      dockerfile: Dockerfile
+    container_name: aegis-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+    networks:
+      - aegis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost/health", "-k"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # Prometheus - Metrics Collection
   prometheus:
     image: prom/prometheus:latest
     container_name: aegis-prometheus
-    ports:
-      - "${PROMETHEUS_PORT_HOST:-9090}:9090"
+    # Remove direct port exposure - access via nginx proxy
     volumes:
       - prometheus_data:/prometheus
       - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -124,12 +150,11 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: aegis-grafana
-    ports:
-      - "${GRAFANA_PORT_HOST:-3001}:3000"
+    # Remove direct port exposure - access via nginx proxy
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin123}
-      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_SERVER_ROOT_URL=https://monitoring.localhost
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:-grafana-secret-key-change-in-production}
