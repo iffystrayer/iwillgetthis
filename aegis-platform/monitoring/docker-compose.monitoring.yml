@@ -183,7 +183,7 @@ services:
       - monitoring
       - aegis-network
     environment:
-      - DATA_SOURCE_NAME=postgresql://aegis_user:your-postgres-password@db:5432/aegis_production?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://aegis_user:fKMdvjqrMYGoZ3AbEquOVxHplTWD1Fv5MqINJLbE97w@db:5432/aegis_db?sslmode=disable
       - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
     volumes:
       - ./monitoring/exporters/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
@@ -203,7 +203,7 @@ services:
       - monitoring
       - aegis-network
     environment:
-      - REDIS_ADDR=redis://cache:6379
+      - REDIS_ADDR=redis://redis:6379
       - REDIS_PASSWORD=your-redis-password
     depends_on:
       - prometheus
