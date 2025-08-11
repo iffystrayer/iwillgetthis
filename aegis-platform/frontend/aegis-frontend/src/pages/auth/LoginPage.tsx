@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,13 +32,22 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
   
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const state = location.state as LocationState;
   const from = state?.from?.pathname || '/dashboard';
+
+  // Effect to handle navigation after login state is updated
+  useEffect(() => {
+    if (shouldNavigate && isLoggedIn) {
+      navigate(from, { replace: true });
+      setShouldNavigate(false);
+    }
+  }, [shouldNavigate, isLoggedIn, navigate, from]);
 
   const {
     register,
@@ -61,7 +70,9 @@ export default function LoginPage() {
       // Update the auth context state with the user data
       login(authResponse.user);
       toast.success('Login successful!');
-      navigate(from, { replace: true });
+      
+      // Trigger navigation after auth state is updated
+      setShouldNavigate(true);
     } catch (err: any) {
       console.error('Login failed:', err);
       const errorMessage = err.response?.data?.detail || err.message || 'Login failed';

@@ -4,7 +4,7 @@ import { ApiResponse, AuthTokens, QueryParams } from '@/types';
 
 // Create axios instance - ALWAYS use real backend
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:26113/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:30641/api/v1',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
