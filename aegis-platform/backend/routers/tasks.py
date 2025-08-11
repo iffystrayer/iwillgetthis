@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
@@ -32,7 +32,15 @@ async def get_tasks(
     db: Session = Depends(get_db)
 ):
     """Get list of tasks with pagination and filtering."""
-    query = db.query(Task)
+    query = db.query(Task).options(
+        joinedload(Task.risk),
+        joinedload(Task.asset),
+        joinedload(Task.assigned_to),
+        joinedload(Task.created_by),
+        joinedload(Task.approved_by),
+        selectinload(Task.comments),
+        selectinload(Task.evidence)
+    )
     
     if search:
         query = query.filter(
@@ -76,7 +84,15 @@ async def get_my_tasks(
     db: Session = Depends(get_db)
 ):
     """Get tasks assigned to current user."""
-    query = db.query(Task).filter(Task.assigned_to_id == current_user.id, Task.is_active == True)
+    query = db.query(Task).options(
+        joinedload(Task.risk),
+        joinedload(Task.asset),
+        joinedload(Task.assigned_to),
+        joinedload(Task.created_by),
+        joinedload(Task.approved_by),
+        selectinload(Task.comments),
+        selectinload(Task.evidence)
+    ).filter(Task.assigned_to_id == current_user.id, Task.is_active == True)
     
     if status:
         query = query.filter(Task.status == status)

@@ -6,6 +6,7 @@ import logging
 import time
 from typing import Dict, Any, List, Optional, Union
 from config import settings
+from llm_cache_service import llm_cache_service
 from ai_providers import (
     BaseLLMProvider, LLMResponse, ProviderStatus,
     AzureOpenAIProvider, OpenAIProvider, GeminiProvider,
@@ -45,6 +46,9 @@ class MultiLLMService:
                 if not settings.ENABLE_AI_FEATURES:
                     logger.info("AI features disabled in configuration")
                     return False
+                
+                # Initialize LLM cache service
+                await llm_cache_service.initialize()
                 
                 # Initialize providers based on configuration
                 await self._initialize_providers()
@@ -275,9 +279,21 @@ class MultiLLMService:
         preferred_provider: Optional[str] = None,
         **kwargs
     ) -> LLMResponse:
-        """Generate completion with automatic failover"""
+        """Generate completion with automatic failover and caching"""
         if not self.enabled:
             raise Exception("Multi-LLM service not enabled or no providers available")
+        
+        # Try to get cached response first
+        cached_response = await llm_cache_service.get_cached_response(
+            messages=messages,
+            task_type=task_type,
+            provider=preferred_provider,
+            **kwargs
+        )
+        
+        if cached_response:
+            logger.debug(f"Using cached response for task_type: {task_type}")
+            return cached_response
         
         # Determine provider order
         provider_order = await self._get_provider_order(task_type, preferred_provider)
@@ -297,6 +313,17 @@ class MultiLLMService:
             try:
                 # Generate completion
                 response = await provider.generate_completion(messages, **kwargs)
+                
+                # Cache the response (fire and forget)
+                asyncio.create_task(
+                    llm_cache_service.cache_response(
+                        messages=messages,
+                        response=response,
+                        task_type=task_type,
+                        provider=provider_name,
+                        **kwargs
+                    )
+                )
                 
                 # Update cost tracking
                 await self._update_cost_tracking(provider_name, response)
@@ -447,6 +474,18 @@ class MultiLLMService:
     def is_enabled(self) -> bool:
         """Check if the multi-LLM service is enabled"""
         return self.enabled
+    
+    async def get_cache_stats(self) -> Dict[str, Any]:
+        """Get LLM cache statistics"""
+        return await llm_cache_service.get_cache_stats()
+    
+    async def clear_cache(self) -> bool:
+        """Clear LLM cache"""
+        return await llm_cache_service.clear_cache()
+    
+    async def invalidate_cache_by_pattern(self, pattern: str) -> int:
+        """Invalidate cached responses matching a pattern"""
+        return await llm_cache_service.invalidate_cache_by_pattern(pattern)
 
 # Global multi-LLM service instance
 multi_llm_service = MultiLLMService()

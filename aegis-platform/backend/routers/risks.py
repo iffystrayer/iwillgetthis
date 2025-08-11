@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from typing import List, Optional
 import json
@@ -106,7 +106,14 @@ async def get_risks(
     db: Session = Depends(get_db)
 ):
     """Get list of risks with pagination and filtering."""
-    query = db.query(Risk)
+    query = db.query(Risk).options(
+        joinedload(Risk.risk_matrix),
+        joinedload(Risk.asset),
+        joinedload(Risk.owner),
+        joinedload(Risk.creator),
+        selectinload(Risk.tasks),
+        selectinload(Risk.risk_scores)
+    )
     
     if search:
         query = query.filter(
@@ -209,7 +216,14 @@ async def get_risk(
     db: Session = Depends(get_db)
 ):
     """Get risk by ID."""
-    risk = db.query(Risk).filter(Risk.id == risk_id).first()
+    risk = db.query(Risk).options(
+        joinedload(Risk.risk_matrix),
+        joinedload(Risk.asset),
+        joinedload(Risk.owner),
+        joinedload(Risk.creator),
+        selectinload(Risk.tasks),
+        selectinload(Risk.risk_scores)
+    ).filter(Risk.id == risk_id).first()
     if not risk:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -429,5 +443,8 @@ async def get_risk_scores(
             detail="Risk not found"
         )
     
-    scores = db.query(RiskScore).filter(RiskScore.risk_id == risk_id).all()
+    scores = db.query(RiskScore).options(
+        joinedload(RiskScore.risk),
+        joinedload(RiskScore.scorer)
+    ).filter(RiskScore.risk_id == risk_id).all()
     return scores

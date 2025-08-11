@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy import func, case
 from typing import List, Optional
 from datetime import datetime
 
@@ -30,7 +30,13 @@ async def get_assessments(
     db: Session = Depends(get_db)
 ):
     """Get list of assessments with pagination and filtering."""
-    query = db.query(Assessment)
+    query = db.query(Assessment).options(
+        joinedload(Assessment.framework),
+        joinedload(Assessment.asset),
+        joinedload(Assessment.created_by_user),
+        joinedload(Assessment.lead_assessor),
+        selectinload(Assessment.assessment_controls)
+    )
     
     if search:
         query = query.filter(
@@ -65,7 +71,13 @@ async def get_assessment(
     db: Session = Depends(get_db)
 ):
     """Get assessment by ID."""
-    assessment = db.query(Assessment).filter(Assessment.id == assessment_id).first()
+    assessment = db.query(Assessment).options(
+        joinedload(Assessment.framework),
+        joinedload(Assessment.asset),
+        joinedload(Assessment.created_by_user),
+        joinedload(Assessment.lead_assessor),
+        selectinload(Assessment.assessment_controls)
+    ).filter(Assessment.id == assessment_id).first()
     if not assessment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -166,35 +178,24 @@ async def get_assessment_summary(
             detail="Assessment not found"
         )
     
-    # Get control status counts
-    total_controls = db.query(func.count(AssessmentControl.id)).filter(
+    # Get control status counts in a single query using CASE WHEN
+    status_counts = db.query(
+        func.count(AssessmentControl.id).label('total_controls'),
+        func.count(case((AssessmentControl.implementation_status == "implemented", 1))).label('implemented'),
+        func.count(case((AssessmentControl.implementation_status == "not_implemented", 1))).label('not_implemented'),
+        func.count(case((AssessmentControl.implementation_status == "partially_implemented", 1))).label('partially_implemented'),
+        func.count(case((AssessmentControl.implementation_status == "not_applicable", 1))).label('not_applicable'),
+        func.count(case((AssessmentControl.implementation_status == "planned", 1))).label('planned')
+    ).filter(
         AssessmentControl.assessment_id == assessment_id
-    ).scalar()
+    ).first()
     
-    implemented = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status == "implemented"
-    ).scalar()
-    
-    not_implemented = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status == "not_implemented"
-    ).scalar()
-    
-    partially_implemented = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status == "partially_implemented"
-    ).scalar()
-    
-    not_applicable = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status == "not_applicable"
-    ).scalar()
-    
-    planned = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status == "planned"
-    ).scalar()
+    total_controls = status_counts.total_controls
+    implemented = status_counts.implemented
+    not_implemented = status_counts.not_implemented
+    partially_implemented = status_counts.partially_implemented
+    not_applicable = status_counts.not_applicable
+    planned = status_counts.planned
     
     completion_percentage = 0
     if total_controls > 0:
@@ -232,7 +233,11 @@ async def get_assessment_controls(
             detail="Assessment not found"
         )
     
-    query = db.query(AssessmentControl).filter(AssessmentControl.assessment_id == assessment_id)
+    query = db.query(AssessmentControl).options(
+        joinedload(AssessmentControl.assessment),
+        joinedload(AssessmentControl.control),
+        joinedload(AssessmentControl.reviewed_by)
+    ).filter(AssessmentControl.assessment_id == assessment_id)
     
     if implementation_status:
         query = query.filter(AssessmentControl.implementation_status == implementation_status)
@@ -332,15 +337,16 @@ async def complete_assessment(
     assessment.status = "completed"
     assessment.actual_completion_date = datetime.utcnow()
     
-    # Calculate overall score
-    total_controls = db.query(func.count(AssessmentControl.id)).filter(
+    # Calculate overall score using a single query
+    control_counts = db.query(
+        func.count(AssessmentControl.id).label('total_controls'),
+        func.count(case((AssessmentControl.implementation_status.in_(["implemented", "not_applicable"]), 1))).label('implemented_controls')
+    ).filter(
         AssessmentControl.assessment_id == assessment_id
-    ).scalar()
+    ).first()
     
-    implemented_controls = db.query(func.count(AssessmentControl.id)).filter(
-        AssessmentControl.assessment_id == assessment_id,
-        AssessmentControl.implementation_status.in_(["implemented", "not_applicable"])
-    ).scalar()
+    total_controls = control_counts.total_controls
+    implemented_controls = control_counts.implemented_controls
     
     if total_controls > 0:
         assessment.overall_score = int((implemented_controls / total_controls) * 100)

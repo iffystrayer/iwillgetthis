@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     
     # Redis Configuration
     REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_PASSWORD: Optional[str] = None
+    REDIS_DB_CACHE: int = 1  # Database for LLM caching
+    REDIS_DB_SESSION: int = 2  # Database for sessions
+    REDIS_DB_TASKS: int = 3  # Database for background tasks
     
     # Security
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
@@ -97,6 +103,12 @@ class Settings(BaseSettings):
     # AI Features Toggle
     ENABLE_AI_FEATURES: bool = True
     
+    # LLM Caching Configuration
+    ENABLE_LLM_CACHING: bool = True
+    LLM_CACHE_TTL_HOURS: int = 24  # Default TTL for cached responses
+    LLM_CACHE_MAX_MEMORY_MB: int = 500  # Maximum memory usage for cache
+    LLM_CACHE_CLEANUP_INTERVAL_HOURS: int = 1  # How often to run cleanup
+    
     # Provider Management
     DEFAULT_LLM_PROVIDER: str = "openai"
     FALLBACK_LLM_PROVIDERS: Optional[List[str]] = ["litellm", "openrouter"]
@@ -108,6 +120,7 @@ class Settings(BaseSettings):
     ENABLE_PROVIDER_HEALTH_CHECKS: bool = True
     COST_OPTIMIZATION: bool = True
     DAILY_COST_LIMIT: float = 100.0
+    MONTHLY_AI_BUDGET: float = 1000.0
     PROVIDER_DAILY_LIMITS: Dict[str, float] = {
         "openai": 50.0,
         "anthropic": 30.0,
