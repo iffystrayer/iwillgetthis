@@ -297,7 +297,7 @@ async def update_assessment_control(
                 asset_id=assessment.asset_id,
                 inherent_likelihood=3,  # Default medium likelihood
                 inherent_impact=3,  # Default medium impact
-                status="identified",
+                status="IDENTIFIED",
                 created_by=current_user.id
             )
             db.add(risk)

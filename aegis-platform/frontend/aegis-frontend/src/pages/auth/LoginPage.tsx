@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import OAuthLoginButtons from '@/components/auth/OAuthLoginButtons';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -100,6 +101,19 @@ export default function LoginPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+        
+        {/* OAuth Login Options */}
+        <OAuthLoginButtons
+          onOAuthStart={() => setIsLoading(true)}
+          onOAuthComplete={(tokens) => {
+            // Handle successful OAuth login
+            navigate(from, { replace: true });
+          }}
+          onError={(error) => {
+            setError(error);
+            setIsLoading(false);
+          }}
+        />
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">

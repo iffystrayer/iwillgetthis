@@ -194,6 +194,14 @@ async def create_asset(
     asset_data = asset.model_dump()
     asset_data["created_by"] = current_user.id
     
+    # Convert Pydantic enum values (lowercase) to database enum values (uppercase)
+    if "asset_type" in asset_data and asset_data["asset_type"]:
+        # Extract the string value from enum object and convert to uppercase
+        asset_data["asset_type"] = str(asset_data["asset_type"].value).upper()
+    if "criticality" in asset_data and asset_data["criticality"]:
+        # Extract the string value from enum object and convert to uppercase
+        asset_data["criticality"] = str(asset_data["criticality"].value).upper()
+    
     db_asset = Asset(**asset_data)
     db.add(db_asset)
     db.commit()

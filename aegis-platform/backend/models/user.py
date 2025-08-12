@@ -35,7 +35,11 @@ class User(Base):
     department = Column(String(100))
     job_title = Column(String(100))
     phone = Column(String(20))
+    # OAuth/SSO Integration Fields
     azure_ad_id = Column(String(255))  # For Azure AD integration
+    external_id = Column(String(255))  # For generic OAuth provider IDs
+    provider = Column(String(50))  # OAuth provider name (azure_ad, google_workspace, okta)
+    created_via_sso = Column(Boolean, default=False)
     preferences = Column(Text)  # JSON string for user preferences
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

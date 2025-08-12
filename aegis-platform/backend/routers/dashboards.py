@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 
 from database import get_db
 from models.user import User
-from models.asset import Asset
-from models.risk import Risk
-from models.task import Task
-from models.assessment import Assessment, AssessmentControl
+from models.asset import Asset, AssetCriticality
+from models.risk import Risk, RiskStatus
+from models.task import Task, TaskStatus, TaskType, TaskPriority
+from models.assessment import Assessment, AssessmentControl, AssessmentStatus, ControlImplementationStatus
 from models.framework import Framework
 from auth import get_current_active_user
 
@@ -27,33 +27,33 @@ async def get_dashboard_overview(
     total_assets = db.query(func.count(Asset.id)).filter(Asset.is_active == True).scalar()
     critical_assets = db.query(func.count(Asset.id)).filter(
         Asset.is_active == True,
-        Asset.criticality == "critical"
+        Asset.criticality == AssetCriticality.CRITICAL
     ).scalar()
     
     # Risk metrics
     total_risks = db.query(func.count(Risk.id)).filter(Risk.is_active == True).scalar()
     high_risks = db.query(func.count(Risk.id)).filter(
         Risk.is_active == True,
-        Risk.risk_level.in_(["high", "critical"])
+        Risk.risk_level.in_(["HIGH", "CRITICAL"])
     ).scalar()
     
     # Open risks by category
     open_risks = db.query(func.count(Risk.id)).filter(
         Risk.is_active == True,
-        Risk.status.in_(["identified", "assessed", "mitigating"])
+        Risk.status.in_([RiskStatus.IDENTIFIED, RiskStatus.ASSESSED, RiskStatus.MITIGATING])
     ).scalar()
     
     # Task metrics
     total_tasks = db.query(func.count(Task.id)).filter(Task.is_active == True).scalar()
     open_tasks = db.query(func.count(Task.id)).filter(
         Task.is_active == True,
-        Task.status.in_(["open", "in_progress"])
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).scalar()
     
     overdue_tasks = db.query(func.count(Task.id)).filter(
         Task.is_active == True,
         Task.due_date < datetime.utcnow(),
-        Task.status.in_(["open", "in_progress"])
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).scalar()
     
     # Assessment metrics
@@ -63,12 +63,12 @@ async def get_dashboard_overview(
     
     active_assessments = db.query(func.count(Assessment.id)).filter(
         Assessment.is_active == True,
-        Assessment.status.in_(["draft", "in_progress"])
+        Assessment.status.in_([AssessmentStatus.DRAFT, AssessmentStatus.IN_PROGRESS])
     ).scalar()
     
     completed_assessments = db.query(func.count(Assessment.id)).filter(
         Assessment.is_active == True,
-        Assessment.status == "completed"
+        Assessment.status == AssessmentStatus.COMPLETED
     ).scalar()
     
     return {
@@ -124,7 +124,7 @@ async def get_ciso_dashboard(
     # Top risks (highest risk score)
     top_risks = db.query(Risk).filter(
         Risk.is_active == True,
-        Risk.status.in_(["identified", "assessed", "mitigating"])
+        Risk.status.in_([RiskStatus.IDENTIFIED, RiskStatus.ASSESSED, RiskStatus.MITIGATING])
     ).order_by(desc(Risk.inherent_risk_score)).limit(10).all()
     
     # Compliance maturity by framework
@@ -134,13 +134,13 @@ async def get_ciso_dashboard(
     for framework in frameworks:
         total_controls = db.query(func.count(AssessmentControl.id)).join(Assessment).filter(
             Assessment.framework_id == framework.id,
-            Assessment.status == "completed"
+            Assessment.status == AssessmentStatus.COMPLETED
         ).scalar()
         
         implemented_controls = db.query(func.count(AssessmentControl.id)).join(Assessment).filter(
             Assessment.framework_id == framework.id,
-            Assessment.status == "completed",
-            AssessmentControl.implementation_status == "implemented"
+            Assessment.status == AssessmentStatus.COMPLETED,
+            AssessmentControl.implementation_status == ControlImplementationStatus.IMPLEMENTED
         ).scalar()
         
         maturity_score = 0
@@ -205,13 +205,13 @@ async def get_analyst_dashboard(
     my_tasks = db.query(Task).filter(
         Task.assigned_to_id == current_user.id,
         Task.is_active == True,
-        Task.status.in_(["open", "in_progress"])
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).order_by(Task.due_date.asc().nullslast()).limit(10).all()
     
     # Upcoming assessments
     upcoming_assessments = db.query(Assessment).filter(
         Assessment.is_active == True,
-        Assessment.status.in_(["draft", "in_progress"]),
+        Assessment.status.in_([AssessmentStatus.DRAFT, AssessmentStatus.IN_PROGRESS]),
         Assessment.target_completion_date.isnot(None)
     ).order_by(Assessment.target_completion_date.asc()).limit(5).all()
     
@@ -220,20 +220,20 @@ async def get_analyst_dashboard(
     recent_high_risks = db.query(Risk).filter(
         Risk.created_at >= week_ago,
         Risk.is_active == True,
-        Risk.risk_level.in_(["high", "critical"])
+        Risk.risk_level.in_(["HIGH", "CRITICAL"])
     ).order_by(desc(Risk.created_at)).limit(10).all()
     
     # Evidence awaiting review
-    from models.evidence import Evidence
+    from models.evidence import Evidence, EvidenceStatus
     pending_evidence = db.query(Evidence).filter(
         Evidence.is_active == True,
-        Evidence.status == "under_review"
+        Evidence.status == EvidenceStatus.UNDER_REVIEW
     ).order_by(desc(Evidence.created_at)).limit(5).all()
     
     # Tasks awaiting my review
     tasks_for_review = db.query(Task).filter(
         Task.is_active == True,
-        Task.status == "awaiting_review"
+        Task.status == TaskStatus.AWAITING_REVIEW
     ).order_by(desc(Task.updated_at)).limit(5).all()
     
     # Workload summary
@@ -246,7 +246,7 @@ async def get_analyst_dashboard(
         Task.assigned_to_id == current_user.id,
         Task.is_active == True,
         Task.due_date < datetime.utcnow(),
-        Task.status.in_(["open", "in_progress"])
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).scalar()
     
     return {
@@ -314,8 +314,8 @@ async def get_system_owner_dashboard(
     my_remediation_tasks = db.query(Task).filter(
         Task.assigned_to_id == current_user.id,
         Task.is_active == True,
-        Task.task_type.in_(["remediation", "mitigation"]),
-        Task.status.in_(["open", "in_progress"])
+        Task.task_type.in_([TaskType.REMEDIATION, TaskType.MITIGATION]),
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).order_by(Task.priority.desc(), Task.due_date.asc().nullslast()).all()
     
     # Controls requiring attestation (from my owned assets)
@@ -331,13 +331,13 @@ async def get_system_owner_dashboard(
         assessments_with_my_assets = db.query(Assessment).filter(
             Assessment.asset_id.in_(asset_ids),
             Assessment.is_active == True,
-            Assessment.status.in_(["in_progress", "under_review"])
+            Assessment.status.in_([AssessmentStatus.IN_PROGRESS, AssessmentStatus.UNDER_REVIEW])
         ).all()
         
         for assessment in assessments_with_my_assets:
             pending_controls = db.query(AssessmentControl).filter(
                 AssessmentControl.assessment_id == assessment.id,
-                AssessmentControl.implementation_status == "not_implemented"
+                AssessmentControl.implementation_status == ControlImplementationStatus.NOT_IMPLEMENTED
             ).limit(5).all()
             
             for control in pending_controls:
@@ -353,7 +353,7 @@ async def get_system_owner_dashboard(
         Task.assigned_to_id == current_user.id,
         Task.is_active == True,
         Task.due_date < datetime.utcnow(),
-        Task.status.in_(["open", "in_progress"])
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.IN_PROGRESS])
     ).all()
     
     # Recent alerts/notifications
@@ -364,7 +364,7 @@ async def get_system_owner_dashboard(
     new_high_priority = db.query(Task).filter(
         Task.assigned_to_id == current_user.id,
         Task.is_active == True,
-        Task.priority.in_(["high", "critical"]),
+        Task.priority.in_([TaskPriority.HIGH, TaskPriority.CRITICAL]),
         Task.created_at >= week_ago
     ).all()
     

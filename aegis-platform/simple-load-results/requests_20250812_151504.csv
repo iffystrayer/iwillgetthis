@@ -1,0 +1,7 @@
+user_id,request_id,endpoint,http_code,duration,curl_time
+1,1,/api/v1/assets,307,.014484000,0.002333
+3,1,/api/v1/auth/profile,{"detail",.016324000,"Not Found"}404
+2,1,/api/v1/tasks,307,.029382000,0.017872
+2,2,/api/v1/risks,307,.012511000,0.004445
+3,2,/api/v1/risks,307,.010052000,0.001706
+1,2,/api/v1/evidence,307,.015839000,0.001704

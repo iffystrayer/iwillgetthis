@@ -1,7 +1,18 @@
-# Aegis Platform - Prometheus Configuration (Bundled Production)
+# Aegis Platform - Prometheus Configuration (Production Monitoring)
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    cluster: 'aegis-production'
+    environment: 'production'
+
+rule_files:
+  - "/etc/prometheus/alert_rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
 
 scrape_configs:
   # Prometheus self-monitoring
@@ -9,16 +20,61 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # Aegis Backend Health Check
-  - job_name: 'aegis-backend'
+  # Aegis Backend Application Metrics
+  - job_name: 'aegis-backend-metrics'
     static_configs:
       - targets: ['backend:8000']
-    metrics_path: '/health'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Aegis Backend Health Check
+  - job_name: 'aegis-backend-health'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/health/metrics'
     scrape_interval: 30s
 
-  # Aegis Frontend Health Check  
-  - job_name: 'aegis-frontend'
+  # Database Health Check (PostgreSQL)
+  - job_name: 'aegis-database'
     static_configs:
-      - targets: ['frontend:3000']
-    metrics_path: '/'
+      - targets: ['db:5432']
+    metrics_path: '/metrics'
     scrape_interval: 30s
+
+  # Redis Metrics
+  - job_name: 'aegis-redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Node/Container Metrics (if node_exporter is available)
+  - job_name: 'aegis-system'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Grafana Metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # Blackbox Exporter for external health checks
+  - job_name: 'aegis-blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://localhost/health
+        - https://localhost/api/v1/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

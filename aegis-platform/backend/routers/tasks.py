@@ -185,6 +185,17 @@ async def create_task(
     task_data = task.model_dump()
     task_data["created_by_id"] = current_user.id
     
+    # Convert Pydantic enum values (lowercase) to database enum values (uppercase)
+    if "task_type" in task_data and task_data["task_type"]:
+        # Extract the string value from enum object and convert to uppercase
+        task_data["task_type"] = str(task_data["task_type"].value).upper()
+    if "priority" in task_data and task_data["priority"]:
+        # Extract the string value from enum object and convert to uppercase
+        task_data["priority"] = str(task_data["priority"].value).upper()
+    if "status" in task_data and task_data["status"]:
+        # Extract the string value from enum object and convert to uppercase
+        task_data["status"] = str(task_data["status"].value).upper()
+    
     db_task = Task(**task_data)
     db.add(db_task)
     db.commit()

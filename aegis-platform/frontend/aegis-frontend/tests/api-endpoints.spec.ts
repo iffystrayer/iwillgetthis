@@ -49,7 +49,7 @@ test.describe('API Endpoints E2E Tests', () => {
     });
     
     test('GET /api/v1/users/me - should return current user', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/users/me`, {
+      const response = await request.get(`${BACKEND_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -420,9 +420,12 @@ test.describe('API Endpoints E2E Tests', () => {
       expect(response.status()).toBe(200);
       const data = await response.json();
       
-      expect(data).toHaveProperty('total_assets');
-      expect(data).toHaveProperty('total_risks');
-      expect(data).toHaveProperty('total_tasks');
+      expect(data).toHaveProperty('assets');
+      expect(data).toHaveProperty('risks');
+      expect(data).toHaveProperty('tasks');
+      expect(data.assets).toHaveProperty('total');
+      expect(data.risks).toHaveProperty('total');
+      expect(data.tasks).toHaveProperty('total');
     });
   });
 
@@ -499,7 +502,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('API Filtering and Search', () => {
     
     test('should handle asset filtering by type', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/assets?asset_type=server`, {
+      const response = await request.get(`${BACKEND_URL}/assets?asset_type=SERVER`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -509,13 +512,13 @@ test.describe('API Endpoints E2E Tests', () => {
       // All returned assets should be of type 'server'
       if (data.items.length > 0) {
         data.items.forEach((asset: any) => {
-          expect(asset.asset_type).toBe('server');
+          expect(asset.asset_type).toBe('SERVER');
         });
       }
     });
     
     test('should handle risk filtering by status', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/risks?status=identified`, {
+      const response = await request.get(`${BACKEND_URL}/risks?status=IDENTIFIED`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -524,7 +527,7 @@ test.describe('API Endpoints E2E Tests', () => {
       
       if (data.items.length > 0) {
         data.items.forEach((risk: any) => {
-          expect(risk.status).toBe('identified');
+          expect(risk.status).toBe('IDENTIFIED');
         });
       }
     });

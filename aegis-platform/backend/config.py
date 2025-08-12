@@ -249,12 +249,34 @@ class Settings(BaseSettings):
     # External Integrations
     # ==============================================
     
-    # Microsoft Entra ID (Azure AD)
+    # ==============================================
+    # OAuth2/OIDC Authentication
+    # ==============================================
+    ENABLE_OAUTH: bool = True
+    FRONTEND_URL: str = "http://localhost:58533"
+
+    # Microsoft Azure AD / Entra ID
     ENABLE_AZURE_AUTH: bool = False
     AZURE_CLIENT_ID: str = ""
     AZURE_CLIENT_SECRET: str = ""
     AZURE_TENANT_ID: str = ""
-    AZURE_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
+
+    # Google Workspace
+    ENABLE_GOOGLE_AUTH: bool = False
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+
+    # Okta
+    ENABLE_OKTA_AUTH: bool = False
+    OKTA_CLIENT_ID: str = ""
+    OKTA_CLIENT_SECRET: str = ""
+    OKTA_DOMAIN: str = ""  # your-domain.okta.com
+
+    # Auth0 (optional)
+    ENABLE_AUTH0: bool = False
+    AUTH0_CLIENT_ID: str = ""
+    AUTH0_CLIENT_SECRET: str = ""
+    AUTH0_DOMAIN: str = ""
     
     # OpenVAS
     ENABLE_OPENVAS: bool = False

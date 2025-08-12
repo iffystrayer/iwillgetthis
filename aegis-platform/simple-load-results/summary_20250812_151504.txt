@@ -1,0 +1,9 @@
+Simple Load Test Results
+========================
+Total Requests: 6
+Successful Requests: 0
+Success Rate: 0%
+Average Response Time: 0.016432 seconds
+Min Response Time: .010052000 seconds
+Max Response Time: .029382000 seconds
+Requests per Second: 130.964

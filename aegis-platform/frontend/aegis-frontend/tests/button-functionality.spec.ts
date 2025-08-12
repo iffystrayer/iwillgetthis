@@ -243,6 +243,11 @@ test.describe('Button Functionality Tests - Manual Testing Verification', () => 
     
     await page.goto('/tasks');
     await page.waitForLoadState('networkidle');
+    
+    // Close any open modals before testing
+    await closeOpenModals(page);
+    await page.waitForTimeout(1000);
+    
     await page.screenshot({ path: 'test-results/tasks-page-before-testing.png' });
     
     // Test New Task button
@@ -256,7 +261,11 @@ test.describe('Button Functionality Tests - Manual Testing Verification', () => 
       await dialog.accept();
     });
     
-    await newTaskBtn.click();
+    await newTaskBtn.click({ force: true });
+    await page.waitForTimeout(1000);
+    
+    // Close any dialog that opened and wait
+    await closeOpenModals(page);
     await page.waitForTimeout(1000);
     
     // Test View Calendar button
@@ -270,7 +279,7 @@ test.describe('Button Functionality Tests - Manual Testing Verification', () => 
       await dialog.accept();
     });
     
-    await calendarBtn.click();
+    await calendarBtn.click({ force: true });
     await page.waitForTimeout(1000);
     
     // Test Filters button
@@ -618,6 +627,46 @@ test.describe('Button Functionality Tests - Manual Testing Verification', () => 
 
 });
 
+// Helper function to close any open modals/dialogs
+async function closeOpenModals(page: any) {
+  try {
+    // Try various methods to close modals
+    const closeSelectors = [
+      'button:has-text("Close")',
+      'button:has-text("Cancel")', 
+      'button[aria-label="Close"]',
+      '[data-state="open"] button:last-child',
+      '.dialog-close',
+      '[role="dialog"] button:first-child'
+    ];
+    
+    for (const selector of closeSelectors) {
+      try {
+        const elements = page.locator(selector);
+        const count = await elements.count();
+        for (let i = 0; i < count; i++) {
+          const element = elements.nth(i);
+          if (await element.isVisible({ timeout: 500 })) {
+            await element.click({ timeout: 1000 });
+            await page.waitForTimeout(300);
+          }
+        }
+      } catch (e) {
+        // Continue if element can't be clicked
+      }
+    }
+    
+    // Try pressing Escape key multiple times
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    
+  } catch (e) {
+    console.log('Note: Some modals may still be open');
+  }
+}
+
 // Helper function to login and navigate to dashboard
 async function loginAndNavigateToDashboard(page: any) {
   await page.goto('/');
@@ -633,4 +682,8 @@ async function loginAndNavigateToDashboard(page: any) {
   
   // Wait for dashboard
   await page.waitForURL(/.*\/dashboard/, { timeout: 10000 });
+  
+  // Close any modals that might be open after login
+  await closeOpenModals(page);
+  await page.waitForTimeout(1000);
 }

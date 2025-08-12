@@ -11,13 +11,15 @@ from config import settings
 from database import engine, Base
 from enhanced_ai_service import enhanced_ai_service
 from middleware.security import setup_security
+from middleware.metrics_middleware import MetricsMiddleware
+from metrics import router as metrics_router
 
 # Import models to ensure they are registered with Base metadata
 from models import analytics
 from routers import (
     auth, users, assets, frameworks, assessments, 
     risks, tasks, evidence, integrations, reports, 
-    dashboards, ai_services, analytics
+    dashboards, ai_services, analytics, oauth
 )
 from health import router as health_router
 
@@ -87,9 +89,11 @@ security_manager = setup_security(app)
 
 # Add additional middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(MetricsMiddleware)
 
 # Include health check router first (no auth required)
 app.include_router(health_router)
+app.include_router(metrics_router, tags=["Metrics"])
 
 # Include API routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
@@ -105,6 +109,7 @@ app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(dashboards.router, prefix="/api/v1/dashboards", tags=["Dashboards"])
 app.include_router(ai_services.router, prefix="/api/v1/ai", tags=["AI Services"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
+app.include_router(oauth.router, prefix="/api/v1/oauth", tags=["OAuth2/OIDC"])
 
 
 @app.get("/", tags=["Root"])

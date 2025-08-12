@@ -188,7 +188,7 @@ async def get_risks_summary(
     # High priority count (high and critical)
     high_priority_count = db.query(func.count(Risk.id)).filter(
         Risk.is_active == True,
-        Risk.risk_level.in_(["high", "critical"])
+        Risk.risk_level.in_(["HIGH", "CRITICAL"])
     ).scalar()
     
     # Overdue count (past target resolution date)
@@ -196,7 +196,7 @@ async def get_risks_summary(
     overdue_count = db.query(func.count(Risk.id)).filter(
         Risk.is_active == True,
         Risk.target_resolution_date < datetime.utcnow(),
-        Risk.status.in_(["identified", "assessed", "mitigating"])
+        Risk.status.in_(["IDENTIFIED", "ASSESSED", "MITIGATING"])
     ).scalar()
     
     return RiskSummary(
@@ -242,6 +242,14 @@ async def create_risk(
     risk_data = risk.model_dump()
     risk_data["created_by"] = current_user.id
     
+    # Convert Pydantic enum values (lowercase) to database enum values (uppercase)
+    if "category" in risk_data and risk_data["category"]:
+        # Extract the string value from enum object and convert to uppercase
+        risk_data["category"] = str(risk_data["category"].value).upper()
+    if "status" in risk_data and risk_data["status"]:
+        # Extract the string value from enum object and convert to uppercase
+        risk_data["status"] = str(risk_data["status"].value).upper()
+    
     # Calculate risk score if likelihood and impact are provided
     if risk_data.get("inherent_likelihood") and risk_data.get("inherent_impact"):
         likelihood = risk_data["inherent_likelihood"]
@@ -251,13 +259,13 @@ async def create_risk(
         # Determine risk level
         score = risk_data["inherent_risk_score"]
         if score <= 5:
-            risk_data["risk_level"] = "low"
+            risk_data["risk_level"] = "LOW"
         elif score <= 10:
-            risk_data["risk_level"] = "medium"
+            risk_data["risk_level"] = "MEDIUM"
         elif score <= 15:
-            risk_data["risk_level"] = "high"
+            risk_data["risk_level"] = "HIGH"
         else:
-            risk_data["risk_level"] = "critical"
+            risk_data["risk_level"] = "CRITICAL"
     
     db_risk = Risk(**risk_data)
     db.add(db_risk)
@@ -330,13 +338,13 @@ async def update_risk(
         # Determine risk level
         if score:
             if score <= 5:
-                update_data["risk_level"] = "low"
+                update_data["risk_level"] = "LOW"
             elif score <= 10:
-                update_data["risk_level"] = "medium"
+                update_data["risk_level"] = "MEDIUM"
             elif score <= 15:
-                update_data["risk_level"] = "high"
+                update_data["risk_level"] = "HIGH"
             else:
-                update_data["risk_level"] = "critical"
+                update_data["risk_level"] = "CRITICAL"
     
     for field, value in update_data.items():
         setattr(risk, field, value)
