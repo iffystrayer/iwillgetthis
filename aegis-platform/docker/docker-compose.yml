@@ -80,7 +80,8 @@ services:
     container_name: aegis-frontend
     env_file:
       - ../.env
-    # Remove direct port exposure - access via nginx proxy
+    ports:
+      - "${FRONTEND_PORT_HOST:-58533}:3000"
     depends_on:
       backend:
         condition: service_healthy

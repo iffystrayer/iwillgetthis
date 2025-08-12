@@ -9,10 +9,11 @@ export default defineConfig({
   reporter: [['html'], ['line']],
   timeout: 30000,
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:58533',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://localhost:443',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    ignoreHTTPSErrors: true, // Accept self-signed certificates for testing
   },
 
   projects: [

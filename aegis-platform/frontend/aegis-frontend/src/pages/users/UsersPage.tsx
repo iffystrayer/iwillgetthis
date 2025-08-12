@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AddUserDialog } from '@/components/dialogs/AddUserDialog';
+import { EditUserDialog } from '@/components/dialogs/EditUserDialog';
 import { InviteUsersDialog } from '@/components/dialogs/InviteUsersDialog';
 
 // User interface for type safety
@@ -34,6 +35,8 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
 
   const fetchUsers = async () => {
@@ -192,7 +195,16 @@ export default function UsersPage() {
 
   const handleEditUser = (userId: number) => {
     console.log('Edit User clicked for user:', userId);
-    console.log(`User editing functionality coming soon - would open edit dialog for user ${userId}`);
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      setSelectedUser(user);
+      setShowEditDialog(true);
+    }
+  };
+
+  const handleUserUpdated = () => {
+    console.log('User updated successfully - refreshing user list');
+    fetchUsers();
   };
 
   const handleUserAdded = () => {
@@ -343,6 +355,14 @@ export default function UsersPage() {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onUserAdded={handleUserAdded}
+      />
+
+      {/* Edit User Dialog */}
+      <EditUserDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        user={selectedUser}
+        onUserUpdated={handleUserUpdated}
       />
 
       {/* Invite Users Dialog */}

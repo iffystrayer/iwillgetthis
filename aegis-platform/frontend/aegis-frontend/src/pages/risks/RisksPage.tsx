@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, AlertTriangle, TrendingUp, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { Plus, AlertTriangle, TrendingUp, Eye, Edit, MoreHorizontal, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { AddRiskDialog } from '@/components/dialogs/AddRiskDialog';
+import { EditRiskDialog } from '@/components/dialogs/EditRiskDialog';
 
 // Risk interface for type safety
 interface Risk {
@@ -28,6 +30,9 @@ interface Risk {
 }
 
 export default function RisksPage() {
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
 
   // Mock data with more comprehensive examples
   const risks: Risk[] = [
@@ -172,11 +177,11 @@ export default function RisksPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewDetails(risk.id)}>
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEditRisk(risk.id)}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Risk
                 </DropdownMenuItem>
@@ -211,14 +216,22 @@ export default function RisksPage() {
 
   const handleAddRisk = () => {
     console.log('Add Risk clicked - Opening risk creation dialog');
-    console.log('Add Risk functionality would open a dialog to create new risks');
-    // TODO: Implement add risk dialog
+    setShowAddDialog(true);
+  };
+
+  const handleRiskAdded = () => {
+    console.log('Risk added successfully - refreshing risk list');
+    // TODO: Refresh the risk list from API
   };
 
   const handleRiskMatrix = () => {
     console.log('Risk Matrix clicked - Opening risk matrix view');
-    console.log('Risk Matrix functionality would show risks plotted on probability vs impact matrix');
-    // TODO: Implement risk matrix visualization
+    alert('Risk Matrix visualization - Would show probability vs impact matrix');
+  };
+
+  const handleFilters = () => {
+    console.log('Filters clicked - Opening filter options');
+    alert('Risk filters - Would show advanced filtering options');
   };
 
 
@@ -226,6 +239,20 @@ export default function RisksPage() {
     console.log('View Details clicked for risk:', riskId);
     console.log(`View Details functionality would navigate to detailed view for risk ${riskId}`);
     // TODO: Navigate to risk details page
+  };
+
+  const handleEditRisk = (riskId: number) => {
+    console.log('Edit Risk clicked for risk:', riskId);
+    const risk = risks.find(r => r.id === riskId);
+    if (risk) {
+      setSelectedRisk(risk);
+      setShowEditDialog(true);
+    }
+  };
+
+  const handleRiskUpdated = () => {
+    console.log('Risk updated successfully - refreshing risk list');
+    // TODO: Refresh the risk list from API
   };
 
   return (
@@ -243,6 +270,10 @@ export default function RisksPage() {
         </div>
         
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleFilters}>
+            <Filter className="w-4 h-4 mr-2" />
+            Filters
+          </Button>
           <Button variant="outline" onClick={handleRiskMatrix}>
             <TrendingUp className="w-4 h-4 mr-2" />
             Risk Matrix
@@ -339,6 +370,21 @@ export default function RisksPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Add Risk Dialog */}
+      <AddRiskDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onRiskAdded={handleRiskAdded}
+      />
+
+      {/* Edit Risk Dialog */}
+      <EditRiskDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        risk={selectedRisk}
+        onRiskUpdated={handleRiskUpdated}
+      />
     </div>
   );
 }

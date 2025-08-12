@@ -6,7 +6,7 @@ const LOGIN_CREDENTIALS = {
   password: 'admin123'
 };
 
-const BACKEND_URL = 'http://localhost:30641';
+const BACKEND_URL = 'https://localhost/api';
 
 test.describe('API Endpoints E2E Tests', () => {
   

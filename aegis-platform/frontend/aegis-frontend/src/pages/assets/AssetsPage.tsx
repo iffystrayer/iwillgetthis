@@ -14,6 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { AddAssetDialog } from '@/components/dialogs/AddAssetDialog';
+import { EditAssetDialog } from '@/components/dialogs/EditAssetDialog';
 
 // Asset interface for type safety
 interface Asset {
@@ -38,6 +40,9 @@ export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -165,11 +170,11 @@ export default function AssetsPage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewAsset(asset.id)}>
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEditAsset(asset.id)}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Asset
                 </DropdownMenuItem>
@@ -181,6 +186,74 @@ export default function AssetsPage() {
     ],
     []
   );
+
+  const handleAddAsset = () => {
+    console.log('Add Asset clicked - Opening asset creation dialog');
+    setShowAddDialog(true);
+  };
+
+  const handleAssetAdded = () => {
+    console.log('Asset added successfully - refreshing asset list');
+    // Refresh the asset list
+    const fetchAssets = async () => {
+      try {
+        setLoading(true);
+        const response = await assetsApi.getAll();
+        setAssets(response.items || []);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch assets');
+        console.error('Error fetching assets:', err);
+        setAssets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssets();
+  };
+
+  const handleImport = () => {
+    console.log('Import clicked');
+    alert('Asset import functionality - Would open file upload dialog');
+  };
+
+  const handleExport = () => {
+    console.log('Export clicked');
+    alert('Asset export functionality - Would download assets as CSV/Excel');
+  };
+
+  const handleViewAsset = (assetId: number) => {
+    console.log('View Asset clicked for asset:', assetId);
+    // TODO: Navigate to asset details page
+  };
+
+  const handleEditAsset = (assetId: number) => {
+    console.log('Edit Asset clicked for asset:', assetId);
+    const asset = assets.find(a => a.id === assetId);
+    if (asset) {
+      setSelectedAsset(asset);
+      setShowEditDialog(true);
+    }
+  };
+
+  const handleAssetUpdated = () => {
+    console.log('Asset updated successfully - refreshing asset list');
+    const fetchAssets = async () => {
+      try {
+        setLoading(true);
+        const response = await assetsApi.getAll();
+        setAssets(response.items || []);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch assets');
+        console.error('Error fetching assets:', err);
+        setAssets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssets();
+  };
 
   return (
     <div className="space-y-6">
@@ -196,15 +269,15 @@ export default function AssetsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleImport}>
             <Upload className="h-4 w-4 mr-2" />
             Import
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button>
+          <Button onClick={handleAddAsset}>
             <Plus className="h-4 w-4 mr-2" />
             Add Asset
           </Button>
@@ -314,6 +387,21 @@ export default function AssetsPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Add Asset Dialog */}
+      <AddAssetDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onAssetAdded={handleAssetAdded}
+      />
+
+      {/* Edit Asset Dialog */}
+      <EditAssetDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        asset={selectedAsset}
+        onAssetUpdated={handleAssetUpdated}
+      />
     </div>
   );
 }
