@@ -104,6 +104,30 @@ Testing is crucial. Tests should be run inside the Docker containers to ensure t
     docker-compose -f docker/docker-compose.yml exec frontend npx playwright test
     ```
 
+
+
+## Project State Management
+
+1. **Interval Summarization**
+   - Every 5 conversation turns, or after any major decision/change, generate a concise summary of the current project state.
+   - The summary should include:
+     - Key decisions made
+     - Current objectives or tasks
+     - Any unresolved questions or TODOs
+
+2. **State Injection**
+   - At the start of each new session, request or inject the latest summary of the project state.
+   - Use this summary to maintain continuity and avoid repeating previous work.
+
+3. **Summary Update Protocol**
+   - When prompted, or at the defined interval, update the summary and provide it in a clearly marked section (e.g., `## Project Summary`).
+   - Save or export the summary for future sessions.
+
+4. **Reminder**
+   - If a session exceeds 5 turns without a summary update, remind the user to generate a new summary.
+
+
+
 ## Configuration Management
 
 -   **Single Source of Truth:** The `aegis-platform/.env` file is the single source of truth for all environment configuration. It is created by copying `.env.example`.
