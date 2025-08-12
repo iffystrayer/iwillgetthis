@@ -6,7 +6,7 @@ const LOGIN_CREDENTIALS = {
   password: 'admin123'
 };
 
-const BACKEND_URL = 'https://localhost/api';
+const BACKEND_URL = 'http://localhost:30641/api/v1';
 
 test.describe('API Endpoints E2E Tests', () => {
   
@@ -14,7 +14,7 @@ test.describe('API Endpoints E2E Tests', () => {
   
   test.beforeAll(async ({ request }) => {
     // Get authentication token for API tests
-    const loginResponse = await request.post(`${BACKEND_URL}/api/v1/auth/login`, {
+    const loginResponse = await request.post(`${BACKEND_URL}/auth/login`, {
       data: {
         username: LOGIN_CREDENTIALS.email,
         password: LOGIN_CREDENTIALS.password
@@ -30,7 +30,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('User Management API', () => {
     
     test('GET /api/v1/users - should list users', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/users`, {
+      const response = await request.get(`${BACKEND_URL}/users`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -49,7 +49,7 @@ test.describe('API Endpoints E2E Tests', () => {
     });
     
     test('GET /api/v1/users/me - should return current user', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/users/me`, {
+      const response = await request.get(`${BACKEND_URL}/users/me`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -69,7 +69,7 @@ test.describe('API Endpoints E2E Tests', () => {
         job_title: 'Analyst'
       };
       
-      const response = await request.post(`${BACKEND_URL}/api/v1/users`, {
+      const response = await request.post(`${BACKEND_URL}/users`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: newUser
       });
@@ -82,7 +82,7 @@ test.describe('API Endpoints E2E Tests', () => {
       
       // Clean up - delete the created user
       const userId = data.id;
-      await request.delete(`${BACKEND_URL}/api/v1/users/${userId}`, {
+      await request.delete(`${BACKEND_URL}/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
     });
@@ -93,7 +93,7 @@ test.describe('API Endpoints E2E Tests', () => {
     let createdAssetId: number;
     
     test('GET /api/v1/assets - should list assets', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/assets`, {
+      const response = await request.get(`${BACKEND_URL}/assets`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -115,7 +115,7 @@ test.describe('API Endpoints E2E Tests', () => {
         environment: 'testing'
       };
       
-      const response = await request.post(`${BACKEND_URL}/api/v1/assets`, {
+      const response = await request.post(`${BACKEND_URL}/assets`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: newAsset
       });
@@ -134,7 +134,7 @@ test.describe('API Endpoints E2E Tests', () => {
         test.skip('No asset created to test with');
       }
       
-      const response = await request.get(`${BACKEND_URL}/api/v1/assets/${createdAssetId}`, {
+      const response = await request.get(`${BACKEND_URL}/assets/${createdAssetId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -155,7 +155,7 @@ test.describe('API Endpoints E2E Tests', () => {
         criticality: 'critical'
       };
       
-      const response = await request.put(`${BACKEND_URL}/api/v1/assets/${createdAssetId}`, {
+      const response = await request.put(`${BACKEND_URL}/assets/${createdAssetId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: updateData
       });
@@ -172,14 +172,14 @@ test.describe('API Endpoints E2E Tests', () => {
         test.skip('No asset created to test with');
       }
       
-      const response = await request.delete(`${BACKEND_URL}/api/v1/assets/${createdAssetId}`, {
+      const response = await request.delete(`${BACKEND_URL}/assets/${createdAssetId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
       expect(response.status()).toBe(204);
       
       // Verify asset is deleted
-      const getResponse = await request.get(`${BACKEND_URL}/api/v1/assets/${createdAssetId}`, {
+      const getResponse = await request.get(`${BACKEND_URL}/assets/${createdAssetId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       expect(getResponse.status()).toBe(404);
@@ -193,7 +193,7 @@ test.describe('API Endpoints E2E Tests', () => {
     
     test.beforeAll(async ({ request }) => {
       // Create a test asset for risk association
-      const assetResponse = await request.post(`${BACKEND_URL}/api/v1/assets`, {
+      const assetResponse = await request.post(`${BACKEND_URL}/assets`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: {
           name: `Risk Test Asset ${Date.now()}`,
@@ -207,7 +207,7 @@ test.describe('API Endpoints E2E Tests', () => {
     });
     
     test('GET /api/v1/risks - should list risks', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/risks`, {
+      const response = await request.get(`${BACKEND_URL}/risks`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -228,7 +228,7 @@ test.describe('API Endpoints E2E Tests', () => {
         status: 'identified'
       };
       
-      const response = await request.post(`${BACKEND_URL}/api/v1/risks`, {
+      const response = await request.post(`${BACKEND_URL}/risks`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: newRisk
       });
@@ -247,7 +247,7 @@ test.describe('API Endpoints E2E Tests', () => {
         test.skip('No risk created to test with');
       }
       
-      const response = await request.get(`${BACKEND_URL}/api/v1/risks/${createdRiskId}`, {
+      const response = await request.get(`${BACKEND_URL}/risks/${createdRiskId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -260,12 +260,12 @@ test.describe('API Endpoints E2E Tests', () => {
     test.afterAll(async ({ request }) => {
       // Clean up test data
       if (createdRiskId) {
-        await request.delete(`${BACKEND_URL}/api/v1/risks/${createdRiskId}`, {
+        await request.delete(`${BACKEND_URL}/risks/${createdRiskId}`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
       }
       if (testAssetId) {
-        await request.delete(`${BACKEND_URL}/api/v1/assets/${testAssetId}`, {
+        await request.delete(`${BACKEND_URL}/assets/${testAssetId}`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
       }
@@ -277,7 +277,7 @@ test.describe('API Endpoints E2E Tests', () => {
     let createdTaskId: number;
     
     test('GET /api/v1/tasks - should list tasks', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/tasks`, {
+      const response = await request.get(`${BACKEND_URL}/tasks`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -297,7 +297,7 @@ test.describe('API Endpoints E2E Tests', () => {
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days from now
       };
       
-      const response = await request.post(`${BACKEND_URL}/api/v1/tasks`, {
+      const response = await request.post(`${BACKEND_URL}/tasks`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: newTask
       });
@@ -321,7 +321,7 @@ test.describe('API Endpoints E2E Tests', () => {
         status: 'in_progress'
       };
       
-      const response = await request.patch(`${BACKEND_URL}/api/v1/tasks/${createdTaskId}`, {
+      const response = await request.patch(`${BACKEND_URL}/tasks/${createdTaskId}`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: updateData
       });
@@ -335,7 +335,7 @@ test.describe('API Endpoints E2E Tests', () => {
     
     test.afterAll(async ({ request }) => {
       if (createdTaskId) {
-        await request.delete(`${BACKEND_URL}/api/v1/tasks/${createdTaskId}`, {
+        await request.delete(`${BACKEND_URL}/tasks/${createdTaskId}`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
       }
@@ -345,7 +345,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('Assessment API', () => {
     
     test('GET /api/v1/assessments - should list assessments', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/assessments`, {
+      const response = await request.get(`${BACKEND_URL}/assessments`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -359,7 +359,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('Evidence Management API', () => {
     
     test('GET /api/v1/evidence - should list evidence', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/evidence`, {
+      const response = await request.get(`${BACKEND_URL}/evidence`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -373,7 +373,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('Framework API', () => {
     
     test('GET /api/v1/frameworks - should list frameworks', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/frameworks`, {
+      const response = await request.get(`${BACKEND_URL}/frameworks`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -388,7 +388,7 @@ test.describe('API Endpoints E2E Tests', () => {
     
     test('GET /api/v1/frameworks/{id}/controls - should list controls for framework', async ({ request }) => {
       // First get frameworks to get an ID
-      const frameworksResponse = await request.get(`${BACKEND_URL}/api/v1/frameworks`, {
+      const frameworksResponse = await request.get(`${BACKEND_URL}/frameworks`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -399,7 +399,7 @@ test.describe('API Endpoints E2E Tests', () => {
       
       const frameworkId = frameworksData.items[0].id;
       
-      const response = await request.get(`${BACKEND_URL}/api/v1/frameworks/${frameworkId}/controls`, {
+      const response = await request.get(`${BACKEND_URL}/frameworks/${frameworkId}/controls`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -413,7 +413,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('Dashboard API', () => {
     
     test('GET /api/v1/dashboards/overview - should get dashboard overview', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/dashboards/overview`, {
+      const response = await request.get(`${BACKEND_URL}/dashboards/overview`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -429,7 +429,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('Reports API', () => {
     
     test('GET /api/v1/reports - should list reports', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/reports`, {
+      const response = await request.get(`${BACKEND_URL}/reports`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -440,7 +440,7 @@ test.describe('API Endpoints E2E Tests', () => {
     });
     
     test('GET /api/v1/reports/templates - should list report templates', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/reports/templates`, {
+      const response = await request.get(`${BACKEND_URL}/reports/templates`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -454,19 +454,19 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('API Error Handling', () => {
     
     test('should handle unauthorized requests', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/users`);
+      const response = await request.get(`${BACKEND_URL}/users`);
       expect(response.status()).toBe(401);
     });
     
     test('should handle invalid endpoints', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/nonexistent`, {
+      const response = await request.get(`${BACKEND_URL}/nonexistent`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       expect(response.status()).toBe(404);
     });
     
     test('should handle invalid data in POST requests', async ({ request }) => {
-      const response = await request.post(`${BACKEND_URL}/api/v1/assets`, {
+      const response = await request.post(`${BACKEND_URL}/assets`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
         data: {
           name: '', // Invalid: empty name
@@ -484,7 +484,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('API Pagination', () => {
     
     test('should handle pagination parameters', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/assets?page=1&per_page=5`, {
+      const response = await request.get(`${BACKEND_URL}/assets?page=1&per_page=5`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -499,7 +499,7 @@ test.describe('API Endpoints E2E Tests', () => {
   test.describe('API Filtering and Search', () => {
     
     test('should handle asset filtering by type', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/assets?asset_type=server`, {
+      const response = await request.get(`${BACKEND_URL}/assets?asset_type=server`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
@@ -515,7 +515,7 @@ test.describe('API Endpoints E2E Tests', () => {
     });
     
     test('should handle risk filtering by status', async ({ request }) => {
-      const response = await request.get(`${BACKEND_URL}/api/v1/risks?status=identified`, {
+      const response = await request.get(`${BACKEND_URL}/risks?status=identified`, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       
