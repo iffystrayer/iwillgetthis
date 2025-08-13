@@ -6,7 +6,7 @@ from datetime import datetime
 
 from database import get_db
 from models.user import User
-from models.assessment import Assessment, AssessmentControl
+from models.assessment import Assessment, AssessmentControl, ControlImplementationStatus
 from models.framework import Framework, Control
 from models.risk import Risk
 from models.audit import AuditLog
@@ -115,7 +115,7 @@ async def create_assessment(
         assessment_control = AssessmentControl(
             assessment_id=db_assessment.id,
             control_id=control.id,
-            implementation_status="not_implemented"  # Default status
+            implementation_status=ControlImplementationStatus.NOT_IMPLEMENTED  # Default status
         )
         db.add(assessment_control)
     
