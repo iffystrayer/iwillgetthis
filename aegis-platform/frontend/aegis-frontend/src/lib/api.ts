@@ -161,11 +161,19 @@ export const evidenceApi = {
   create: (data: any) => apiCall('POST', '/evidence', data),
   update: (id: string, data: any) => apiCall('PUT', `/evidence/${id}`, data),
   delete: (id: string) => apiCall('DELETE', `/evidence/${id}`),
-  upload: async (formData: FormData) => {
+  upload: async (formData: FormData, title: string, evidenceType: string, description?: string) => {
     try {
+      // Backend expects title and evidence_type as query parameters
+      const params = new URLSearchParams();
+      params.append('title', title);
+      params.append('evidence_type', evidenceType);
+      if (description) {
+        params.append('description', description);
+      }
+
       const response = await api({
         method: 'POST',
-        url: '/evidence/upload',
+        url: `/evidence/upload?${params.toString()}`,
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',

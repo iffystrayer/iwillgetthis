@@ -36,14 +36,15 @@ interface EvidenceFormData {
 }
 
 const evidenceTypes = [
-  'Policy',
-  'Technical',
-  'Training',
-  'Administrative',
-  'Procedure',
-  'Certificate',
-  'Report',
-  'Other'
+  { value: 'document', label: 'Document' },
+  { value: 'policy', label: 'Policy' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'training', label: 'Training' },
+  { value: 'administrative', label: 'Administrative' },
+  { value: 'procedure', label: 'Procedure' },
+  { value: 'certificate', label: 'Certificate' },
+  { value: 'report', label: 'Report' },
+  { value: 'other', label: 'Other' }
 ];
 
 export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }: UploadEvidenceDialogProps) {
@@ -114,12 +115,9 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
 
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('type', data.type);
 
-      // Use the evidence API to upload
-      await evidenceApi.upload(formData);
+      // Use the corrected evidence API with proper parameters
+      await evidenceApi.upload(formData, data.title, data.type, data.description);
 
       // Reset form and close dialog
       reset();
@@ -131,10 +129,10 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
         onEvidenceUploaded();
       }
 
-      console.log('Evidence uploaded successfully');
+      console.log('✅ Evidence uploaded successfully');
     } catch (error: any) {
-      console.error('Error uploading evidence:', error);
-      setUploadError(error.message || 'Failed to upload evidence. Please try again.');
+      console.error('❌ Error uploading evidence:', error);
+      setUploadError(error.response?.data?.detail || error.message || 'Failed to upload evidence. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -161,19 +159,21 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Upload Evidence</DialogTitle>
-          <DialogDescription>
-            Upload compliance evidence and supporting documentation
+      <DialogContent className="sm:max-w-md form-glass border-0">
+        <DialogHeader className="text-center space-y-3">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            ✨ Upload Evidence
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground/80">
+            Upload compliance evidence and supporting documentation with our secure platform
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* File Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="file">File</Label>
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* File Upload - Glassmorphism */}
+          <div className="space-y-3">
+            <Label htmlFor="file" className="text-sm font-semibold text-foreground/90">📁 File</Label>
+            <div className="glass border-2 border-dashed border-primary/30 rounded-xl p-8 text-center hover:border-primary/50 transition-all duration-300">
               {selectedFile ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-center">
@@ -217,73 +217,90 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
             </div>
           </div>
 
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+          {/* Title - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="title" className="text-sm font-semibold text-foreground/90">✨ Title *</Label>
             <Input
               id="title"
               {...register('title', { required: 'Title is required' })}
               placeholder="Enter evidence title"
+              className="input-glass h-12 text-base"
             />
             {errors.title && (
-              <p className="text-sm text-destructive">{errors.title.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.title.message}</p>
             )}
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+          {/* Description - Glass Textarea */}
+          <div className="space-y-3">
+            <Label htmlFor="description" className="text-sm font-semibold text-foreground/90">📝 Description</Label>
             <Textarea
               id="description"
               {...register('description')}
               placeholder="Describe the evidence (optional)"
               rows={3}
+              className="input-glass resize-none"
             />
           </div>
 
-          {/* Type */}
-          <div className="space-y-2">
-            <Label htmlFor="type">Type *</Label>
+          {/* Type - Glass Select */}
+          <div className="space-y-3">
+            <Label htmlFor="type" className="text-sm font-semibold text-foreground/90">🏷️ Type *</Label>
             <Select
               value={selectedType}
               onValueChange={(value) => setValue('type', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="input-glass h-12">
                 <SelectValue placeholder="Select evidence type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass border-0">
                 {evidenceTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
+                  <SelectItem key={type.value} value={type.value} className="hover:bg-primary/10">
+                    {type.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.type && (
-              <p className="text-sm text-destructive">Evidence type is required</p>
+              <p className="text-sm text-red-500 font-medium">Evidence type is required</p>
             )}
           </div>
 
-          {/* Error Alert */}
+          {/* Error Alert - Glass Style */}
           {uploadError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{uploadError}</AlertDescription>
+            <Alert variant="destructive" className="glass border-red-200/50 bg-red-50/80">
+              <AlertCircle className="h-5 w-5" />
+              <AlertDescription className="font-medium">{uploadError}</AlertDescription>
             </Alert>
           )}
 
-          {/* Actions */}
-          <div className="flex justify-end space-x-2 pt-4">
+          {/* Actions - Gradient Buttons */}
+          <div className="flex justify-end space-x-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isUploading}
+              className="glass border-primary/20 hover:border-primary/40 px-6 h-11"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isUploading || !selectedFile}>
-              {isUploading ? 'Uploading...' : 'Upload Evidence'}
+            <Button 
+              type="submit" 
+              disabled={isUploading || !selectedFile}
+              className="btn-gradient-primary px-8 h-11 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Evidence
+                </>
+              )}
             </Button>
           </div>
         </form>
