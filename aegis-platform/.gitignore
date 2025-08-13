@@ -37,3 +37,7 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+# Test artifacts and reports that should not be committed
+frontend/aegis-frontend/playwright-report/data/
+frontend/aegis-frontend/test-results/
+*.DS_Store

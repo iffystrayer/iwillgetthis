@@ -4,7 +4,7 @@ Supports multiple enterprise identity providers with automatic user provisioning
 """
 
 import httpx
-import jwt
+from jose import jwt
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
