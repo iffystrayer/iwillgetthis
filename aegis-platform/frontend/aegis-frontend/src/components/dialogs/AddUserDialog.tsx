@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Plus, User, Mail, Key, Shield } from 'lucide-react';
+import { Plus, User, Mail, Key, Shield, AlertCircle } from 'lucide-react';
 
 import {
   Dialog,
@@ -113,23 +113,23 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Add New User
+      <DialogContent className="sm:max-w-[500px] form-glass border-0">
+        <DialogHeader className="text-center space-y-3">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
+            <User className="h-6 w-6 text-indigo-600" />
+            ✨ Add New User
           </DialogTitle>
-          <DialogDescription>
-            Create a new user account with appropriate roles and permissions.
+          <DialogDescription className="text-muted-foreground/80">
+            Create a new user account with appropriate roles and permissions using our secure platform
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Full Name */}
-          <div className="space-y-2">
-            <Label htmlFor="full_name" className="flex items-center gap-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Full Name - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="full_name" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <User className="h-4 w-4" />
-              Full Name
+              👤 Full Name *
             </Label>
             <Input
               id="full_name"
@@ -138,18 +138,18 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
                 required: 'Full name is required',
                 minLength: { value: 2, message: 'Name must be at least 2 characters' },
               })}
-              className={errors.full_name ? 'border-red-500' : ''}
+              className={`input-glass h-12 text-base ${errors.full_name ? 'border-red-500/50' : ''}`}
             />
             {errors.full_name && (
-              <p className="text-sm text-red-600">{errors.full_name.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.full_name.message}</p>
             )}
           </div>
 
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
+          {/* Email - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              Email Address
+              📧 Email Address *
             </Label>
             <Input
               id="email"
@@ -163,18 +163,18 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
                 },
                 onChange: (e) => generateUsername(e.target.value),
               })}
-              className={errors.email ? 'border-red-500' : ''}
+              className={`input-glass h-12 text-base ${errors.email ? 'border-red-500/50' : ''}`}
             />
             {errors.email && (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.email.message}</p>
             )}
           </div>
 
-          {/* Username */}
-          <div className="space-y-2">
-            <Label htmlFor="username" className="flex items-center gap-2">
+          {/* Username - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="username" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <User className="h-4 w-4" />
-              Username
+              🔤 Username *
             </Label>
             <Input
               id="username"
@@ -183,18 +183,18 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
                 required: 'Username is required',
                 minLength: { value: 3, message: 'Username must be at least 3 characters' },
               })}
-              className={errors.username ? 'border-red-500' : ''}
+              className={`input-glass h-12 text-base ${errors.username ? 'border-red-500/50' : ''}`}
             />
             {errors.username && (
-              <p className="text-sm text-red-600">{errors.username.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.username.message}</p>
             )}
           </div>
 
-          {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="password" className="flex items-center gap-2">
+          {/* Password - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="password" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <Key className="h-4 w-4" />
-              Temporary Password
+              🔐 Temporary Password *
             </Label>
             <Input
               id="password"
@@ -204,37 +204,37 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
                 required: 'Password is required',
                 minLength: { value: 8, message: 'Password must be at least 8 characters' },
               })}
-              className={errors.password ? 'border-red-500' : ''}
+              className={`input-glass h-12 text-base ${errors.password ? 'border-red-500/50' : ''}`}
             />
             {errors.password && (
-              <p className="text-sm text-red-600">{errors.password.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.password.message}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground/70">
               User will be prompted to change password on first login
             </p>
           </div>
 
-          {/* Role Selection */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
+          {/* Role Selection - Glass Select */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              Role & Permissions
+              🛡️ Role & Permissions *
             </Label>
             <Select
               value={selectedRole}
               onValueChange={(value) => setValue('role', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="input-glass h-12">
                 <SelectValue placeholder="Select user role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass border-0">
                 {roleOptions.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
+                  <SelectItem key={role.value} value={role.value} className="hover:bg-primary/10">
                     <div className="flex items-center gap-2">
                       <Badge variant={role.color} className="text-xs">
                         {role.label}
                       </Badge>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         {role.description}
                       </span>
                     </div>
@@ -243,34 +243,41 @@ export function AddUserDialog({ open, onOpenChange, onUserAdded }: AddUserDialog
               </SelectContent>
             </Select>
             {selectedRoleInfo && (
-              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+              <div className="flex items-center gap-2 p-3 glass rounded-lg">
                 <Badge variant={selectedRoleInfo.color}>
                   {selectedRoleInfo.label}
                 </Badge>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-muted-foreground">
                   {selectedRoleInfo.description}
                 </span>
               </div>
             )}
           </div>
 
-          {/* Error Message */}
+          {/* Error Message - Glass Style */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="glass border-red-200/50 bg-red-50/80 p-4 rounded-xl flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <p className="text-sm text-red-800 font-medium">{error}</p>
             </div>
           )}
 
-          <DialogFooter>
+          {/* Actions - Gradient Buttons */}
+          <DialogFooter className="flex justify-end space-x-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
+              className="glass border-primary/20 hover:border-primary/40 px-6 h-11"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="btn-gradient-primary px-8 h-11 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />

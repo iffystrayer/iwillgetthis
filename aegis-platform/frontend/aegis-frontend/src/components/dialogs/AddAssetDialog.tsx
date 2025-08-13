@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Plus, Database, Building, MapPin, Cpu } from 'lucide-react';
+import { Plus, Database, Building, MapPin, Cpu, AlertCircle } from 'lucide-react';
 
 import {
   Dialog,
@@ -138,23 +138,23 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" />
-            Add New Asset
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto form-glass border-0">
+        <DialogHeader className="text-center space-y-3">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center justify-center gap-3">
+            <Database className="h-6 w-6 text-indigo-600" />
+            ✨ Add New Asset
           </DialogTitle>
-          <DialogDescription>
-            Register a new asset in the asset management system with detailed information.
+          <DialogDescription className="text-muted-foreground/80">
+            Register a new asset in the asset management system with comprehensive security details
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Asset Name */}
-          <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Asset Name - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="name" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <Database className="h-4 w-4" />
-              Asset Name
+              🏢 Asset Name *
             </Label>
             <Input
               id="name"
@@ -163,17 +163,17 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
                 required: 'Asset name is required',
                 minLength: { value: 2, message: 'Name must be at least 2 characters' },
               })}
-              className={errors.name ? 'border-red-500' : ''}
+              className={`input-glass h-12 text-base ${errors.name ? 'border-red-500/50' : ''}`}
             />
             {errors.name && (
-              <p className="text-sm text-red-600">{errors.name.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.name.message}</p>
             )}
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              Description
+          {/* Description - Glass Textarea */}
+          <div className="space-y-3">
+            <Label htmlFor="description" className="text-sm font-semibold text-foreground/90">
+              📝 Description *
             </Label>
             <Textarea
               id="description"
@@ -183,30 +183,30 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
                 required: 'Asset description is required',
                 minLength: { value: 5, message: 'Description must be at least 5 characters' },
               })}
-              className={errors.description ? 'border-red-500' : ''}
+              className={`input-glass resize-none ${errors.description ? 'border-red-500/50' : ''}`}
             />
             {errors.description && (
-              <p className="text-sm text-red-600">{errors.description.message}</p>
+              <p className="text-sm text-red-500 font-medium">{errors.description.message}</p>
             )}
           </div>
 
           {/* Asset Type, Criticality, Environment */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <Label className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
                 <Cpu className="h-4 w-4" />
-                Asset Type
+                🖥️ Asset Type
               </Label>
               <Select
                 value={selectedAssetType}
                 onValueChange={(value) => setValue('asset_type', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="input-glass h-11">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass border-0">
                   {assetTypeOptions.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="hover:bg-primary/10">
                       <div className="flex items-center gap-2">
                         <Badge variant={type.color} className="text-xs">
                           {type.label}
@@ -224,17 +224,17 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
             </div>
 
             <div className="space-y-2">
-              <Label>Criticality</Label>
+              <Label className="text-sm font-semibold text-foreground/90">⚡ Criticality</Label>
               <Select
                 value={selectedCriticality}
                 onValueChange={(value) => setValue('criticality', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="input-glass h-11">
                   <SelectValue placeholder="Select criticality" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass border-0">
                   {criticalityOptions.map((crit) => (
-                    <SelectItem key={crit.value} value={crit.value}>
+                    <SelectItem key={crit.value} value={crit.value} className="hover:bg-primary/10">
                       <div className="flex items-center gap-2">
                         <Badge variant={crit.color} className="text-xs">
                           {crit.label}
@@ -252,17 +252,17 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
             </div>
 
             <div className="space-y-2">
-              <Label>Environment</Label>
+              <Label className="text-sm font-semibold text-foreground/90">🌐 Environment</Label>
               <Select
                 value={selectedEnvironment}
                 onValueChange={(value) => setValue('environment', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="input-glass h-11">
                   <SelectValue placeholder="Select environment" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="glass border-0">
                   {environmentOptions.map((env) => (
-                    <SelectItem key={env.value} value={env.value}>
+                    <SelectItem key={env.value} value={env.value} className="hover:bg-primary/10">
                       <div className="flex items-center gap-2">
                         <Badge variant={env.color} className="text-xs">
                           {env.label}
@@ -280,88 +280,100 @@ export function AddAssetDialog({ open, onOpenChange, onAssetAdded }: AddAssetDia
             </div>
           </div>
 
-          {/* Technical Details */}
-          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium">Technical Information</h3>
+          {/* Technical Details - Glass Section */}
+          <div className="space-y-4 p-6 glass rounded-xl">
+            <h3 className="font-semibold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">🔧 Technical Information</h3>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="ip_address">
-                  IP Address
+                <Label htmlFor="ip_address" className="text-sm font-medium text-foreground/90">
+                  🌐 IP Address
                 </Label>
                 <Input
                   id="ip_address"
                   placeholder="192.168.1.100"
                   {...register('ip_address')}
+                  className="input-glass h-11"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hostname">
-                  Hostname
+                <Label htmlFor="hostname" className="text-sm font-medium text-foreground/90">
+                  💻 Hostname
                 </Label>
                 <Input
                   id="hostname"
                   placeholder="server01.company.com"
                   {...register('hostname')}
+                  className="input-glass h-11"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="operating_system">
-                  Operating System
+                <Label htmlFor="operating_system" className="text-sm font-medium text-foreground/90">
+                  🖥️ Operating System
                 </Label>
                 <Input
                   id="operating_system"
                   placeholder="Ubuntu 22.04 LTS"
                   {...register('operating_system')}
+                  className="input-glass h-11"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center gap-2">
+                <Label htmlFor="location" className="text-sm font-medium text-foreground/90 flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Location
+                  📍 Location
                 </Label>
                 <Input
                   id="location"
                   placeholder="Data Center A, Rack 12"
                   {...register('location')}
+                  className="input-glass h-11"
                 />
               </div>
             </div>
           </div>
 
-          {/* Business Information */}
-          <div className="space-y-2">
-            <Label htmlFor="business_unit" className="flex items-center gap-2">
+          {/* Business Information - Glass Input */}
+          <div className="space-y-3">
+            <Label htmlFor="business_unit" className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
               <Building className="h-4 w-4" />
-              Business Unit
+              🏢 Business Unit
             </Label>
             <Input
               id="business_unit"
               placeholder="IT Department, Finance, etc."
               {...register('business_unit')}
+              className="input-glass h-12 text-base"
             />
           </div>
 
-          {/* Error Message */}
+          {/* Error Message - Glass Style */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="glass border-red-200/50 bg-red-50/80 p-4 rounded-xl flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <p className="text-sm text-red-800 font-medium">{error}</p>
             </div>
           )}
 
-          <DialogFooter>
+          {/* Actions - Gradient Buttons */}
+          <DialogFooter className="flex justify-end space-x-3 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
+              className="glass border-primary/20 hover:border-primary/40 px-6 h-11"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="btn-gradient-primary px-8 h-11 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
