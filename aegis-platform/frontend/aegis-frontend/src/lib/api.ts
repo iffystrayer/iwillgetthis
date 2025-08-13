@@ -200,7 +200,7 @@ export const dashboardApi = {
   getRecentActivity: () => apiCall('GET', '/dashboards/recent-activity'),
   getCisoCockpit: () => apiCall('GET', '/dashboards/ciso-cockpit'),
   getAnalystWorkbench: () => apiCall('GET', '/dashboards/analyst-workbench'),
-  getSystemOwner: () => apiCall('GET', '/dashboards/system-owner'),
+  getSystemOwner: () => apiCall('GET', '/dashboards/system-owner-inbox'),
 };
 
 // Users API
