@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
+import json
 
 
 class UserBase(BaseModel):
@@ -56,7 +57,7 @@ class Token(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
-    user: UserResponse
+    user: Dict[str, Any]
 
 
 class TokenRefresh(BaseModel):
@@ -80,11 +81,58 @@ class RoleUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class RoleResponse(RoleBase):
+class RoleResponse(BaseModel):
     id: int
+    name: str
+    description: Optional[str] = None
+    permissions: Dict[str, List[str]] = {}
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
+    
+    @classmethod
+    def from_orm(cls, obj):
+        # Convert permissions JSON string to structured format for frontend
+        permissions = {}
+        if obj.permissions:
+            try:
+                raw_permissions = json.loads(obj.permissions)
+                if raw_permissions == ["all"]:
+                    # Admin user with all permissions
+                    permissions = {
+                        "assets": ["read", "write", "delete"],
+                        "risks": ["read", "write", "delete"],
+                        "assessments": ["read", "write", "delete"],
+                        "tasks": ["read", "write", "delete"],
+                        "evidence": ["read", "write", "delete"],
+                        "reports": ["read", "write", "delete"],
+                        "ai_services": ["read", "write", "delete"],
+                        "integrations": ["read", "write", "delete"],
+                        "users": ["read", "write", "delete"],
+                        "settings": ["read", "write", "delete"]
+                    }
+                elif isinstance(raw_permissions, list):
+                    # Convert list to module-based permissions
+                    for perm in raw_permissions:
+                        if "_" in perm:
+                            module, action = perm.split("_", 1)
+                            if module not in permissions:
+                                permissions[module] = []
+                            permissions[module].append(action)
+                elif isinstance(raw_permissions, dict):
+                    permissions = raw_permissions
+            except (json.JSONDecodeError, ValueError):
+                permissions = {}
+        
+        return cls(
+            id=obj.id,
+            name=obj.name,
+            description=obj.description,
+            permissions=permissions,
+            is_active=obj.is_active,
+            created_at=obj.created_at,
+            updated_at=obj.updated_at
+        )
     
     class Config:
         from_attributes = True

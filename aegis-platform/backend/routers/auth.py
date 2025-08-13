@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from database import get_db
 from models.user import User, Role, UserRole
+import json
 from models.audit import AuditLog
 from schemas.user import UserCreate, UserLogin, Token, TokenRefresh, UserResponse
 from auth import (
@@ -118,12 +119,76 @@ async def login(user_login: UserLogin, db: Session = Depends(get_db)):
     db.add(audit_log)
     db.commit()
     
+    print("DEBUG: Starting role loading process")
+    
+    # Load user roles for the response
+    user_roles = db.query(UserRole).filter(UserRole.user_id == user.id).all()
+    print(f"Debug: Found {len(user_roles)} user roles for user {user.id}")
+    roles = []
+    for user_role in user_roles:
+        role = db.query(Role).filter(Role.id == user_role.role_id).first()
+        if role:
+            print(f"Debug: Processing role {role.name} with permissions {role.permissions}")
+            # Transform permissions for frontend
+            permissions = {}
+            if role.permissions:
+                try:
+                    raw_permissions = json.loads(role.permissions)
+                    print(f"Debug: Raw permissions: {raw_permissions}")
+                    if raw_permissions == ["all"]:
+                        permissions = {
+                            "assets": ["read", "write", "delete"],
+                            "risks": ["read", "write", "delete"],
+                            "assessments": ["read", "write", "delete"],
+                            "tasks": ["read", "write", "delete"],
+                            "evidence": ["read", "write", "delete"],
+                            "reports": ["read", "write", "delete"],
+                            "ai_services": ["read", "write", "delete"],
+                            "integrations": ["read", "write", "delete"],
+                            "users": ["read", "write", "delete"],
+                            "settings": ["read", "write", "delete"]
+                        }
+                        print(f"Debug: Transformed permissions: {permissions}")
+                except Exception as e:
+                    print(f"Debug: Error parsing permissions: {e}")
+                    permissions = {}
+            
+            role_data = {
+                "id": role.id,
+                "name": role.name,
+                "description": role.description,
+                "permissions": permissions,
+                "is_active": role.is_active
+            }
+            roles.append(role_data)
+            print(f"Debug: Added role data: {role_data}")
+    
+    # Add roles to user object
+    user_dict = {
+        "id": user.id,
+        "email": user.email,
+        "username": user.username,
+        "full_name": user.full_name,
+        "is_active": user.is_active,
+        "is_verified": user.is_verified,
+        "last_login": user.last_login,
+        "profile_picture": user.profile_picture,
+        "department": user.department,
+        "job_title": user.job_title,
+        "phone": user.phone,
+        "azure_ad_id": user.azure_ad_id,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+        "roles": roles
+    }
+    print(f"Debug: Final user dict with roles: {user_dict['roles']}")
+    
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
         "expires_in": settings.jwt_access_token_expire_minutes * 60,
-        "user": user
+        "user": user_dict
     }
 
 
@@ -184,12 +249,73 @@ async def logout(
     return {"message": "Successfully logged out"}
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def get_current_user_info(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
-    """Get current user information."""
-    return current_user
+    """Get current user information with roles."""
+    print("DEBUG: Getting current user with roles")
+    
+    # Load user roles
+    user_roles = db.query(UserRole).filter(UserRole.user_id == current_user.id).all()
+    print(f"DEBUG: Found {len(user_roles)} roles for user")
+    
+    roles = []
+    for user_role in user_roles:
+        role = db.query(Role).filter(Role.id == user_role.role_id).first()
+        if role:
+            print(f"DEBUG: Processing role {role.name}")
+            # Transform permissions for frontend
+            permissions = {}
+            if role.permissions:
+                try:
+                    raw_permissions = json.loads(role.permissions)
+                    if raw_permissions == ["all"]:
+                        permissions = {
+                            "assets": ["read", "write", "delete"],
+                            "risks": ["read", "write", "delete"],
+                            "assessments": ["read", "write", "delete"],
+                            "tasks": ["read", "write", "delete"],
+                            "evidence": ["read", "write", "delete"],
+                            "reports": ["read", "write", "delete"],
+                            "ai_services": ["read", "write", "delete"],
+                            "integrations": ["read", "write", "delete"],
+                            "users": ["read", "write", "delete"],
+                            "settings": ["read", "write", "delete"]
+                        }
+                except:
+                    permissions = {}
+            
+            role_data = {
+                "id": role.id,
+                "name": role.name,
+                "description": role.description,
+                "permissions": permissions,
+                "is_active": role.is_active
+            }
+            roles.append(role_data)
+    
+    user_dict = {
+        "id": current_user.id,
+        "email": current_user.email,
+        "username": current_user.username,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "is_verified": current_user.is_verified,
+        "last_login": current_user.last_login,
+        "profile_picture": current_user.profile_picture,
+        "department": current_user.department,
+        "job_title": current_user.job_title,
+        "phone": current_user.phone,
+        "azure_ad_id": current_user.azure_ad_id,
+        "created_at": current_user.created_at,
+        "updated_at": current_user.updated_at,
+        "roles": roles
+    }
+    
+    print(f"DEBUG: Returning user with {len(roles)} roles")
+    return user_dict
 
 
 @router.get("/verify-token")

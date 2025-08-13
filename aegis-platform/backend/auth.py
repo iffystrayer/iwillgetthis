@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from config import settings
 from database import get_db
-from models.user import User
+from models.user import User, Role, UserRole
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -59,8 +59,18 @@ def verify_token(token: str) -> Optional[dict]:
 
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
-    """Get user by ID."""
-    return db.query(User).filter(User.id == user_id).first()
+    """Get user by ID with roles."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        # Load user roles
+        user_roles = db.query(UserRole).filter(UserRole.user_id == user.id).all()
+        roles = []
+        for user_role in user_roles:
+            role = db.query(Role).filter(Role.id == user_role.role_id).first()
+            if role:
+                roles.append(role)
+        user.roles = roles
+    return user
 
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
