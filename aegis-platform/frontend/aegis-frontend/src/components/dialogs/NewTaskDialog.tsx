@@ -36,22 +36,20 @@ interface NewTaskDialogProps {
 }
 
 const priorities = [
-  { value: 'Low', label: 'Low Priority' },
-  { value: 'Medium', label: 'Medium Priority' },
-  { value: 'High', label: 'High Priority' },
-  { value: 'Critical', label: 'Critical Priority' },
+  { value: 'low', label: 'Low Priority' },
+  { value: 'medium', label: 'Medium Priority' },
+  { value: 'high', label: 'High Priority' },
+  { value: 'critical', label: 'Critical Priority' },
 ];
 
 const taskTypes = [
-  'Security Review',
-  'Compliance Task',
-  'Risk Assessment',
-  'Vulnerability Remediation',
-  'Policy Update',
-  'Training Task',
-  'Audit Task',
-  'Incident Response',
-  'General Task',
+  { value: 'remediation', label: 'Remediation' },
+  { value: 'mitigation', label: 'Mitigation' },
+  { value: 'assessment', label: 'Assessment' },
+  { value: 'documentation', label: 'Documentation' },
+  { value: 'review', label: 'Review' },
+  { value: 'compliance', label: 'Compliance' },
+  { value: 'other', label: 'Other' },
 ];
 
 export function NewTaskDialog({
@@ -66,8 +64,7 @@ export function NewTaskDialog({
     title: '',
     description: '',
     priority: '',
-    type: '',
-    assigned_to: '',
+    task_type: '',
     category: '',
   });
 
@@ -76,8 +73,7 @@ export function NewTaskDialog({
       title: '',
       description: '',
       priority: '',
-      type: '',
-      assigned_to: '',
+      task_type: '',
       category: '',
     });
     setDueDate(undefined);
@@ -103,11 +99,14 @@ export function NewTaskDialog({
 
     try {
       const taskData = {
-        ...formData,
-        due_date: dueDate ? format(dueDate, 'yyyy-MM-dd') : null,
-        status: 'Open',
-        progress: 0,
-        created_date: new Date().toISOString(),
+        title: formData.title,
+        description: formData.description || null,
+        task_type: formData.task_type || 'other',
+        priority: formData.priority || 'medium',
+        category: formData.category || null,
+        due_date: dueDate ? dueDate.toISOString() : null,
+        estimated_hours: null,
+        requires_approval: false,
       };
 
       console.log('Creating task with data:', taskData);
@@ -198,16 +197,16 @@ export function NewTaskDialog({
               <div className="space-y-3">
                 <Label htmlFor="type" className="text-sm font-semibold text-foreground/90">🏷️ Task Type</Label>
                 <Select 
-                  value={formData.type} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                  value={formData.task_type} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, task_type: value }))}
                 >
                   <SelectTrigger className="input-glass h-11">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent className="glass border-0">
                     {taskTypes.map((type) => (
-                      <SelectItem key={type} value={type} className="hover:bg-primary/10">
-                        {type}
+                      <SelectItem key={type.value} value={type.value} className="hover:bg-primary/10">
+                        {type.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -215,43 +214,30 @@ export function NewTaskDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor="assigned_to" className="text-sm font-semibold text-foreground/90">👤 Assigned To</Label>
-                <Input
-                  id="assigned_to"
-                  placeholder="Enter assignee name"
-                  value={formData.assigned_to}
-                  onChange={(e) => setFormData(prev => ({ ...prev, assigned_to: e.target.value }))}
-                  className="input-glass h-11"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground/90">📅 Due Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal input-glass h-11",
-                        !dueDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, "PPP") : "Select due date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 glass border-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dueDate}
-                      onSelect={setDueDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-foreground/90">📅 Due Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal input-glass h-11",
+                      !dueDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dueDate ? format(dueDate, "PPP") : "Select due date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 glass border-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dueDate}
+                    onSelect={setDueDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-3">
