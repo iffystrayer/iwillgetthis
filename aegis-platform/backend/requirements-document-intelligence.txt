@@ -1,0 +1,29 @@
+# Optional dependencies for document intelligence features
+# Install these for full document analysis capabilities
+
+# PDF processing
+PyPDF2>=3.0.0
+
+# Word document processing  
+python-docx>=0.8.11
+
+# Image processing and OCR
+Pillow>=10.0.0
+pytesseract>=0.3.10
+
+# Additional text processing
+chardet>=5.0.0
+python-magic>=0.4.27
+
+# Excel/Spreadsheet processing
+openpyxl>=3.1.2
+xlrd>=2.0.1
+
+# Advanced text analysis
+nltk>=3.8
+spacy>=3.6.0
+
+# Note: For OCR functionality, you also need to install Tesseract OCR:
+# - Ubuntu/Debian: sudo apt-get install tesseract-ocr
+# - macOS: brew install tesseract
+# - Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
