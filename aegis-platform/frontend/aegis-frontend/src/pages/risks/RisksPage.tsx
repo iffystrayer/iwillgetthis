@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, AlertTriangle, TrendingUp, Eye, Edit, MoreHorizontal, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +31,7 @@ interface Risk {
 }
 
 export default function RisksPage() {
+  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
@@ -237,8 +239,7 @@ export default function RisksPage() {
 
   const handleViewDetails = (riskId: number) => {
     console.log('View Details clicked for risk:', riskId);
-    console.log(`View Details functionality would navigate to detailed view for risk ${riskId}`);
-    // TODO: Navigate to risk details page
+    navigate(`/risks/${riskId}`);
   };
 
   const handleEditRisk = (riskId: number) => {

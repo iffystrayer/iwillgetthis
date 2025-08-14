@@ -125,6 +125,11 @@ export const assetsApi = {
   create: (data: any) => apiCall('POST', '/assets', data),
   update: (id: string, data: any) => apiCall('PUT', `/assets/${id}`, data),
   delete: (id: string) => apiCall('DELETE', `/assets/${id}`),
+  import: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiCall('POST', '/assets/import', formData);
+  },
 };
 
 // Risks API

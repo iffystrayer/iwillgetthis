@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, CheckSquare, Calendar, User, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +31,7 @@ interface Task {
 }
 
 export default function TasksPage() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -207,7 +209,7 @@ export default function TasksPage() {
 
   const handleViewDetails = (taskId: number) => {
     console.log('View Details clicked for task:', taskId);
-    // TODO: Navigate to task details page
+    navigate(`/tasks/${taskId}`);
   };
 
   return (

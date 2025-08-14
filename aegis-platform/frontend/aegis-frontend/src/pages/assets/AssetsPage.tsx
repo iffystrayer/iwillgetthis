@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Database, Download, Upload, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AddAssetDialog } from '@/components/dialogs/AddAssetDialog';
 import { EditAssetDialog } from '@/components/dialogs/EditAssetDialog';
+import { ImportAssetsDialog } from '@/components/dialogs/ImportAssetsDialog';
 
 // Asset interface for type safety
 interface Asset {
@@ -37,11 +39,13 @@ interface Asset {
 }
 
 export default function AssetsPage() {
+  const navigate = useNavigate();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
   useEffect(() => {
@@ -213,18 +217,36 @@ export default function AssetsPage() {
   };
 
   const handleImport = () => {
-    console.log('Import clicked');
-    alert('Asset import functionality - Would open file upload dialog');
+    console.log('Import clicked - Opening import dialog');
+    setShowImportDialog(true);
   };
 
   const handleExport = () => {
-    console.log('Export clicked');
-    alert('Asset export functionality - Would download assets as CSV/Excel');
+    console.log('Export clicked - Generating CSV export');
+    
+    // Generate CSV from current assets data
+    const csvHeaders = 'Name,Description,Type,Criticality,Status,Environment,Owner,IP Address,Hostname,Location\n';
+    const csvContent = assets.map(asset => 
+      `"${asset.name || ''}","${asset.description || ''}","${asset.asset_type || ''}","${asset.criticality || ''}","${asset.status || ''}","${asset.environment || ''}","${asset.owner_id || ''}","${asset.ip_address || ''}","${asset.hostname || ''}","${asset.location || ''}"`
+    ).join('\n');
+    
+    const csvData = csvHeaders + csvContent;
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assets_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    console.log(`✅ Exported ${assets.length} assets to CSV`);
   };
 
   const handleViewAsset = (assetId: number) => {
     console.log('View Asset clicked for asset:', assetId);
-    // TODO: Navigate to asset details page
+    navigate(`/assets/${assetId}`);
   };
 
   const handleEditAsset = (assetId: number) => {
@@ -234,6 +256,26 @@ export default function AssetsPage() {
       setSelectedAsset(asset);
       setShowEditDialog(true);
     }
+  };
+
+  const handleAssetsImported = () => {
+    console.log('Assets imported - Refreshing list');
+    // Refresh the assets list
+    const fetchAssets = async () => {
+      try {
+        setLoading(true);
+        const response = await assetsApi.getAll();
+        setAssets(response.items || []);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch assets');
+        console.error('Error fetching assets:', err);
+        setAssets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssets();
   };
 
   const handleAssetUpdated = () => {
@@ -381,8 +423,8 @@ export default function AssetsPage() {
             showPagination={true}
             pageSize={10}
             onRowClick={(asset) => {
-              // Handle row click - navigate to asset details
               console.log('View asset:', asset);
+              navigate(`/assets/${asset.id}`);
             }}
           />
         </CardContent>
@@ -401,6 +443,13 @@ export default function AssetsPage() {
         onOpenChange={setShowEditDialog}
         asset={selectedAsset}
         onAssetUpdated={handleAssetUpdated}
+      />
+
+      {/* Import Assets Dialog */}
+      <ImportAssetsDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onAssetsImported={handleAssetsImported}
       />
     </div>
   );
