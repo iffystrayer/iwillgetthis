@@ -41,3 +41,4 @@ Thumbs.db
 frontend/aegis-frontend/playwright-report/data/
 frontend/aegis-frontend/test-results/
 *.DS_Store
+.DS_Store

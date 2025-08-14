@@ -1,20 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime
 import json
+import os
+from pathlib import Path
 
 from database import get_db
 from models.user import User
 from models.report import Report, ReportTemplate
 from models.audit import AuditLog
+from models.risk import Risk
+from models.assessment import Assessment
+from models.framework import Framework
 from schemas.report import (
     ReportResponse, ReportCreate, ReportUpdate,
     ReportTemplateResponse, ReportTemplateCreate, ReportTemplateUpdate,
     ReportGeneration, ReportSchedule
 )
 from auth import get_current_active_user
+from services.enhanced_reporting import enhanced_reporting_service
 
 router = APIRouter()
 
@@ -414,3 +421,328 @@ async def unschedule_report(
     db.commit()
     
     return {"message": "Report scheduling removed successfully"}
+
+
+# Enhanced Branded Reporting Endpoints
+
+@router.post("/generate/risk-register-pdf")
+async def generate_risk_register_pdf(
+    organization: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Generate branded PDF risk register report"""
+    try:
+        # Fetch risk data from database
+        risks_query = db.query(Risk)
+        risks = risks_query.all()
+        
+        # Convert to format expected by reporting service
+        risks_data = []
+        for risk in risks:
+            risks_data.append({
+                'id': risk.id,
+                'title': risk.title or 'Untitled Risk',
+                'description': risk.description or '',
+                'category': risk.category or 'General',
+                'level': risk.level or 'Medium',
+                'score': risk.risk_score or 0,
+                'status': risk.status or 'Open',
+                'owner': risk.owner or 'Unassigned',
+                'created_date': risk.created_at.strftime('%Y-%m-%d') if risk.created_at else '',
+                'due_date': risk.due_date.strftime('%Y-%m-%d') if risk.due_date else '',
+                'mitigation': risk.mitigation_strategy or ''
+            })
+        
+        # Generate PDF report
+        pdf_path = await enhanced_reporting_service.generate_branded_risk_register_pdf(
+            risks_data, organization or "Your Organization"
+        )
+        
+        # Log audit event
+        audit_log = AuditLog(
+            event_type="generate",
+            entity_type="report",
+            entity_id=None,
+            user_id=current_user.id,
+            action="Risk register PDF generated",
+            description=f"Generated branded risk register PDF with {len(risks_data)} risks",
+            source="web_ui",
+            risk_level="low"
+        )
+        db.add(audit_log)
+        db.commit()
+        
+        return {
+            "message": "Risk register PDF generated successfully",
+            "file_path": pdf_path,
+            "risk_count": len(risks_data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate risk register PDF: {str(e)}"
+        )
+
+
+@router.post("/generate/risk-register-excel")
+async def generate_risk_register_excel(
+    organization: Optional[str] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Generate Excel risk register report with charts"""
+    try:
+        # Fetch risk data from database
+        risks_query = db.query(Risk)
+        risks = risks_query.all()
+        
+        # Convert to format expected by reporting service
+        risks_data = []
+        for risk in risks:
+            risks_data.append({
+                'id': risk.id,
+                'title': risk.title or 'Untitled Risk',
+                'description': risk.description or '',
+                'category': risk.category or 'General',
+                'level': risk.level or 'Medium',
+                'score': risk.risk_score or 0,
+                'status': risk.status or 'Open',
+                'owner': risk.owner or 'Unassigned',
+                'created_date': risk.created_at.strftime('%Y-%m-%d') if risk.created_at else '',
+                'due_date': risk.due_date.strftime('%Y-%m-%d') if risk.due_date else '',
+                'mitigation': risk.mitigation_strategy or ''
+            })
+        
+        # Generate Excel report
+        excel_path = await enhanced_reporting_service.generate_excel_risk_register(
+            risks_data, organization or "Your Organization"
+        )
+        
+        # Log audit event
+        audit_log = AuditLog(
+            event_type="generate",
+            entity_type="report",
+            entity_id=None,
+            user_id=current_user.id,
+            action="Risk register Excel generated",
+            description=f"Generated Excel risk register with {len(risks_data)} risks",
+            source="web_ui",
+            risk_level="low"
+        )
+        db.add(audit_log)
+        db.commit()
+        
+        return {
+            "message": "Risk register Excel generated successfully",
+            "file_path": excel_path,
+            "risk_count": len(risks_data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate risk register Excel: {str(e)}"
+        )
+
+
+@router.post("/generate/executive-dashboard-pdf")
+async def generate_executive_dashboard_pdf(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Generate executive dashboard PDF report"""
+    try:
+        # Gather dashboard metrics from database
+        total_risks = db.query(Risk).count()
+        critical_risks = db.query(Risk).filter(Risk.level == 'Critical').count()
+        high_risks = db.query(Risk).filter(Risk.level == 'High').count()
+        
+        # Get recent assessments
+        recent_assessments = db.query(Assessment).count()
+        
+        # Calculate compliance score (simplified)
+        total_frameworks = db.query(Framework).count()
+        compliance_score = 75 if total_frameworks > 0 else 0  # Placeholder calculation
+        
+        # Get top risks
+        top_risks_query = db.query(Risk).filter(
+            Risk.level.in_(['Critical', 'High'])
+        ).order_by(Risk.risk_score.desc()).limit(5)
+        top_risks = []
+        for risk in top_risks_query:
+            top_risks.append({
+                'title': risk.title or 'Untitled Risk',
+                'level': risk.level or 'Medium',
+                'score': risk.risk_score or 0,
+                'owner': risk.owner or 'Unassigned'
+            })
+        
+        dashboard_data = {
+            'total_risks': total_risks,
+            'critical_risks': critical_risks,
+            'high_risks': high_risks,
+            'compliance_score': compliance_score,
+            'open_tasks': 0,  # Would need tasks table
+            'recent_assessments': recent_assessments,
+            'top_risks': top_risks
+        }
+        
+        # Generate PDF report
+        pdf_path = await enhanced_reporting_service.generate_executive_dashboard_pdf(dashboard_data)
+        
+        # Log audit event
+        audit_log = AuditLog(
+            event_type="generate",
+            entity_type="report",
+            entity_id=None,
+            user_id=current_user.id,
+            action="Executive dashboard PDF generated",
+            description="Generated executive dashboard PDF report",
+            source="web_ui",
+            risk_level="low"
+        )
+        db.add(audit_log)
+        db.commit()
+        
+        return {
+            "message": "Executive dashboard PDF generated successfully",
+            "file_path": pdf_path,
+            "metrics": dashboard_data
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate executive dashboard PDF: {str(e)}"
+        )
+
+
+@router.post("/generate/compliance-report-excel")
+async def generate_compliance_report_excel(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Generate comprehensive compliance report in Excel format"""
+    try:
+        # Fetch frameworks and their compliance data
+        frameworks_query = db.query(Framework)
+        frameworks = frameworks_query.all()
+        
+        frameworks_data = []
+        overall_compliance = 0
+        
+        for framework in frameworks:
+            # Get assessments for this framework
+            assessments = db.query(Assessment).filter(
+                Assessment.framework_id == framework.id
+            ).all()
+            
+            total_controls = len(framework.controls) if hasattr(framework, 'controls') else 0
+            implemented_controls = 0
+            
+            # Calculate implementation percentage (simplified)
+            for assessment in assessments:
+                if hasattr(assessment, 'status') and assessment.status == 'completed':
+                    implemented_controls += 1
+            
+            compliance_percentage = (implemented_controls / total_controls * 100) if total_controls > 0 else 0
+            
+            framework_data = {
+                'name': framework.name,
+                'total_controls': total_controls,
+                'implemented_controls': implemented_controls,
+                'compliance_percentage': compliance_percentage,
+                'controls': []  # Would need detailed control data
+            }
+            
+            frameworks_data.append(framework_data)
+            overall_compliance += compliance_percentage
+        
+        if frameworks_data:
+            overall_compliance = overall_compliance / len(frameworks_data)
+        
+        compliance_data = {
+            'overall_score': overall_compliance,
+            'frameworks': frameworks_data
+        }
+        
+        # Generate Excel report
+        excel_path = await enhanced_reporting_service.generate_compliance_report_excel(compliance_data)
+        
+        # Log audit event
+        audit_log = AuditLog(
+            event_type="generate",
+            entity_type="report",
+            entity_id=None,
+            user_id=current_user.id,
+            action="Compliance report Excel generated",
+            description=f"Generated compliance report Excel with {len(frameworks_data)} frameworks",
+            source="web_ui",
+            risk_level="low"
+        )
+        db.add(audit_log)
+        db.commit()
+        
+        return {
+            "message": "Compliance report Excel generated successfully",
+            "file_path": excel_path,
+            "overall_compliance": overall_compliance,
+            "frameworks_count": len(frameworks_data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate compliance report Excel: {str(e)}"
+        )
+
+
+@router.get("/download/{file_name}")
+async def download_report_file(
+    file_name: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """Download generated report file"""
+    try:
+        # Validate file name to prevent directory traversal
+        if ".." in file_name or "/" in file_name or "\\" in file_name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid file name"
+            )
+        
+        # Check if file exists in reports directory
+        reports_dir = Path("uploads/reports")
+        file_path = reports_dir / file_name
+        
+        if not file_path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Report file not found"
+            )
+        
+        # Determine media type based on file extension
+        if file_name.endswith('.pdf'):
+            media_type = 'application/pdf'
+        elif file_name.endswith('.xlsx'):
+            media_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        elif file_name.endswith('.html'):
+            media_type = 'text/html'
+        else:
+            media_type = 'application/octet-stream'
+        
+        return FileResponse(
+            path=str(file_path),
+            filename=file_name,
+            media_type=media_type
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download report file: {str(e)}"
+        )

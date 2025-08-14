@@ -12,6 +12,7 @@ from database import engine, Base
 from enhanced_ai_service import enhanced_ai_service
 from middleware.security import setup_security
 from middleware.metrics_middleware import MetricsMiddleware
+from middleware.audit_middleware import audit_middleware
 from metrics import router as metrics_router
 
 # Import models to ensure they are registered with Base metadata
@@ -19,7 +20,8 @@ from models import analytics
 from routers import (
     auth, users, assets, frameworks, assessments, 
     risks, tasks, evidence, integrations, reports, 
-    dashboards, ai_services, analytics, oauth
+    dashboards, ai_services, analytics, oauth,
+    notifications, bulk_operations, search, audit
 )
 from health import router as health_router
 
@@ -90,6 +92,8 @@ security_manager = setup_security(app)
 # Add additional middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(MetricsMiddleware)
+# Note: audit_middleware is added via middleware decorator in the future or can be added here
+# For now, we'll handle audit logging in individual endpoints and through decorators
 
 # Include health check router first (no auth required)
 app.include_router(health_router)
@@ -110,6 +114,10 @@ app.include_router(dashboards.router, prefix="/api/v1/dashboards", tags=["Dashbo
 app.include_router(ai_services.router, prefix="/api/v1/ai", tags=["AI Services"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(oauth.router, prefix="/api/v1/oauth", tags=["OAuth2/OIDC"])
+app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
+app.include_router(bulk_operations.router, prefix="/api/v1/bulk", tags=["Bulk Operations"])
+app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
+app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit Trail"])
 
 
 @app.get("/", tags=["Root"])
@@ -155,7 +163,11 @@ async def api_info():
             "dashboards": "/api/v1/dashboards",
             "ai_services": "/api/v1/ai",
             "integrations": "/api/v1/integrations",
-            "analytics": "/api/v1/analytics"
+            "analytics": "/api/v1/analytics",
+            "notifications": "/api/v1/notifications",
+            "bulk_operations": "/api/v1/bulk",
+            "search": "/api/v1/search",
+            "audit_trail": "/api/v1/audit"
         }
     }
 

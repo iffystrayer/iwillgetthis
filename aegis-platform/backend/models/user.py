@@ -50,6 +50,10 @@ class User(Base):
     assigned_tasks = relationship("Task", foreign_keys="Task.assigned_to_id", back_populates="assigned_to")
     created_tasks = relationship("Task", foreign_keys="Task.created_by_id", back_populates="created_by")
     audit_logs = relationship("AuditLog", back_populates="user")
+    
+    # Notification relationships
+    notification_preferences = relationship("NotificationPreference", back_populates="user")
+    notification_subscriptions = relationship("NotificationSubscription", back_populates="user")
 
 
 class UserRole(Base):

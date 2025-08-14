@@ -85,6 +85,8 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/plain',
       'text/csv',
+      'text/markdown',
+      'text/x-markdown',
       'image/jpeg',
       'image/png',
       'image/gif'
@@ -99,7 +101,7 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
     }
 
     if (!validateFileType(selectedFile)) {
-      setUploadError('Invalid file type. Please upload PDF, Word, Excel, text, or image files only.');
+      setUploadError('Invalid file type. Please upload PDF, Word, Excel, text, markdown, or image files only.');
       return;
     }
 
@@ -202,14 +204,14 @@ export function UploadEvidenceDialog({ open, onOpenChange, onEvidenceUploaded }:
                   <div>
                     <p className="font-medium">Click to upload or drag and drop</p>
                     <p className="text-sm text-muted-foreground">
-                      PDF, Word, Excel, Text, or Image files (max 50MB)
+                      PDF, Word, Excel, Text, Markdown, or Image files (max 50MB)
                     </p>
                   </div>
                   <Input
                     id="file"
                     type="file"
                     onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.jpg,.jpeg,.png,.gif"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.md,.markdown,.jpg,.jpeg,.png,.gif"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
