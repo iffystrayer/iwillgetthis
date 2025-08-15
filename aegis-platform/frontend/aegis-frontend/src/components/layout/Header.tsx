@@ -33,7 +33,7 @@ export function Header() {
       
       <div className="flex-1 flex items-center gap-4">
         {/* Search */}
-        <div className="relative max-w-md flex-1">
+        <div className="relative max-w-md flex-1 hidden sm:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -41,9 +41,14 @@ export function Header() {
             className="pl-8"
           />
         </div>
+        
+        {/* Mobile search button */}
+        <Button variant="ghost" size="icon" className="sm:hidden">
+          <Search className="h-4 w-4" />
+        </Button>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -57,7 +62,7 @@ export function Header() {
               </Badge>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80 sm:w-80 max-w-[calc(100vw-2rem)]">
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="p-2 space-y-2">

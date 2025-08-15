@@ -138,10 +138,10 @@ export function DataTable<TData, TValue>({
     <div className={cn("space-y-4", className)}>
       {/* Search and Controls */}
       {(showSearch || showColumnToggle) && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
           {showSearch && (
-            <div className="flex items-center space-x-2 flex-1">
-              <div className="relative max-w-sm">
+            <div className="flex items-center space-x-2 flex-1 w-full sm:w-auto">
+              <div className="relative flex-1 sm:max-w-sm">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={searchPlaceholder}
@@ -151,8 +151,8 @@ export function DataTable<TData, TValue>({
                 />
               </div>
               {filteredRowCount !== totalRowCount && (
-                <Badge variant="secondary">
-                  {filteredRowCount} of {totalRowCount} results
+                <Badge variant="secondary" className="hidden sm:inline-flex">
+                  {filteredRowCount} of {totalRowCount}
                 </Badge>
               )}
             </div>
@@ -161,9 +161,10 @@ export function DataTable<TData, TValue>({
           {showColumnToggle && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   <Settings2 className="h-4 w-4 mr-2" />
-                  View
+                  <span className="hidden sm:inline">View</span>
+                  <span className="sm:hidden">Columns</span>
                   <ChevronDown className="h-4 w-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>

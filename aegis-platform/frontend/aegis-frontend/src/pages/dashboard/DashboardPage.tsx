@@ -51,34 +51,34 @@ export default function DashboardPage() {
       )}
       
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Welcome back, {user?.full_name || 'User'}. Here's your security posture overview.
           </p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {user && hasRole(user, 'admin') && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="justify-start sm:justify-center">
               <a href="/dashboard/ciso">
                 <BarChart3 className="w-4 h-4 mr-2" />
-                CISO Cockpit
+                <span className="sm:inline">CISO Cockpit</span>
               </a>
             </Button>
           )}
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="justify-start sm:justify-center">
             <a href="/dashboard/analyst">
               <Shield className="w-4 h-4 mr-2" />
-              Analyst Workbench
+              <span className="sm:inline">Analyst Workbench</span>
             </a>
           </Button>
         </div>
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
@@ -133,8 +133,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Risk Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="md:col-span-2">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Risk Posture Trend</CardTitle>
             <CardDescription>
