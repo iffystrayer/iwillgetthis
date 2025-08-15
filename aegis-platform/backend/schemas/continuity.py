@@ -227,7 +227,7 @@ class TestObjectiveBase(BaseModel):
 class TestScenarioBase(BaseModel):
     name: str = Field(..., min_length=1)
     description: str = Field(..., min_length=1)
-    type: str = Field(..., regex="^(tabletop|walkthrough|simulation|full_test)$")
+    type: str = Field(..., pattern="^(tabletop|walkthrough|simulation|full_test)$")
     estimated_duration_hours: Optional[float] = Field(None, ge=0, le=24)
     target_rto_hours: Optional[float] = Field(None, ge=0, le=168)
     target_rpo_hours: Optional[float] = Field(None, ge=0, le=24)
@@ -238,7 +238,7 @@ class TestScenarioBase(BaseModel):
 class ContinuityTestBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=500)
     description: Optional[str] = None
-    test_type: str = Field(..., regex="^(Tabletop|Walkthrough|Simulation|Full Test)$")
+    test_type: str = Field(..., pattern="^(Tabletop|Walkthrough|Simulation|Full Test)$")
     scope: Optional[str] = None
     scheduled_date: datetime
     objectives: List[TestObjectiveBase] = Field(default_factory=list)
@@ -259,7 +259,7 @@ class ContinuityTestCreate(ContinuityTestBase):
 class ContinuityTestUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
-    test_type: Optional[str] = Field(None, regex="^(Tabletop|Walkthrough|Simulation|Full Test)$")
+    test_type: Optional[str] = Field(None, pattern="^(Tabletop|Walkthrough|Simulation|Full Test)$")
     scope: Optional[str] = None
     scheduled_date: Optional[datetime] = None
     status: Optional[ContinuityTestStatusEnum] = None

@@ -782,7 +782,7 @@ class CampaignInteractionResponse(CampaignInteractionBase):
 class PhishingInteractionRequest(BaseModel):
     simulation_id: int = Field(..., gt=0)
     user_id: str = Field(..., min_length=1, max_length=255)
-    interaction_type: str = Field(..., regex="^(email_opened|link_clicked|attachment_opened|data_entered|reported_phishing|deleted_email)$")
+    interaction_type: str = Field(..., pattern="^(email_opened|link_clicked|attachment_opened|data_entered|reported_phishing|deleted_email)$")
     interaction_data: Optional[Dict[str, Any]] = None
 
 class CertificationEligibilityResponse(BaseModel):

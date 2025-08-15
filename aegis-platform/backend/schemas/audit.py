@@ -154,7 +154,7 @@ class AuditExportRequest(BaseModel):
     """Schema for audit export request"""
     start_date: datetime
     end_date: datetime
-    format: str = Field(default="json", regex="^(json|csv)$")
+    format: str = Field(default="json", pattern="^(json|csv)$")
     entity_types: Optional[List[str]] = None
     include_sensitive_data: bool = False
     

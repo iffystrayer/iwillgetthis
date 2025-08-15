@@ -422,6 +422,11 @@ class Settings(BaseSettings):
     def uploads_dir(self) -> str:
         """Alias for uploads directory"""
         return self.UPLOAD_PATH
+    
+    @property
+    def UPLOADS_DIR(self) -> str:
+        """Alias for UPLOADS_DIR (for backward compatibility)"""
+        return self.UPLOAD_PATH
 
 # Global settings instance
 settings = Settings()

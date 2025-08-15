@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from database import get_db
 from auth import get_current_user
-from models.users import User
+from models.user import User
 from services.dashboard_analytics_service import dashboard_analytics_service
 from utils.audit_helpers import log_user_action, log_system_event
 

@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from database import get_db
 from auth import get_current_user
-from models.users import User
+from models.user import User
 from models.evidence import Evidence
 from services.document_intelligence_service import document_intelligence_service
 from utils.audit_helpers import log_user_action, log_system_event

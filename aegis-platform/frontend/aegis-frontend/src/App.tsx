@@ -34,6 +34,7 @@ const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
 const IntegrationsPage = lazy(() => import('./pages/integrations/IntegrationsPage'));
 const UsersPage = lazy(() => import('./pages/users/UsersPage'));
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
+const NotificationSettingsPage = lazy(() => import('./pages/settings/NotificationSettingsPage'));
 
 // Lazy load AI Management pages
 const ProvidersPage = lazy(() => import('./pages/ai/ProvidersPage'));
@@ -203,6 +204,11 @@ function App() {
                   <Route path="settings" element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <SettingsPage />
+                    </Suspense>
+                  } />
+                  <Route path="settings/notifications" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <NotificationSettingsPage />
                     </Suspense>
                   } />
                 </Route>

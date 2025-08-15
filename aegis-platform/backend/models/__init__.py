@@ -9,6 +9,10 @@ from .evidence import Evidence, EvidenceControl
 from .audit import AuditLog
 from .integration import Integration, VulnerabilityData, ThreatIntelData
 from .report import Report, ReportTemplate
+from .notification import (
+    NotificationPreference, NotificationLog, NotificationTemplate,
+    NotificationQueue, NotificationSubscription, NotificationChannel
+)
 
 __all__ = [
     "User", "Role", "UserRole",
@@ -20,5 +24,7 @@ __all__ = [
     "Evidence", "EvidenceControl",
     "AuditLog",
     "Integration", "VulnerabilityData", "ThreatIntelData",
-    "Report", "ReportTemplate"
+    "Report", "ReportTemplate",
+    "NotificationPreference", "NotificationLog", "NotificationTemplate",
+    "NotificationQueue", "NotificationSubscription", "NotificationChannel"
 ]

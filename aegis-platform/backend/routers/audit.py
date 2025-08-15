@@ -226,7 +226,7 @@ async def get_user_activity_summary(
 @router.get("/security-events", response_model=SecurityEventSummary)
 async def get_security_events(
     days: int = Query(7, ge=1, le=90, description="Number of days to analyze"),
-    risk_level: str = Query("high", regex="^(low|medium|high|critical)$"),
+    risk_level: str = Query("high", pattern="^(low|medium|high|critical)$"),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):

@@ -1,6 +1,6 @@
 """API endpoints for bulk operations (import/export)"""
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Path as PathParam, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
@@ -25,7 +25,7 @@ router = APIRouter()
 # Template Generation Endpoints
 @router.get("/templates/risks/{format_type}", response_class=FileResponse)
 async def download_risk_template(
-    format_type: str = Query(..., regex="^(xlsx|csv)$"),
+    format_type: str = PathParam(..., pattern="^(xlsx|csv)$"),
     current_user: User = Depends(get_current_active_user)
 ):
     """Download risk import template"""
@@ -50,7 +50,7 @@ async def download_risk_template(
 
 @router.get("/templates/controls/{format_type}", response_class=FileResponse)
 async def download_control_template(
-    format_type: str = Query(..., regex="^(xlsx|csv)$"),
+    format_type: str = PathParam(..., pattern="^(xlsx|csv)$"),
     current_user: User = Depends(get_current_active_user)
 ):
     """Download control import template"""
@@ -76,7 +76,7 @@ async def download_control_template(
 # Import Validation Endpoint
 @router.post("/validate", response_model=BulkValidationResponse)
 async def validate_import_file(
-    entity_type: str = Query(..., regex="^(risks|controls)$"),
+    entity_type: str = Query(..., pattern="^(risks|controls)$"),
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -131,9 +131,9 @@ async def validate_import_file(
 # Import Endpoints
 @router.post("/import/risks", response_model=BulkImportResponse)
 async def import_risks(
-    update_existing: bool = Query(False),
     file: UploadFile = File(...),
-    background_tasks: BackgroundTasks,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    update_existing: bool = Query(False),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -228,7 +228,7 @@ async def import_risks(
 # Export Endpoints
 @router.post("/export/risks", response_class=FileResponse)
 async def export_risks(
-    format_type: str = Query("xlsx", regex="^(xlsx|csv|json)$"),
+    format_type: str = Query("xlsx", pattern="^(xlsx|csv|json)$"),
     category: Optional[str] = None,
     level: Optional[str] = None,
     status: Optional[str] = None,
@@ -289,8 +289,8 @@ async def export_risks(
 async def get_bulk_operations_history(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    operation_type: Optional[str] = Query(None, regex="^(import|export)$"),
-    entity_type: Optional[str] = Query(None, regex="^(risk|control)$"),
+    operation_type: Optional[str] = Query(None, pattern="^(import|export)$"),
+    entity_type: Optional[str] = Query(None, pattern="^(risk|control)$"),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):

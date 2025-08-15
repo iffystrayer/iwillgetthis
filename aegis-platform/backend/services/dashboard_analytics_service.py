@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, and_, or_, text
 from collections import defaultdict
 
-from models.users import User
-from models.assets import Asset, AssetCriticality, AssetType
-from models.risks import Risk, RiskStatus, RiskLevel
-from models.tasks import Task, TaskStatus, TaskPriority
-from models.assessments import Assessment, AssessmentControl, AssessmentStatus, ControlImplementationStatus
-from models.frameworks import Framework
+from models.user import User
+from models.asset import Asset, AssetCriticality, AssetType
+from models.risk import Risk, RiskStatus, RiskLevel
+from models.task import Task, TaskStatus, TaskPriority
+from models.assessment import Assessment, AssessmentControl, AssessmentStatus, ControlImplementationStatus
+from models.framework import Framework
 from models.evidence import Evidence, EvidenceStatus
 from models.analytics import MetricValue, MetricDefinition
 from enhanced_ai_service import enhanced_ai_service

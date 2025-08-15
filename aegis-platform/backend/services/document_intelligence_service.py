@@ -27,8 +27,8 @@ from fastapi import UploadFile
 
 from enhanced_ai_service import enhanced_ai_service
 from models.evidence import Evidence
-from models.risks import Risk
-from models.assessments import Assessment
+from models.risk import Risk
+from models.assessment import Assessment
 
 logger = logging.getLogger(__name__)
 

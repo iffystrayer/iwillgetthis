@@ -16,8 +16,8 @@ class BulkImportResponse(BaseModel):
 
 class BulkExportRequest(BaseModel):
     """Request schema for bulk export operations"""
-    format_type: str = Field(..., regex="^(xlsx|csv|json)$")
-    entity_type: str = Field(..., regex="^(risks|controls)$")
+    format_type: str = Field(..., pattern="^(xlsx|csv|json)$")
+    entity_type: str = Field(..., pattern="^(risks|controls)$")
     filters: Optional[Dict[str, Any]] = None
 
 class BulkExportResponse(BaseModel):

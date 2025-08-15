@@ -167,9 +167,9 @@ class ComplianceControlBase(BaseModel):
     
     control_type: ControlTypeEnum
     control_class: Optional[str] = Field(None, max_length=50)
-    priority: str = Field("medium", regex="^(low|medium|high|critical)$")
+    priority: str = Field("medium", pattern="^(low|medium|high|critical)$")
     
-    baseline_impact: Optional[str] = Field(None, regex="^(low|moderate|high)$")
+    baseline_impact: Optional[str] = Field(None, pattern="^(low|moderate|high)$")
     privacy_control: bool = False
     security_control: bool = True
     operational_control: bool = False
@@ -205,7 +205,7 @@ class ComplianceControlUpdate(BaseModel):
     
     control_type: Optional[ControlTypeEnum] = None
     control_class: Optional[str] = None
-    priority: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    priority: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     
     implementation_status: Optional[ComplianceStatusEnum] = None
     implementation_notes: Optional[str] = None
@@ -331,8 +331,8 @@ class ControlAssessmentBase(BaseModel):
     assessment_method: str = Field(..., max_length=100)
     
     compliance_status: ComplianceStatusEnum
-    effectiveness_rating: str = Field(..., regex="^(effective|partially_effective|ineffective)$")
-    confidence_level: str = Field("medium", regex="^(low|medium|high)$")
+    effectiveness_rating: str = Field(..., pattern="^(effective|partially_effective|ineffective)$")
+    confidence_level: str = Field("medium", pattern="^(low|medium|high)$")
     
     compliance_score: Optional[float] = Field(None, ge=0, le=10)
     maturity_level: Optional[int] = Field(None, ge=1, le=5)
@@ -360,8 +360,8 @@ class ControlAssessmentCreate(ControlAssessmentBase):
 
 class ControlAssessmentUpdate(BaseModel):
     compliance_status: Optional[ComplianceStatusEnum] = None
-    effectiveness_rating: Optional[str] = Field(None, regex="^(effective|partially_effective|ineffective)$")
-    confidence_level: Optional[str] = Field(None, regex="^(low|medium|high)$")
+    effectiveness_rating: Optional[str] = Field(None, pattern="^(effective|partially_effective|ineffective)$")
+    confidence_level: Optional[str] = Field(None, pattern="^(low|medium|high)$")
     
     compliance_score: Optional[float] = Field(None, ge=0, le=10)
     maturity_level: Optional[int] = Field(None, ge=1, le=5)
@@ -404,8 +404,8 @@ class ComplianceFindingBase(BaseModel):
     finding_description: str = Field(..., min_length=1)
     finding_type: str = Field(..., max_length=50)
     
-    severity: str = Field(..., regex="^(critical|high|medium|low)$")
-    risk_level: Optional[str] = Field(None, regex="^(critical|high|medium|low)$")
+    severity: str = Field(..., pattern="^(critical|high|medium|low)$")
+    risk_level: Optional[str] = Field(None, pattern="^(critical|high|medium|low)$")
     business_impact: Optional[str] = None
     compliance_impact: Optional[str] = None
     
@@ -433,7 +433,7 @@ class ComplianceFindingUpdate(BaseModel):
     finding_description: Optional[str] = Field(None, min_length=1)
     finding_type: Optional[str] = None
     
-    severity: Optional[str] = Field(None, regex="^(critical|high|medium|low)$")
+    severity: Optional[str] = Field(None, pattern="^(critical|high|medium|low)$")
     risk_level: Optional[str] = None
     business_impact: Optional[str] = None
     compliance_impact: Optional[str] = None
@@ -501,7 +501,7 @@ class ComplianceEvidenceBase(BaseModel):
     validation_date: Optional[datetime] = None
     validation_notes: Optional[str] = None
     
-    confidentiality_level: str = Field("internal", regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: str = Field("internal", pattern="^(public|internal|confidential|restricted)$")
     retention_period_days: int = Field(2555, gt=0)  # 7 years default
     
     active: bool = True
@@ -526,7 +526,7 @@ class ComplianceEvidenceUpdate(BaseModel):
     validation_date: Optional[datetime] = None
     validation_notes: Optional[str] = None
     
-    confidentiality_level: Optional[str] = Field(None, regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: Optional[str] = Field(None, pattern="^(public|internal|confidential|restricted)$")
     retention_period_days: Optional[int] = Field(None, gt=0)
     
     active: Optional[bool] = None

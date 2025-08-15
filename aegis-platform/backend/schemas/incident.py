@@ -110,14 +110,14 @@ class IncidentBase(BaseModel):
     affected_systems: Optional[List[str]] = []
     affected_users_count: int = Field(0, ge=0)
     financial_impact: Optional[float] = Field(None, ge=0)
-    reputation_impact: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    reputation_impact: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     
     # Detection and source
     detection_method: Optional[str] = Field(None, max_length=100)
     detection_source: Optional[str] = Field(None, max_length=200)
     
     # Classification and handling
-    confidentiality_level: str = Field("internal", regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: str = Field("internal", pattern="^(public|internal|confidential|restricted)$")
     handling_instructions: Optional[str] = None
     legal_hold_required: bool = False
     
@@ -151,7 +151,7 @@ class IncidentUpdate(BaseModel):
     affected_systems: Optional[List[str]] = None
     affected_users_count: Optional[int] = Field(None, ge=0)
     financial_impact: Optional[float] = Field(None, ge=0)
-    reputation_impact: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    reputation_impact: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     
     # Assignment updates
     primary_responder_id: Optional[int] = None
@@ -168,7 +168,7 @@ class IncidentUpdate(BaseModel):
     regulatory_notification_deadline: Optional[datetime] = None
     
     # Handling updates
-    confidentiality_level: Optional[str] = Field(None, regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: Optional[str] = Field(None, pattern="^(public|internal|confidential|restricted)$")
     handling_instructions: Optional[str] = None
     legal_hold_required: Optional[bool] = None
     
@@ -309,7 +309,7 @@ class IncidentTeamMemberBase(BaseModel):
     # Skills and certifications
     skills: Optional[List[str]] = []
     certifications: Optional[List[str]] = []
-    experience_level: str = Field("intermediate", regex="^(junior|intermediate|senior|expert)$")
+    experience_level: str = Field("intermediate", pattern="^(junior|intermediate|senior|expert)$")
     
     # Contact preferences
     preferred_contact_method: Optional[CommunicationChannelEnum] = None
@@ -330,7 +330,7 @@ class IncidentTeamMemberUpdate(BaseModel):
     
     skills: Optional[List[str]] = None
     certifications: Optional[List[str]] = None
-    experience_level: Optional[str] = Field(None, regex="^(junior|intermediate|senior|expert)$")
+    experience_level: Optional[str] = Field(None, pattern="^(junior|intermediate|senior|expert)$")
     
     preferred_contact_method: Optional[CommunicationChannelEnum] = None
     contact_details: Optional[Dict[str, Any]] = None
@@ -372,7 +372,7 @@ class IncidentActivityBase(BaseModel):
     tools_used: Optional[List[str]] = []
     
     # Metadata
-    priority: str = Field("medium", regex="^(low|medium|high|critical)$")
+    priority: str = Field("medium", pattern="^(low|medium|high|critical)$")
     tags: Optional[List[str]] = []
 
 
@@ -394,7 +394,7 @@ class IncidentActivityUpdate(BaseModel):
     systems_affected: Optional[List[str]] = None
     tools_used: Optional[List[str]] = None
     
-    priority: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    priority: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     tags: Optional[List[str]] = None
 
 
@@ -441,14 +441,14 @@ class IncidentArtifactBase(BaseModel):
     
     # Analysis and relevance
     relevance_score: Optional[float] = Field(None, ge=0.0, le=1.0)
-    analysis_status: str = Field("pending", regex="^(pending|in_progress|completed)$")
+    analysis_status: str = Field("pending", pattern="^(pending|in_progress|completed)$")
     analysis_results: Optional[str] = None
     analysis_tools_used: Optional[List[str]] = []
     
     # Legal and compliance
     legal_hold: bool = False
     retention_period_days: int = Field(2555, gt=0)
-    confidentiality_level: str = Field("internal", regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: str = Field("internal", pattern="^(public|internal|confidential|restricted)$")
     
     # Metadata
     tags: Optional[List[str]] = []
@@ -479,13 +479,13 @@ class IncidentArtifactUpdate(BaseModel):
     verification_method: Optional[str] = None
     
     relevance_score: Optional[float] = Field(None, ge=0.0, le=1.0)
-    analysis_status: Optional[str] = Field(None, regex="^(pending|in_progress|completed)$")
+    analysis_status: Optional[str] = Field(None, pattern="^(pending|in_progress|completed)$")
     analysis_results: Optional[str] = None
     analysis_tools_used: Optional[List[str]] = None
     
     legal_hold: Optional[bool] = None
     retention_period_days: Optional[int] = Field(None, gt=0)
-    confidentiality_level: Optional[str] = Field(None, regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: Optional[str] = Field(None, pattern="^(public|internal|confidential|restricted)$")
     
     tags: Optional[List[str]] = None
     ioc_indicators: Optional[List[str]] = None
@@ -524,7 +524,7 @@ class IncidentCommunicationBase(BaseModel):
     bcc_recipients: Optional[List[int]] = []
     
     # Timing and urgency
-    urgency: str = Field("normal", regex="^(low|normal|high|urgent)$")
+    urgency: str = Field("normal", pattern="^(low|normal|high|urgent)$")
     read_receipt_required: bool = False
     
     # External communication
@@ -555,7 +555,7 @@ class IncidentCommunicationUpdate(BaseModel):
     cc_recipients: Optional[List[int]] = None
     bcc_recipients: Optional[List[int]] = None
     
-    urgency: Optional[str] = Field(None, regex="^(low|normal|high|urgent)$")
+    urgency: Optional[str] = Field(None, pattern="^(low|normal|high|urgent)$")
     read_receipt_required: Optional[bool] = None
     
     external_recipients: Optional[List[str]] = None
@@ -606,7 +606,7 @@ class IncidentTaskBase(BaseModel):
     task_type: Optional[str] = Field(None, max_length=100)
     
     # Priority and timing
-    priority: str = Field("medium", regex="^(low|medium|high|critical)$")
+    priority: str = Field("medium", pattern="^(low|medium|high|critical)$")
     due_date: Optional[datetime] = None
     estimated_hours: Optional[float] = Field(None, gt=0)
     
@@ -631,12 +631,12 @@ class IncidentTaskUpdate(BaseModel):
     description: Optional[str] = None
     task_type: Optional[str] = None
     
-    priority: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    priority: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     due_date: Optional[datetime] = None
     estimated_hours: Optional[float] = Field(None, gt=0)
     actual_hours: Optional[float] = Field(None, gt=0)
     
-    status: Optional[str] = Field(None, regex="^(assigned|in_progress|completed|cancelled|blocked)$")
+    status: Optional[str] = Field(None, pattern="^(assigned|in_progress|completed|cancelled|blocked)$")
     progress_percentage: Optional[int] = Field(None, ge=0, le=100)
     completion_notes: Optional[str] = None
     
@@ -699,7 +699,7 @@ class IncidentTimelineEntryBase(BaseModel):
     
     # Source and verification
     source: Optional[str] = Field(None, max_length=200)
-    confidence_level: str = Field("medium", regex="^(low|medium|high)$")
+    confidence_level: str = Field("medium", pattern="^(low|medium|high)$")
     verified: bool = False
     
     # Categorization
@@ -709,7 +709,7 @@ class IncidentTimelineEntryBase(BaseModel):
     technique: Optional[str] = Field(None, max_length=200)
     
     # Impact and severity
-    impact_level: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    impact_level: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     business_impact: Optional[str] = None
     technical_impact: Optional[str] = None
     
@@ -733,7 +733,7 @@ class IncidentTimelineEntryUpdate(BaseModel):
     description: Optional[str] = None
     
     source: Optional[str] = None
-    confidence_level: Optional[str] = Field(None, regex="^(low|medium|high)$")
+    confidence_level: Optional[str] = Field(None, pattern="^(low|medium|high)$")
     verified: Optional[bool] = None
     verified_by: Optional[int] = None
     
@@ -742,7 +742,7 @@ class IncidentTimelineEntryUpdate(BaseModel):
     target: Optional[str] = None
     technique: Optional[str] = None
     
-    impact_level: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    impact_level: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     business_impact: Optional[str] = None
     technical_impact: Optional[str] = None
     
@@ -785,9 +785,9 @@ class PostIncidentReviewBase(BaseModel):
     resolution_time_minutes: Optional[int] = Field(None, gt=0)
     
     # Effectiveness assessment
-    response_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
-    communication_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
-    coordination_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
+    response_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
+    communication_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
+    coordination_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
     tool_effectiveness: Optional[Dict[str, str]] = {}
     
     # Root cause analysis
@@ -832,7 +832,7 @@ class PostIncidentReviewBase(BaseModel):
     
     # Approval and distribution
     distribution_list: Optional[List[str]] = []
-    confidentiality_level: str = Field("internal", regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: str = Field("internal", pattern="^(public|internal|confidential|restricted)$")
 
 
 class PostIncidentReviewCreate(PostIncidentReviewBase):
@@ -850,9 +850,9 @@ class PostIncidentReviewUpdate(BaseModel):
     containment_time_minutes: Optional[int] = Field(None, gt=0)
     resolution_time_minutes: Optional[int] = Field(None, gt=0)
     
-    response_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
-    communication_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
-    coordination_effectiveness: Optional[str] = Field(None, regex="^(excellent|good|fair|poor)$")
+    response_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
+    communication_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
+    coordination_effectiveness: Optional[str] = Field(None, pattern="^(excellent|good|fair|poor)$")
     tool_effectiveness: Optional[Dict[str, str]] = None
     
     root_cause: Optional[str] = None
@@ -891,7 +891,7 @@ class PostIncidentReviewUpdate(BaseModel):
     approved_by: Optional[int] = None
     approved_at: Optional[datetime] = None
     distribution_list: Optional[List[str]] = None
-    confidentiality_level: Optional[str] = Field(None, regex="^(public|internal|confidential|restricted)$")
+    confidentiality_level: Optional[str] = Field(None, pattern="^(public|internal|confidential|restricted)$")
 
 
 class PostIncidentReviewResponse(PostIncidentReviewBase):
@@ -1086,7 +1086,7 @@ class LessonLearnedBase(BaseModel):
     affected_systems: Optional[List[str]] = []
     
     # Implementation tracking
-    implementation_status: str = Field("identified", regex="^(identified|planned|in_progress|implemented|verified)$")
+    implementation_status: str = Field("identified", pattern="^(identified|planned|in_progress|implemented|verified)$")
     implementation_date: Optional[datetime] = None
     implementation_cost: Optional[float] = Field(None, ge=0)
     implementation_effort_hours: Optional[float] = Field(None, ge=0)
@@ -1108,8 +1108,8 @@ class LessonLearnedBase(BaseModel):
     sharing_restrictions: Optional[str] = None
     
     # Metadata
-    confidence_level: str = Field("medium", regex="^(high|medium|low)$")
-    evidence_quality: str = Field("medium", regex="^(high|medium|low)$")
+    confidence_level: str = Field("medium", pattern="^(high|medium|low)$")
+    evidence_quality: str = Field("medium", pattern="^(high|medium|low)$")
     tags: Optional[List[str]] = []
 
 
@@ -1139,7 +1139,7 @@ class LessonLearnedUpdate(BaseModel):
     applicability_scope: Optional[str] = None
     affected_systems: Optional[List[str]] = None
     
-    implementation_status: Optional[str] = Field(None, regex="^(identified|planned|in_progress|implemented|verified)$")
+    implementation_status: Optional[str] = Field(None, pattern="^(identified|planned|in_progress|implemented|verified)$")
     implementation_date: Optional[datetime] = None
     implementation_owner: Optional[int] = None
     implementation_cost: Optional[float] = Field(None, ge=0)
@@ -1160,8 +1160,8 @@ class LessonLearnedUpdate(BaseModel):
     shared_externally: Optional[bool] = None
     sharing_restrictions: Optional[str] = None
     
-    confidence_level: Optional[str] = Field(None, regex="^(high|medium|low)$")
-    evidence_quality: Optional[str] = Field(None, regex="^(high|medium|low)$")
+    confidence_level: Optional[str] = Field(None, pattern="^(high|medium|low)$")
+    evidence_quality: Optional[str] = Field(None, pattern="^(high|medium|low)$")
     tags: Optional[List[str]] = None
 
 
@@ -1204,7 +1204,7 @@ class ActionItemBase(BaseModel):
     responsible_team: Optional[str] = Field(None, max_length=200)
     
     # Priority and timing
-    priority: str = Field("medium", regex="^(low|medium|high|critical)$")
+    priority: str = Field("medium", pattern="^(low|medium|high|critical)$")
     due_date: datetime
     estimated_effort_hours: Optional[float] = Field(None, ge=0)
     estimated_cost: Optional[float] = Field(None, ge=0)
@@ -1242,12 +1242,12 @@ class ActionItemUpdate(BaseModel):
     
     responsible_team: Optional[str] = None
     
-    priority: Optional[str] = Field(None, regex="^(low|medium|high|critical)$")
+    priority: Optional[str] = Field(None, pattern="^(low|medium|high|critical)$")
     due_date: Optional[datetime] = None
     estimated_effort_hours: Optional[float] = Field(None, ge=0)
     estimated_cost: Optional[float] = Field(None, ge=0)
     
-    status: Optional[str] = Field(None, regex="^(open|in_progress|completed|cancelled|on_hold)$")
+    status: Optional[str] = Field(None, pattern="^(open|in_progress|completed|cancelled|on_hold)$")
     progress_percentage: Optional[int] = Field(None, ge=0, le=100)
     status_notes: Optional[str] = None
     
@@ -1338,14 +1338,14 @@ class KnowledgeArticleBase(BaseModel):
     # Content
     summary: Optional[str] = None
     content: str = Field(..., min_length=1)
-    content_format: str = Field("markdown", regex="^(markdown|html|plain_text)$")
+    content_format: str = Field("markdown", pattern="^(markdown|html|plain_text)$")
     
     # Source and derivation
     source_documents: Optional[List[str]] = []
     
     # Applicability and audience
     target_audience: Optional[List[str]] = []
-    skill_level_required: str = Field("intermediate", regex="^(beginner|intermediate|advanced|expert)$")
+    skill_level_required: str = Field("intermediate", pattern="^(beginner|intermediate|advanced|expert)$")
     applicable_scenarios: Optional[List[str]] = []
     
     # Knowledge management
@@ -1358,7 +1358,7 @@ class KnowledgeArticleBase(BaseModel):
     review_frequency_days: int = Field(365, gt=0)
     
     # Access control
-    access_level: str = Field("internal", regex="^(public|internal|restricted|confidential)$")
+    access_level: str = Field("internal", pattern="^(public|internal|restricted|confidential)$")
     allowed_roles: Optional[List[str]] = []
     allowed_teams: Optional[List[str]] = []
     
@@ -1388,12 +1388,12 @@ class KnowledgeArticleUpdate(BaseModel):
     
     summary: Optional[str] = None
     content: Optional[str] = Field(None, min_length=1)
-    content_format: Optional[str] = Field(None, regex="^(markdown|html|plain_text)$")
+    content_format: Optional[str] = Field(None, pattern="^(markdown|html|plain_text)$")
     
     source_documents: Optional[List[str]] = None
     
     target_audience: Optional[List[str]] = None
-    skill_level_required: Optional[str] = Field(None, regex="^(beginner|intermediate|advanced|expert)$")
+    skill_level_required: Optional[str] = Field(None, pattern="^(beginner|intermediate|advanced|expert)$")
     applicable_scenarios: Optional[List[str]] = None
     
     keywords: Optional[List[str]] = None
@@ -1416,7 +1416,7 @@ class KnowledgeArticleUpdate(BaseModel):
     approved_by: Optional[int] = None
     approved_at: Optional[datetime] = None
     
-    access_level: Optional[str] = Field(None, regex="^(public|internal|restricted|confidential)$")
+    access_level: Optional[str] = Field(None, pattern="^(public|internal|restricted|confidential)$")
     allowed_roles: Optional[List[str]] = None
     allowed_teams: Optional[List[str]] = None
     
@@ -1511,7 +1511,7 @@ class TrendAnalysisBase(BaseModel):
     # Data quality and methodology
     data_sources: Optional[List[str]] = []
     methodology: Optional[str] = None
-    confidence_level: str = Field("medium", regex="^(high|medium|low)$")
+    confidence_level: str = Field("medium", pattern="^(high|medium|low)$")
     limitations: Optional[str] = None
     
     # Results and impact
@@ -1563,7 +1563,7 @@ class TrendAnalysisUpdate(BaseModel):
     
     data_sources: Optional[List[str]] = None
     methodology: Optional[str] = None
-    confidence_level: Optional[str] = Field(None, regex="^(high|medium|low)$")
+    confidence_level: Optional[str] = Field(None, pattern="^(high|medium|low)$")
     limitations: Optional[str] = None
     
     findings_summary: Optional[str] = None
