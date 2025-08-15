@@ -13,29 +13,33 @@ export interface NotificationTemplate {
 export const SystemNotifications = {
   // Authentication & Security
   LOGIN_SUCCESS: {
-    type: 'success' as NotificationType,
-    priority: 'low' as NotificationPriority,
+    type: 'success' as const,
+    priority: 'low' as const,
+    status: 'unread' as const,
     category: 'security',
     title: 'Successfully logged in',
     message: 'Welcome back to Aegis Platform',
   },
   LOGIN_FAILED: {
-    type: 'error' as NotificationType,
-    priority: 'medium' as NotificationPriority,
+    type: 'error' as const,
+    priority: 'medium' as const,
+    status: 'unread' as const,
     category: 'security',
     title: 'Login failed',
     message: 'Invalid credentials. Please try again.',
   },
   SESSION_EXPIRED: {
-    type: 'warning' as NotificationType,
-    priority: 'high' as NotificationPriority,
+    type: 'warning' as const,
+    priority: 'high' as const,
+    status: 'unread' as const,
     category: 'security',
     title: 'Session expired',
     message: 'Your session has expired. Please log in again.',
   },
   UNAUTHORIZED_ACCESS: {
-    type: 'error' as NotificationType,
-    priority: 'critical' as NotificationPriority,
+    type: 'error' as const,
+    priority: 'critical' as const,
+    status: 'unread' as const,
     category: 'security',
     title: 'Unauthorized access detected',
     message: 'Suspicious activity detected on your account.',
@@ -43,8 +47,9 @@ export const SystemNotifications = {
 
   // Data Operations
   DATA_SAVED: {
-    type: 'success' as NotificationType,
-    priority: 'low' as NotificationPriority,
+    type: 'success' as const,
+    priority: 'low' as const,
+    status: 'unread' as const,
     category: 'data',
     title: 'Data saved successfully',
   },
@@ -228,8 +233,8 @@ export const SystemNotifications = {
 // Helper function to create notification from template
 export const createNotificationFromTemplate = (
   template: NotificationTemplate,
-  overrides?: Partial<Omit<Notification, 'id' | 'createdAt' | 'isRead'>>
-): Omit<Notification, 'id' | 'createdAt' | 'isRead'> => {
+  overrides?: Partial<Omit<Notification, 'id' | 'createdAt' | 'isRead' | 'timestamp' | 'status'>>
+): Omit<Notification, 'id' | 'createdAt' | 'isRead' | 'timestamp' | 'status'> => {
   return {
     ...template,
     ...overrides,

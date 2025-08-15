@@ -144,6 +144,12 @@ export function AppSidebar() {
           icon: TrendingUp,
           permission: { module: "ai_services", action: "read" },
         },
+        {
+          title: "Predictive Analytics",
+          url: "/ai/predictive",
+          icon: Brain,
+          permission: { module: "ai_services", action: "read" },
+        },
       ],
     },
     {

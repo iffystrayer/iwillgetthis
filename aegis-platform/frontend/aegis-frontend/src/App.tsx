@@ -39,6 +39,7 @@ const NotificationSettingsPage = lazy(() => import('./pages/settings/Notificatio
 // Lazy load AI Management pages
 const ProvidersPage = lazy(() => import('./pages/ai/ProvidersPage'));
 const AIAnalyticsPage = lazy(() => import('./pages/ai/AIAnalyticsPage'));
+const PredictiveAnalyticsPage = lazy(() => import('./pages/ai/PredictiveAnalyticsPage'));
 
 // Lazy load Workflow Management pages
 const WorkflowsPage = lazy(() => import('./pages/workflows/WorkflowsPage'));
@@ -194,6 +195,11 @@ function App() {
                   <Route path="ai/analytics" element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <AIAnalyticsPage />
+                    </Suspense>
+                  } />
+                  <Route path="ai/predictive" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <PredictiveAnalyticsPage />
                     </Suspense>
                   } />
                   

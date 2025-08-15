@@ -88,7 +88,7 @@ export function DataTable<TData, TValue>({
   enableBulkSelect = false,
   bulkActions = [],
   onBulkSelectionChange,
-  getRowId = (row: TData, index: number) => index.toString(),
+  getRowId = (row: TData) => (row as any).id?.toString() || Math.random().toString(),
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -144,7 +144,7 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns: enhancedColumns,
-    getRowId: (row, index) => getRowId(row, index),
+    getRowId: (row) => getRowId(row),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelection,

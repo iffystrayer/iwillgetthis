@@ -252,5 +252,41 @@ export const aiApi = {
   getUsageSummary: () => apiCall('GET', '/ai/usage-summary'),
 };
 
+// AI Analytics API
+export const aiAnalyticsApi = {
+  // Models
+  getModels: (params?: QueryParams) => apiCall('GET', '/ai-analytics/models', undefined, params),
+  getModel: (id: number) => apiCall('GET', `/ai-analytics/models/${id}`),
+  createModel: (data: any) => apiCall('POST', '/ai-analytics/models', data),
+  updateModel: (id: number, data: any) => apiCall('PUT', `/ai-analytics/models/${id}`, data),
+  trainModel: (id: number, data: any) => apiCall('POST', `/ai-analytics/models/${id}/train`, data),
+  evaluateModel: (id: number, params: any) => apiCall('POST', `/ai-analytics/models/${id}/evaluate`, undefined, params),
+  
+  // Predictions
+  getPredictions: (params?: QueryParams) => apiCall('GET', '/ai-analytics/predictions', undefined, params),
+  createPrediction: (data: any) => apiCall('POST', '/ai-analytics/predictions', data),
+  createBulkPredictions: (data: any) => apiCall('POST', '/ai-analytics/predictions/bulk', data),
+  updatePredictionOutcome: (id: number, outcome: number) => apiCall('PUT', `/ai-analytics/predictions/${id}/outcome`, { actual_outcome: outcome }),
+  
+  // Anomaly Detection
+  detectAnomalies: (data: any) => apiCall('POST', '/ai-analytics/anomalies/detect', data),
+  
+  // Risk Forecasting
+  generateRiskForecast: (data: any) => apiCall('POST', '/ai-analytics/forecasts/risk', data),
+  
+  // Alerts
+  getAlerts: (params?: QueryParams) => apiCall('GET', '/ai-analytics/alerts', undefined, params),
+  acknowledgeAlert: (id: number) => apiCall('PUT', `/ai-analytics/alerts/${id}/acknowledge`),
+  
+  // Insights
+  getInsights: (params?: QueryParams) => apiCall('GET', '/ai-analytics/insights', undefined, params),
+  
+  // Model Comparison
+  compareModels: (data: any) => apiCall('POST', '/ai-analytics/models/compare', data),
+  
+  // Dashboard
+  getDashboard: () => apiCall('GET', '/ai-analytics/dashboard'),
+};
+
 // Default export
 export default api;

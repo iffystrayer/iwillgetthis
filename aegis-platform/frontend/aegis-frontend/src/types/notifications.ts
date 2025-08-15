@@ -1,6 +1,12 @@
 // Notification types and interfaces for the Aegis platform
 
 export type NotificationType = 
+  // UI notification types - REQUIRED for toast notifications and UI components
+  | 'success'              // Success messages
+  | 'error'                // Error messages  
+  | 'warning'              // Warning messages
+  | 'info'                 // Informational messages
+  // Domain-specific notification types
   | 'risk_alert'           // High/Critical risk findings
   | 'task_reminder'        // Task due dates and overdue items
   | 'assessment_complete'  // Assessment completion
@@ -22,9 +28,12 @@ export interface Notification {
   priority: NotificationPriority;
   status: NotificationStatus;
   title: string;
-  message: string;
+  message?: string;
   timestamp: string;
+  createdAt: string;
+  isRead: boolean;
   userId?: string;
+  category?: string;
   metadata?: {
     resourceId?: string | number;
     resourceType?: 'asset' | 'risk' | 'task' | 'user' | 'assessment';

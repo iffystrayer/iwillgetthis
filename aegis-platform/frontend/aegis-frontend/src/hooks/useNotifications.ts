@@ -10,19 +10,22 @@ export interface NotificationContextValue {
   markAllAsRead: () => void;
   dismissNotification: (id: string) => void;
   clearAll: () => void;
-  addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'isRead' | 'timestamp' | 'status'>) => void;
 }
 
 export const useNotifications = (): NotificationContextValue => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Add notification helper
-  const addNotification = useCallback((notificationData: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => {
+  const addNotification = useCallback((notificationData: Omit<Notification, 'id' | 'createdAt' | 'isRead' | 'timestamp' | 'status'>) => {
+    const now = new Date().toISOString();
     const notification: Notification = {
       ...notificationData,
       id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+      timestamp: now,
+      createdAt: now,
       isRead: false,
+      status: 'unread' as const,
     };
 
     setNotifications(prev => [notification, ...prev]);
