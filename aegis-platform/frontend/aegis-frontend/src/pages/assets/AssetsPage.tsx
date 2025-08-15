@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Database, Download, Upload, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { Plus, Database, Download, Upload, Eye, Edit, MoreHorizontal, Trash2, Archive, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { assetsApi } from '@/lib/api';
 import { DataTable, CriticalityBadge, StatusBadge } from '@/components/ui/data-table';
+import { createCommonBulkActions } from '@/components/ui/bulk-actions-toolbar';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   DropdownMenu,
@@ -47,6 +48,7 @@ export default function AssetsPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -297,6 +299,58 @@ export default function AssetsPage() {
     fetchAssets();
   };
 
+  // Bulk operations handlers
+  const handleBulkDelete = async () => {
+    console.log('Bulk delete assets:', selectedAssets.map(a => a.id));
+    // TODO: Implement bulk delete API call
+    alert(`Would delete ${selectedAssets.length} assets`);
+  };
+
+  const handleBulkArchive = async () => {
+    console.log('Bulk archive assets:', selectedAssets.map(a => a.id));
+    // TODO: Implement bulk archive API call
+    alert(`Would archive ${selectedAssets.length} assets`);
+  };
+
+  const handleBulkUpdateStatus = async () => {
+    console.log('Bulk update status for assets:', selectedAssets.map(a => a.id));
+    // TODO: Implement bulk status update dialog
+    alert(`Would update status for ${selectedAssets.length} assets`);
+  };
+
+  const handleBulkExport = () => {
+    console.log('Bulk export selected assets:', selectedAssets.map(a => a.id));
+    
+    // Generate CSV from selected assets
+    const csvHeaders = 'Name,Description,Type,Criticality,Status,Environment,Owner,IP Address,Hostname,Location\n';
+    const csvContent = selectedAssets.map(asset => 
+      `"${asset.name || ''}","${asset.description || ''}","${asset.asset_type || ''}","${asset.criticality || ''}","${asset.status || ''}","${asset.environment || ''}","${asset.owner_id || ''}","${asset.ip_address || ''}","${asset.hostname || ''}","${asset.location || ''}"`
+    ).join('\n');
+    
+    const csvData = csvHeaders + csvContent;
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `selected_assets_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    console.log(`✅ Exported ${selectedAssets.length} selected assets to CSV`);
+  };
+
+  // Create bulk actions for assets
+  const bulkActions = useMemo(() => {
+    return createCommonBulkActions(selectedAssets, {
+      onExport: handleBulkExport,
+      onUpdateStatus: handleBulkUpdateStatus,
+      onArchive: handleBulkArchive,
+      onDelete: handleBulkDelete,
+    });
+  }, [selectedAssets]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -426,6 +480,10 @@ export default function AssetsPage() {
               console.log('View asset:', asset);
               navigate(`/assets/${asset.id}`);
             }}
+            enableBulkSelect={true}
+            bulkActions={bulkActions}
+            onBulkSelectionChange={setSelectedAssets}
+            getRowId={(row) => row.id.toString()}
           />
         </CardContent>
       </Card>

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { usersApi } from '@/lib/api';
 import { DataTable, StatusBadge } from '@/components/ui/data-table';
+import { createCommonBulkActions } from '@/components/ui/bulk-actions-toolbar';
+import { BulkOperationProgress, useBulkOperationProgress } from '@/components/ui/bulk-operation-progress';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   DropdownMenu,
@@ -38,6 +40,18 @@ export default function UsersPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+
+  // Bulk operation progress tracking
+  const {
+    isOpen: isBulkProgressOpen,
+    operation: currentOperation,
+    items: progressItems,
+    canCancel: canCancelOperation,
+    startOperation,
+    updateItemStatus,
+    closeProgress,
+  } = useBulkOperationProgress();
 
   const fetchUsers = async () => {
     try {
@@ -213,6 +227,181 @@ export default function UsersPage() {
     fetchUsers();
   };
 
+  // Bulk operations handlers with progress tracking
+  const handleBulkDelete = async () => {
+    console.log('Bulk delete users:', selectedUsers.map(u => u.id));
+    
+    // Start progress tracking
+    startOperation(
+      `Deleting ${selectedUsers.length} Users`,
+      selectedUsers.map(user => ({ id: user.id, name: user.full_name })),
+      true // Can be cancelled
+    );
+
+    // Simulate bulk deletion with progress updates
+    for (const user of selectedUsers) {
+      try {
+        updateItemStatus(user.id, 'processing');
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // TODO: Replace with actual API call
+        // await usersApi.delete(user.id);
+        
+        updateItemStatus(user.id, 'completed');
+      } catch (error) {
+        updateItemStatus(user.id, 'failed', error instanceof Error ? error.message : 'Delete failed');
+      }
+    }
+    
+    // Refresh user list after completion
+    fetchUsers();
+  };
+
+  const handleBulkUpdateStatus = async () => {
+    console.log('Bulk update status for users:', selectedUsers.map(u => u.id));
+    
+    // Start progress tracking
+    startOperation(
+      `Updating Status for ${selectedUsers.length} Users`,
+      selectedUsers.map(user => ({ id: user.id, name: user.full_name })),
+      true
+    );
+
+    // Simulate bulk status update with progress
+    for (const user of selectedUsers) {
+      try {
+        updateItemStatus(user.id, 'processing');
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
+        // TODO: Replace with actual API call
+        // await usersApi.updateStatus(user.id, newStatus);
+        
+        updateItemStatus(user.id, 'completed');
+      } catch (error) {
+        updateItemStatus(user.id, 'failed', error instanceof Error ? error.message : 'Status update failed');
+      }
+    }
+    
+    // Refresh user list after completion
+    fetchUsers();
+  };
+
+  const handleBulkUpdateRole = async () => {
+    console.log('Bulk update role for users:', selectedUsers.map(u => u.id));
+    
+    // Start progress tracking
+    startOperation(
+      `Updating Roles for ${selectedUsers.length} Users`,
+      selectedUsers.map(user => ({ id: user.id, name: user.full_name })),
+      true
+    );
+
+    // Simulate bulk role update with progress
+    for (const user of selectedUsers) {
+      try {
+        updateItemStatus(user.id, 'processing');
+        
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 700));
+        
+        // TODO: Replace with actual API call
+        // await usersApi.updateRole(user.id, newRole);
+        
+        updateItemStatus(user.id, 'completed');
+      } catch (error) {
+        updateItemStatus(user.id, 'failed', error instanceof Error ? error.message : 'Role update failed');
+      }
+    }
+    
+    // Refresh user list after completion
+    fetchUsers();
+  };
+
+  const handleBulkExport = async () => {
+    console.log('Bulk export selected users:', selectedUsers.map(u => u.id));
+    
+    // Start progress tracking for export
+    startOperation(
+      `Exporting ${selectedUsers.length} Users`,
+      selectedUsers.map(user => ({ id: user.id, name: user.full_name })),
+      false // Export cannot be cancelled
+    );
+
+    try {
+      // Process each user for export with progress updates
+      for (const user of selectedUsers) {
+        updateItemStatus(user.id, 'processing');
+        
+        // Simulate processing time for each user
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        updateItemStatus(user.id, 'completed');
+      }
+
+      // Generate CSV from selected users
+      const csvHeaders = 'Full Name,Email,Role,Status,Last Login,Created\n';
+      const csvContent = selectedUsers.map(user => 
+        `"${user.full_name || ''}","${user.email || ''}","${user.role || ''}","${user.status || ''}","${user.last_login || ''}","${user.created_at || ''}"`
+      ).join('\n');
+      
+      const csvData = csvHeaders + csvContent;
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `selected_users_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      console.log(`✅ Exported ${selectedUsers.length} selected users to CSV`);
+    } catch (error) {
+      // Mark all remaining users as failed if export fails
+      selectedUsers.forEach(user => {
+        updateItemStatus(user.id, 'failed', 'Export failed');
+      });
+    }
+  };
+
+  // Create bulk actions for users (custom actions for user management)
+  const bulkActions = useMemo(() => {
+    return [
+      {
+        id: 'export',
+        label: 'Export Selected',
+        icon: Users,
+        variant: 'secondary' as const,
+        onClick: handleBulkExport,
+      },
+      {
+        id: 'updateRole',
+        label: 'Update Role',
+        icon: UserCheck,
+        variant: 'secondary' as const,
+        onClick: handleBulkUpdateRole,
+      },
+      {
+        id: 'updateStatus',
+        label: 'Update Status',
+        icon: UserX,
+        variant: 'secondary' as const,
+        onClick: handleBulkUpdateStatus,
+      },
+      {
+        id: 'delete',
+        label: 'Delete Users',
+        icon: UserX,
+        variant: 'destructive' as const,
+        onClick: handleBulkDelete,
+      },
+    ];
+  }, [selectedUsers]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -346,6 +535,10 @@ export default function UsersPage() {
               if (isInactive) return 'bg-gray-50 hover:bg-gray-100';
               return '';
             }}
+            enableBulkSelect={true}
+            bulkActions={bulkActions}
+            onBulkSelectionChange={setSelectedUsers}
+            getRowId={(row) => row.id.toString()}
           />
         </CardContent>
       </Card>
@@ -370,6 +563,16 @@ export default function UsersPage() {
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
         onUsersInvited={handleUsersInvited}
+      />
+
+      {/* Bulk Operation Progress Dialog */}
+      <BulkOperationProgress
+        isOpen={isBulkProgressOpen}
+        onClose={closeProgress}
+        operation={currentOperation}
+        items={progressItems}
+        canCancel={canCancelOperation}
+        showDetails={true}
       />
     </div>
   );

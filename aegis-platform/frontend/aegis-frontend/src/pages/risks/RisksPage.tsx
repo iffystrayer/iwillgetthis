@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DataTable, CriticalityBadge, StatusBadge } from '@/components/ui/data-table';
+import { createCommonBulkActions } from '@/components/ui/bulk-actions-toolbar';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ export default function RisksPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
+  const [selectedRisks, setSelectedRisks] = useState<Risk[]>([]);
 
   // Mock data with more comprehensive examples
   const risks: Risk[] = [
@@ -256,6 +258,58 @@ export default function RisksPage() {
     // TODO: Refresh the risk list from API
   };
 
+  // Bulk operations handlers
+  const handleBulkDelete = async () => {
+    console.log('Bulk delete risks:', selectedRisks.map(r => r.id));
+    // TODO: Implement bulk delete API call
+    alert(`Would delete ${selectedRisks.length} risks`);
+  };
+
+  const handleBulkUpdateStatus = async () => {
+    console.log('Bulk update status for risks:', selectedRisks.map(r => r.id));
+    // TODO: Implement bulk status update dialog
+    alert(`Would update status for ${selectedRisks.length} risks`);
+  };
+
+  const handleBulkAssign = async () => {
+    console.log('Bulk assign risks:', selectedRisks.map(r => r.id));
+    // TODO: Implement bulk assignment dialog
+    alert(`Would assign ${selectedRisks.length} risks`);
+  };
+
+  const handleBulkExport = () => {
+    console.log('Bulk export selected risks:', selectedRisks.map(r => r.id));
+    
+    // Generate CSV from selected risks
+    const csvHeaders = 'Title,Category,Level,Score,Status,Owner,Due Date\n';
+    const csvContent = selectedRisks.map(risk => 
+      `"${risk.title || ''}","${risk.category || ''}","${risk.level || ''}","${risk.score || ''}","${risk.status || ''}","${risk.owner || ''}","${risk.dueDate || ''}"`
+    ).join('\n');
+    
+    const csvData = csvHeaders + csvContent;
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `selected_risks_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    console.log(`✅ Exported ${selectedRisks.length} selected risks to CSV`);
+  };
+
+  // Create bulk actions for risks
+  const bulkActions = useMemo(() => {
+    return createCommonBulkActions(selectedRisks, {
+      onExport: handleBulkExport,
+      onUpdateStatus: handleBulkUpdateStatus,
+      onAssign: handleBulkAssign,
+      onDelete: handleBulkDelete,
+    });
+  }, [selectedRisks]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -368,6 +422,10 @@ export default function RisksPage() {
               if (isCritical) return 'bg-yellow-50 hover:bg-yellow-100';
               return '';
             }}
+            enableBulkSelect={true}
+            bulkActions={bulkActions}
+            onBulkSelectionChange={setSelectedRisks}
+            getRowId={(row) => row.id.toString()}
           />
         </CardContent>
       </Card>

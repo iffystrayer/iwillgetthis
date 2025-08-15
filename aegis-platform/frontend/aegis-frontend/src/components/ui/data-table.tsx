@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
   useReactTable,
   flexRender,
+  RowSelectionState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -41,6 +42,8 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { BulkActionsToolbar, BulkAction } from '@/components/ui/bulk-actions-toolbar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData, TValue> {
@@ -59,6 +62,11 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   rowClassName?: (row: TData) => string;
   onRowClick?: (row: TData) => void;
+  // Bulk operations
+  enableBulkSelect?: boolean;
+  bulkActions?: BulkAction[];
+  onBulkSelectionChange?: (selectedRows: TData[]) => void;
+  getRowId?: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -77,17 +85,69 @@ export function DataTable<TData, TValue>({
   className,
   rowClassName,
   onRowClick,
+  enableBulkSelect = false,
+  bulkActions = [],
+  onBulkSelectionChange,
+  getRowId = (row: TData, index: number) => index.toString(),
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = useState('');
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  // Enhanced columns with bulk selection
+  const enhancedColumns = useMemo(() => {
+    if (!enableBulkSelect) return columns;
+    
+    const selectColumn = {
+      id: 'select',
+      header: ({ table }: { table: any }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }: { row: any }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    };
+    
+    return [selectColumn, ...columns];
+  }, [columns, enableBulkSelect]);
+
+  // Selected rows data
+  const selectedRows = useMemo(() => {
+    if (!enableBulkSelect) return [];
+    return Object.keys(rowSelection)
+      .filter(key => rowSelection[key])
+      .map(key => data[parseInt(key)])
+      .filter(Boolean);
+  }, [rowSelection, data, enableBulkSelect]);
+
+  // Notify parent of selection changes
+  React.useEffect(() => {
+    if (enableBulkSelect && onBulkSelectionChange) {
+      onBulkSelectionChange(selectedRows);
+    }
+  }, [selectedRows, enableBulkSelect, onBulkSelectionChange]);
 
   const table = useReactTable({
     data,
-    columns,
+    columns: enhancedColumns,
+    getRowId: (row, index) => getRowId(row, index),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -95,11 +155,13 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: 'includesString',
+    enableRowSelection: enableBulkSelect,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       globalFilter,
+      rowSelection,
       pagination: {
         pageIndex: 0,
         pageSize,
@@ -136,6 +198,16 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("space-y-4", className)}>
+      {/* Bulk Actions Toolbar */}
+      {enableBulkSelect && selectedRows.length > 0 && (
+        <BulkActionsToolbar
+          selectedCount={selectedRows.length}
+          totalCount={data.length}
+          onClearSelection={() => setRowSelection({})}
+          actions={bulkActions}
+        />
+      )}
+
       {/* Search and Controls */}
       {(showSearch || showColumnToggle) && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
@@ -245,7 +317,7 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center">
+                <TableCell colSpan={enhancedColumns.length} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <div className="text-lg font-medium text-muted-foreground">
                       {emptyStateTitle}

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, CheckSquare, Calendar, User, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { Plus, CheckSquare, Calendar, User, Eye, Edit, MoreHorizontal, Trash2, Archive, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { tasksApi } from '@/lib/api';
 import { DataTable, StatusBadge } from '@/components/ui/data-table';
+import { createCommonBulkActions } from '@/components/ui/bulk-actions-toolbar';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   DropdownMenu,
@@ -36,6 +37,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<Task[]>([]);
 
   const fetchTasks = async () => {
     try {
@@ -212,6 +214,58 @@ export default function TasksPage() {
     navigate(`/tasks/${taskId}`);
   };
 
+  // Bulk operations handlers
+  const handleBulkDelete = async () => {
+    console.log('Bulk delete tasks:', selectedTasks.map(t => t.id));
+    // TODO: Implement bulk delete API call
+    alert(`Would delete ${selectedTasks.length} tasks`);
+  };
+
+  const handleBulkUpdateStatus = async () => {
+    console.log('Bulk update status for tasks:', selectedTasks.map(t => t.id));
+    // TODO: Implement bulk status update dialog
+    alert(`Would update status for ${selectedTasks.length} tasks`);
+  };
+
+  const handleBulkAssign = async () => {
+    console.log('Bulk assign tasks:', selectedTasks.map(t => t.id));
+    // TODO: Implement bulk assignment dialog
+    alert(`Would assign ${selectedTasks.length} tasks`);
+  };
+
+  const handleBulkExport = () => {
+    console.log('Bulk export selected tasks:', selectedTasks.map(t => t.id));
+    
+    // Generate CSV from selected tasks
+    const csvHeaders = 'Title,Description,Status,Priority,Assigned To,Due Date,Created\n';
+    const csvContent = selectedTasks.map(task => 
+      `"${task.title || ''}","${task.description || ''}","${task.status || ''}","${task.priority || ''}","${task.assigned_to || ''}","${task.due_date || ''}","${task.created_at || ''}"`
+    ).join('\n');
+    
+    const csvData = csvHeaders + csvContent;
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `selected_tasks_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    console.log(`✅ Exported ${selectedTasks.length} selected tasks to CSV`);
+  };
+
+  // Create bulk actions for tasks
+  const bulkActions = useMemo(() => {
+    return createCommonBulkActions(selectedTasks, {
+      onExport: handleBulkExport,
+      onUpdateStatus: handleBulkUpdateStatus,
+      onAssign: handleBulkAssign,
+      onDelete: handleBulkDelete,
+    });
+  }, [selectedTasks]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -346,6 +400,10 @@ export default function TasksPage() {
               if (isHighPriority) return 'bg-yellow-50 hover:bg-yellow-100';
               return '';
             }}
+            enableBulkSelect={true}
+            bulkActions={bulkActions}
+            onBulkSelectionChange={setSelectedTasks}
+            getRowId={(row) => row.id.toString()}
           />
         </CardContent>
       </Card>
