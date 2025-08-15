@@ -22,7 +22,7 @@ from routers import (
     risks, tasks, evidence, integrations, reports, 
     dashboards, ai_services, analytics, oauth,
     notifications, bulk_operations, search, audit, document_intelligence,
-    workflows
+    workflows, ai_analytics
 )
 from health import router as health_router
 
@@ -114,6 +114,7 @@ app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(dashboards.router, prefix="/api/v1/dashboards", tags=["Dashboards"])
 app.include_router(ai_services.router, prefix="/api/v1/ai", tags=["AI Services"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
+app.include_router(ai_analytics.router, prefix="/api/v1/ai-analytics", tags=["AI Analytics"])
 app.include_router(oauth.router, prefix="/api/v1/oauth", tags=["OAuth2/OIDC"])
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 app.include_router(bulk_operations.router, prefix="/api/v1/bulk", tags=["Bulk Operations"])
@@ -167,6 +168,7 @@ async def api_info():
             "ai_services": "/api/v1/ai",
             "integrations": "/api/v1/integrations",
             "analytics": "/api/v1/analytics",
+            "ai_analytics": "/api/v1/ai-analytics",
             "notifications": "/api/v1/notifications",
             "bulk_operations": "/api/v1/bulk",
             "search": "/api/v1/search",
