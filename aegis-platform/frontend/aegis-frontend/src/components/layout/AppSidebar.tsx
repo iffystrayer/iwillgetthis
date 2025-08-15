@@ -15,6 +15,8 @@ import {
   Inbox,
   Server,
   TrendingUp,
+  GitBranch,
+  Play,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { hasPermission, hasRole } from '@/lib/auth';
@@ -141,6 +143,23 @@ export function AppSidebar() {
           url: "/ai/analytics",
           icon: TrendingUp,
           permission: { module: "ai_services", action: "read" },
+        },
+      ],
+    },
+    {
+      title: "Workflow Management",
+      items: [
+        {
+          title: "Workflows",
+          url: "/workflows",
+          icon: GitBranch,
+          permission: { module: "workflows", action: "read" },
+        },
+        {
+          title: "Active Instances",
+          url: "/workflows/instances",
+          icon: Play,
+          permission: { module: "workflows", action: "read" },
         },
       ],
     },

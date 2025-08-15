@@ -21,7 +21,8 @@ from routers import (
     auth, users, assets, frameworks, assessments, 
     risks, tasks, evidence, integrations, reports, 
     dashboards, ai_services, analytics, oauth,
-    notifications, bulk_operations, search, audit, document_intelligence
+    notifications, bulk_operations, search, audit, document_intelligence,
+    workflows
 )
 from health import router as health_router
 
@@ -119,6 +120,7 @@ app.include_router(bulk_operations.router, prefix="/api/v1/bulk", tags=["Bulk Op
 app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit Trail"])
 app.include_router(document_intelligence.router, prefix="/api/v1/document-intelligence", tags=["Document Intelligence"])
+app.include_router(workflows.router, tags=["Workflows"])
 
 
 @app.get("/", tags=["Root"])

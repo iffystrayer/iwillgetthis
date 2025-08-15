@@ -13,6 +13,10 @@ from .notification import (
     NotificationPreference, NotificationLog, NotificationTemplate,
     NotificationQueue, NotificationSubscription, NotificationChannel
 )
+from .workflow import (
+    Workflow, WorkflowStep, WorkflowInstance, WorkflowStepInstance,
+    WorkflowAction, WorkflowTemplate, WorkflowRole
+)
 
 __all__ = [
     "User", "Role", "UserRole",
@@ -26,5 +30,7 @@ __all__ = [
     "Integration", "VulnerabilityData", "ThreatIntelData",
     "Report", "ReportTemplate",
     "NotificationPreference", "NotificationLog", "NotificationTemplate",
-    "NotificationQueue", "NotificationSubscription", "NotificationChannel"
+    "NotificationQueue", "NotificationSubscription", "NotificationChannel",
+    "Workflow", "WorkflowStep", "WorkflowInstance", "WorkflowStepInstance",
+    "WorkflowAction", "WorkflowTemplate", "WorkflowRole"
 ]

@@ -40,6 +40,10 @@ const NotificationSettingsPage = lazy(() => import('./pages/settings/Notificatio
 const ProvidersPage = lazy(() => import('./pages/ai/ProvidersPage'));
 const AIAnalyticsPage = lazy(() => import('./pages/ai/AIAnalyticsPage'));
 
+// Lazy load Workflow Management pages
+const WorkflowsPage = lazy(() => import('./pages/workflows/WorkflowsPage'));
+const WorkflowInstancesPage = lazy(() => import('./pages/workflows/WorkflowInstancesPage'));
+
 // Loading fallback component
 const PageLoadingFallback = () => (
   <div className="flex items-center justify-center min-h-96">
@@ -190,6 +194,18 @@ function App() {
                   <Route path="ai/analytics" element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <AIAnalyticsPage />
+                    </Suspense>
+                  } />
+                  
+                  {/* Workflow Management */}
+                  <Route path="workflows" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <WorkflowsPage />
+                    </Suspense>
+                  } />
+                  <Route path="workflows/instances" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <WorkflowInstancesPage />
                     </Suspense>
                   } />
                   
