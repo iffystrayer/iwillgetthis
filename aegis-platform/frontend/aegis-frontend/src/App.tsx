@@ -45,6 +45,9 @@ const PredictiveAnalyticsPage = lazy(() => import('./pages/ai/PredictiveAnalytic
 const WorkflowsPage = lazy(() => import('./pages/workflows/WorkflowsPage'));
 const WorkflowInstancesPage = lazy(() => import('./pages/workflows/WorkflowInstancesPage'));
 
+// Lazy load Audit Trail page
+const AuditTrailPage = lazy(() => import('./pages/audit/AuditTrailPage'));
+
 // Loading fallback component
 const PageLoadingFallback = () => (
   <div className="flex items-center justify-center min-h-96">
@@ -219,6 +222,13 @@ function App() {
                   <Route path="users" element={
                     <Suspense fallback={<PageLoadingFallback />}>
                       <UsersPage />
+                    </Suspense>
+                  } />
+                  
+                  {/* Audit Trail */}
+                  <Route path="audit" element={
+                    <Suspense fallback={<PageLoadingFallback />}>
+                      <AuditTrailPage />
                     </Suspense>
                   } />
                   

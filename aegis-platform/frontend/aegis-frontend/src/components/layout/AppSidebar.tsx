@@ -17,6 +17,7 @@ import {
   TrendingUp,
   GitBranch,
   Play,
+  History,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { hasPermission, hasRole } from '@/lib/auth';
@@ -183,6 +184,12 @@ export function AppSidebar() {
           url: "/users",
           icon: Users,
           permission: { module: "users", action: "read" },
+        },
+        {
+          title: "Audit Trail",
+          url: "/audit",
+          icon: History,
+          permission: { module: "audit", action: "read" },
         },
         {
           title: "Settings",
