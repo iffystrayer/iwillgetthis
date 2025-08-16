@@ -234,6 +234,14 @@ export const integrationsApi = {
   delete: (id: string) => apiCall('DELETE', `/integrations/${id}`),
   sync: (id: string) => apiCall('POST', `/integrations/${id}/sync`),
   test: (id: string) => apiCall('POST', `/integrations/${id}/test`),
+  
+  // Enhanced enterprise integration endpoints
+  getTypes: (category?: string) => apiCall('GET', '/integrations/types', undefined, category ? { category } : undefined),
+  createConnector: (data: any) => apiCall('POST', '/integrations/connectors/create', data),
+  testConnector: (connectorId: string) => apiCall('POST', `/integrations/connectors/${connectorId}/test`),
+  syncConnector: (connectorId: string, options?: any) => apiCall('POST', `/integrations/connectors/${connectorId}/sync`, options),
+  getConnectorStatus: (connectorId: string) => apiCall('GET', `/integrations/connectors/${connectorId}/status`),
+  getSyncLogs: (connectorId: string, limit?: number) => apiCall('GET', `/integrations/sync-logs/${connectorId}`, undefined, limit ? { limit } : undefined),
 };
 
 // AI API

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Zap, Plus, Settings, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Zap, Plus, Settings, RefreshCw, AlertTriangle, CheckCircle, Activity, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { integrationsApi } from '@/lib/api';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import CreateIntegrationDialog from '@/components/integrations/CreateIntegrationDialog';
 
 export default function IntegrationsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,22 +14,22 @@ export default function IntegrationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchIntegrations = async () => {
-      try {
-        setLoading(true);
-        const response = await integrationsApi.getAll();
-        setIntegrations(response.items || []);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch integrations');
-        console.error('Error fetching integrations:', err);
-        setIntegrations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchIntegrations = async () => {
+    try {
+      setLoading(true);
+      const response = await integrationsApi.getAll();
+      setIntegrations(response.items || []);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch integrations');
+      console.error('Error fetching integrations:', err);
+      setIntegrations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchIntegrations();
   }, []);
 
@@ -65,9 +66,7 @@ export default function IntegrationsPage() {
   };
 
   const handleAddIntegration = () => {
-    console.log('Add Integration clicked - Opening integration creation dialog');
-    console.log('Add Integration functionality would open a dialog to create new integrations');
-    // TODO: Implement add integration dialog
+    // This will be handled by the CreateIntegrationDialog component
   };
 
   const handleSyncAll = () => {
@@ -106,10 +105,7 @@ export default function IntegrationsPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Sync All
           </Button>
-          <Button onClick={handleAddIntegration}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Integration
-          </Button>
+          <CreateIntegrationDialog onSuccess={fetchIntegrations} />
         </div>
       </div>
 
@@ -211,10 +207,7 @@ export default function IntegrationsPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search criteria' : 'Get started by adding your first integration'}
               </p>
-              <Button onClick={handleAddIntegration}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Integration
-              </Button>
+              <CreateIntegrationDialog onSuccess={fetchIntegrations} />
             </div>
           ) : (
             <div className="space-y-4">
