@@ -17,6 +17,13 @@ from .workflow import (
     Workflow, WorkflowStep, WorkflowInstance, WorkflowStepInstance,
     WorkflowAction, WorkflowTemplate, WorkflowRole
 )
+from .mfa import (
+    MFAMethod, MFASession, MFABackupCode, MFAAttempt, TrustedDevice
+)
+from .rbac import (
+    Permission, EnhancedRole, EnhancedUserRole, RoleRequest,
+    PermissionGrant, AccessControlList, RoleUsageLog
+)
 
 __all__ = [
     "User", "Role", "UserRole",
@@ -32,5 +39,8 @@ __all__ = [
     "NotificationPreference", "NotificationLog", "NotificationTemplate",
     "NotificationQueue", "NotificationSubscription", "NotificationChannel",
     "Workflow", "WorkflowStep", "WorkflowInstance", "WorkflowStepInstance",
-    "WorkflowAction", "WorkflowTemplate", "WorkflowRole"
+    "WorkflowAction", "WorkflowTemplate", "WorkflowRole",
+    "MFAMethod", "MFASession", "MFABackupCode", "MFAAttempt", "TrustedDevice",
+    "Permission", "EnhancedRole", "EnhancedUserRole", "RoleRequest",
+    "PermissionGrant", "AccessControlList", "RoleUsageLog"
 ]

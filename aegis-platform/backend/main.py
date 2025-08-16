@@ -22,7 +22,7 @@ from routers import (
     risks, tasks, evidence, integrations, reports, 
     dashboards, ai_services, analytics, oauth,
     notifications, bulk_operations, search, audit, document_intelligence,
-    workflows, ai_analytics
+    workflows, ai_analytics, mfa, rbac
 )
 from health import router as health_router
 
@@ -116,6 +116,8 @@ app.include_router(ai_services.router, prefix="/api/v1/ai", tags=["AI Services"]
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(ai_analytics.router, prefix="/api/v1/ai-analytics", tags=["AI Analytics"])
 app.include_router(oauth.router, prefix="/api/v1/oauth", tags=["OAuth2/OIDC"])
+app.include_router(mfa.router, prefix="/api/v1/mfa", tags=["Multi-Factor Authentication"])
+app.include_router(rbac.router, prefix="/api/v1/rbac", tags=["Role-Based Access Control"])
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 app.include_router(bulk_operations.router, prefix="/api/v1/bulk", tags=["Bulk Operations"])
 app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])

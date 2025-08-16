@@ -41,6 +41,12 @@ class User(Base):
     provider = Column(String(50))  # OAuth provider name (azure_ad, google_workspace, okta)
     created_via_sso = Column(Boolean, default=False)
     preferences = Column(Text)  # JSON string for user preferences
+    
+    # MFA Integration Fields
+    mfa_enabled = Column(Boolean, default=False)
+    mfa_enforced = Column(Boolean, default=False)  # Admin can enforce MFA
+    mfa_backup_codes_generated = Column(Boolean, default=False)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
@@ -54,6 +60,10 @@ class User(Base):
     # Notification relationships
     notification_preferences = relationship("NotificationPreference", back_populates="user")
     notification_subscriptions = relationship("NotificationSubscription", back_populates="user")
+    
+    # MFA relationships
+    mfa_methods = relationship("MFAMethod", back_populates="user")
+    trusted_devices = relationship("TrustedDevice", back_populates="user")
 
 
 class UserRole(Base):
